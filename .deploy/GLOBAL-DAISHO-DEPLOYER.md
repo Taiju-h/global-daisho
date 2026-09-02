@@ -26,8 +26,10 @@ chmod 700 .deploy/install-global-daisho-deployer.sh
 ```
 
 The installer asks for the Basic authentication password. It also installs a
-strict Apache configuration, a command-specific sudoers rule, and reloads
-Apache after `apache2ctl configtest` succeeds.
+strict Apache configuration inside only the two `global.daishokagaku.com`
+VirtualHosts, installs a command-specific sudoers rule, and reloads Apache
+after `apache2ctl configtest` succeeds. VirtualHost backups are written below
+`/var/backups/global-daisho-deployer` before the first edit.
 
 ## Safety rules
 

@@ -6,7 +6,7 @@ readonly SOURCE_ROOT="$REPO_ROOT/.deploy/global-daisho"
 readonly RUNTIME_DIR='/var/www/global-daisho-deployer'
 readonly STATE_DIR='/var/lib/global-daisho-deployer'
 readonly PASSWORD_FILE='/etc/apache2/global-daisho-deployer.htpasswd'
-readonly APACHE_CONF='/etc/apache2/conf-available/global-daisho-deployer.conf'
+readonly APACHE_CONF='/etc/apache2/global-daisho-deployer-vhost.conf'
 readonly SUDOERS_FILE='/etc/sudoers.d/global-daisho-deployer'
 readonly HELPER='/usr/local/sbin/global-daisho-deploy'
 readonly SSH_KEY='/home/heartf/.ssh/global_daisho_github_ed25519'
@@ -21,7 +21,7 @@ die() {
 [ "$(id -u)" -eq 0 ] || die 'Run this installer as root.'
 [[ "$DEPLOY_USER" =~ ^[A-Za-z0-9._-]{1,64}$ ]] || die 'Invalid Basic authentication username.'
 
-for command in git php htpasswd apache2ctl a2enmod a2enconf visudo sudo install flock ssh systemctl; do
+for command in git php htpasswd apache2ctl a2enmod visudo sudo install flock ssh systemctl awk readlink; do
     command -v "$command" >/dev/null 2>&1 || die "Required command was not found: $command"
 done
 
@@ -68,8 +68,50 @@ chown root:www-data "$PASSWORD_FILE"
 chmod 0640 "$PASSWORD_FILE"
 
 a2enmod alias auth_basic authn_file authz_core >/dev/null
-a2enconf global-daisho-deployer >/dev/null
-apache2ctl configtest
+
+backup_dir="/var/backups/global-daisho-deployer/$(date +%Y%m%d-%H%M%S)"
+include_line='    IncludeOptional /etc/apache2/global-daisho-deployer-vhost.conf'
+modified_targets=()
+backup_files=()
+
+for enabled_vhost in \
+    /etc/apache2/sites-enabled/global.daishokagaku.com.conf \
+    /etc/apache2/sites-enabled/global.daishokagaku.com-le-ssl.conf; do
+    [ -e "$enabled_vhost" ] || continue
+    target_vhost="$(readlink -f "$enabled_vhost")"
+    [ -f "$target_vhost" ] || die "VirtualHost configuration is not a file: $enabled_vhost"
+    if grep -Fq '/etc/apache2/global-daisho-deployer-vhost.conf' "$target_vhost"; then
+        continue
+    fi
+
+    install -d -o root -g root -m 0700 "$backup_dir"
+    backup_file="$backup_dir/$(basename "$target_vhost")"
+    cp -a "$target_vhost" "$backup_file"
+    temp_vhost="$(mktemp "${target_vhost}.XXXXXX")"
+    awk -v include_line="$include_line" '
+        /^[[:space:]]*<\/VirtualHost>[[:space:]]*$/ { print include_line }
+        { print }
+    ' "$target_vhost" > "$temp_vhost"
+    grep -Fq '/etc/apache2/global-daisho-deployer-vhost.conf' "$temp_vhost" || die "Could not update VirtualHost: $target_vhost"
+    chown --reference="$target_vhost" "$temp_vhost"
+    chmod --reference="$target_vhost" "$temp_vhost"
+    cp "$temp_vhost" "$target_vhost"
+    rm -f "$temp_vhost"
+    modified_targets+=("$target_vhost")
+    backup_files+=("$backup_file")
+done
+
+[ "${#modified_targets[@]}" -gt 0 ] || \
+    grep -RFlq '/etc/apache2/global-daisho-deployer-vhost.conf' /etc/apache2/sites-enabled || \
+    die 'No global.daishokagaku.com VirtualHost configuration was found.'
+
+if ! apache2ctl configtest; then
+    for index in "${!modified_targets[@]}"; do
+        cp -a "${backup_files[$index]}" "${modified_targets[$index]}"
+    done
+    apache2ctl configtest || true
+    die "Apache configuration failed. VirtualHost files were restored from $backup_dir"
+fi
 systemctl reload apache2
 
 sudo -u www-data -- sudo -n "$HELPER" status >/dev/null
