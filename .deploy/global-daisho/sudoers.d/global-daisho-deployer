@@ -1,0 +1,4 @@
+www-data ALL=(root) NOPASSWD: /usr/local/sbin/global-daisho-deploy status
+www-data ALL=(root) NOPASSWD: /usr/local/sbin/global-daisho-deploy diff
+www-data ALL=(root) NOPASSWD: /usr/local/sbin/global-daisho-deploy production
+www-data ALL=(root) NOPASSWD: /usr/local/sbin/global-daisho-deploy rollback

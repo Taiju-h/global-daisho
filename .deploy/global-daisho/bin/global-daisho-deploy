@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+readonly REPO_ROOT='/var/www/daisho'
+readonly EXPECTED_ORIGIN='git@github.com:Taiju-h/global-daisho.git'
+readonly BRANCH='main'
+readonly SSH_KEY='/home/heartf/.ssh/global_daisho_github_ed25519'
+readonly RUNTIME_DIR='/var/www/global-daisho-deployer'
+readonly WEB_SOURCE="$REPO_ROOT/.deploy/global-daisho/web"
+readonly LOCK_FILE='/run/lock/global-daisho-deployer.lock'
+
+die() {
+    printf 'ERROR: %s\n' "$*" >&2
+    exit 1
+}
+
+git_run() {
+    GIT_TERMINAL_PROMPT=0 \
+    GIT_SSH_COMMAND="ssh -i $SSH_KEY -o IdentitiesOnly=yes -o BatchMode=yes" \
+        git -C "$REPO_ROOT" "$@"
+}
+
+assert_repository() {
+    [ -d "$REPO_ROOT/.git" ] || die "Git repository not found: $REPO_ROOT"
+    [ -r "$SSH_KEY" ] || die "SSH deploy key is not readable: $SSH_KEY"
+
+    local origin current_branch
+    origin="$(git_run remote get-url origin)"
+    [ "$origin" = "$EXPECTED_ORIGIN" ] || die "Unexpected origin: $origin"
+
+    current_branch="$(git_run symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+    [ "$current_branch" = "$BRANCH" ] || die "Current branch must be $BRANCH (found: ${current_branch:-detached})"
+}
+
+assert_clean() {
+    local changes
+    changes="$(git_run status --porcelain=v1 --untracked-files=no)"
+    [ -z "$changes" ] || {
+        printf '%s\n' "$changes" >&2
+        die 'Tracked local changes exist. Commit or restore them before deployment.'
+    }
+}
+
+refresh_web_runtime() {
+    if [ -f "$WEB_SOURCE/index.php" ]; then
+        install -d -o root -g www-data -m 0750 "$RUNTIME_DIR"
+        install -o root -g www-data -m 0640 "$WEB_SOURCE/index.php" "$RUNTIME_DIR/index.php"
+    fi
+}
+
+print_status() {
+    local changes clean commit_full commit_short commit_time
+    changes="$(git_run status --porcelain=v1 --untracked-files=no)"
+    clean=1
+    [ -z "$changes" ] || clean=0
+    commit_full="$(git_run rev-parse HEAD)"
+    commit_short="$(git_run rev-parse --short=10 HEAD)"
+    commit_time="$(git_run log -1 --pretty=format:%ci)"
+
+    printf 'BRANCH=%s\n' "$BRANCH"
+    printf 'COMMIT_FULL=%s\n' "$commit_full"
+    printf 'COMMIT_SHORT=%s\n' "$commit_short"
+    printf 'COMMIT_TIME=%s\n' "$commit_time"
+    printf 'TREE_CLEAN=%s\n' "$clean"
+    printf 'ORIGIN=%s\n' "$EXPECTED_ORIGIN"
+    printf '%s\n' '---DETAILS---'
+    if [ -n "$changes" ]; then
+        printf '%s\n' "$changes"
+    fi
+}
+
+show_diff() {
+    assert_clean
+    git_run fetch --prune origin "$BRANCH"
+
+    printf '%s\n' 'Commits:'
+    if ! git_run log --oneline --decorate "HEAD..origin/$BRANCH" | sed -n '1,100p'; then
+        die 'Could not read remote commits.'
+    fi
+    printf '\n%s\n' 'Files:'
+    git_run diff --name-status "HEAD..origin/$BRANCH" | sed -n '1,500p'
+    printf '\n%s\n' 'Summary:'
+    git_run diff --stat "HEAD..origin/$BRANCH" | sed -n '1,500p'
+}
+
+deploy_production() {
+    local before after
+    assert_clean
+    before="$(git_run rev-parse HEAD)"
+    git_run fetch --prune origin "$BRANCH"
+    git_run merge-base --is-ancestor HEAD "origin/$BRANCH" || \
+        die 'Production HEAD is not an ancestor of origin/main. A fast-forward deployment is impossible.'
+    git_run merge --ff-only "origin/$BRANCH"
+    after="$(git_run rev-parse HEAD)"
+    refresh_web_runtime
+    printf 'BEFORE=%s\nAFTER=%s\n' "$before" "$after"
+}
+
+rollback_one() {
+    local before target after
+    assert_clean
+    before="$(git_run rev-parse HEAD)"
+    target="$(git_run rev-parse HEAD^ 2>/dev/null)" || die 'There is no previous commit to roll back to.'
+    git_run reset --hard "$target"
+    after="$(git_run rev-parse HEAD)"
+    refresh_web_runtime
+    printf 'BEFORE=%s\nAFTER=%s\n' "$before" "$after"
+}
+
+[ "$#" -eq 1 ] || die 'Usage: global-daisho-deploy {status|diff|production|rollback}'
+
+case "$1" in
+    status)
+        assert_repository
+        print_status
+        ;;
+    diff|production|rollback)
+        exec 9>"$LOCK_FILE"
+        flock -n 9 || die 'Another deployment operation is already running.'
+        assert_repository
+        case "$1" in
+            diff) show_diff ;;
+            production) deploy_production ;;
+            rollback) rollback_one ;;
+        esac
+        ;;
+    *)
+        die 'Unknown action.'
+        ;;
+esac
