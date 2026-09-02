@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poland Export Calc (Multi-Currency)</title>
+    <style>
+        body { font-family: "Helvetica Neue", Arial, sans-serif; background-color: #f0f2f5; color: #333; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); max-width: 700px; width: 100%; } /* 幅を少し広げました */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+        h2 { margin: 0; color: #2c3e50; font-size: 1.4em; }
+        .lang-switch { display: flex; background: #e9ecef; border-radius: 20px; padding: 2px; cursor: pointer; }
+        .lang-option { padding: 6px 16px; border-radius: 18px; font-size: 0.85em; font-weight: bold; color: #666; transition: 0.3s; }
+        .lang-option.active { background: #007bff; color: white; }
+        .section { margin-bottom: 20px; padding: 20px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; color: #555; }
+        select, input[type="number"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        input[type="range"] { width: 100%; margin: 10px 0; cursor: pointer; accent-color: #007bff; }
+        .slider-val { float: right; font-weight: bold; color: #007bff; }
+        
+        /* Currency Display Styles */
+        .market-card { background: linear-gradient(135deg, #0062cc 0%, #004a99 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
+        .target-card { background: #e8f5e9; border: 2px dashed #4caf50; color: #2e7d32; padding: 15px; border-radius: 10px; text-align: center; }
+        
+        .price-main { font-size: 2.0em; font-weight: bold; margin-bottom: 5px; }
+        .price-sub { font-size: 0.95em; opacity: 0.9; font-weight: normal; margin-top: 2px; }
+        .price-sub span { margin: 0 8px; display: inline-block; }
+        .divider { opacity: 0.6; }
+
+        .details-box { background: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 10px; font-size: 0.9em; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; align-items: center;}
+        .row:last-child { border-bottom: none; }
+        .total-row { font-weight: bold; font-size: 1.1em; color: #333; border-top: 2px solid #ccc; padding-top: 10px; margin-top: 5px; }
+        
+        /* Small currency text in rows */
+        .multi-currency-text { text-align: right; line-height: 1.2; }
+        .mc-main { font-weight: bold; }
+        .mc-sub { font-size: 0.8em; color: #666; display: block; }
+
+        /* Facelift Badge */
+        .badge { display:inline-block; padding:3px 8px; border-radius:10px; font-size:0.75em; font-weight:bold; color:white; margin-left:10px; vertical-align: middle; }
+        .badge-late { background-color: #28a745; }
+        .badge-early { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2 id="title">🇵🇱 Import Calc (3-Currency)</h2>
+        <div class="lang-switch" onclick="toggleLang()">
+            <div class="lang-option active" id="btn-ja">JP</div>
+            <div class="lang-option" id="btn-en">EN</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <label id="lbl-model">車種を選択 (Model)</label>
+        <select id="modelSelect" onchange="updateModel()"></select>
+
+        <div style="margin-top: 20px;">
+            <label>
+                <span id="lbl-year">年式</span> 
+                <span id="yearBadge"></span>
+                <span id="yearVal" class="slider-val">---</span>
+            </label>
+            <input type="range" id="yearRange" step="1" oninput="updateCalculations()">
+            <div style="font-size:0.8em; color:#999; margin-top:5px; text-align:right;" id="faceliftInfo"></div>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <label><span id="lbl-mileage">走行距離</span> <span id="mileageVal" class="slider-val">90,000 km</span></label>
+            <input type="range" id="mileageRange" min="0" max="200000" step="5000" value="90000" oninput="updateCalculations()">
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="market-card">
+            <div style="font-size:0.9em; opacity:0.9;" id="lbl-est-sell">現地での想定販売価格 (ポーランド)</div>
+            <div id="estPriceBox">
+                </div>
+            <div style="font-size:0.75em; opacity:0.8; margin-top:5px;">Based on Market Data</div>
+        </div>
+
+        <div class="target-card">
+            <div style="font-size:0.9em;" id="lbl-target-buy">仕入れ目標価格 (日本)</div>
+            <div id="targetPriceBox">
+                </div>
+            <div style="font-size:0.8em; margin-top:5px;" id="lbl-profit-zone">この価格以下なら利益が出る水準</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <label id="lbl-input-cost">実際の仕入れ価格を入力 (円)</label>
+        <input type="number" id="inputJpy" value="2500000" oninput="updateCalculations()">
+        <div style="font-size:0.8em; color:#777; margin-bottom:10px;">Input JPY only</div>
+
+        <div class="details-box">
+            <div class="row"><span id="lbl-transport">輸送費</span><div id="valTransport" class="multi-currency-text"></div></div>
+            <div class="row"><span id="lbl-duty">関税 (10%)</span><div id="valDuty" class="multi-currency-text"></div></div>
+            <div class="row"><span id="lbl-excise">物品税 (18.6%)</span><div id="valExcise" class="multi-currency-text"></div></div>
+            <div class="row"><span id="lbl-vat">VAT (23%)</span><div id="valVat" class="multi-currency-text"></div></div>
+            <div class="row total-row"><span id="lbl-total">ポーランド着地コスト</span><div id="valTotal" class="multi-currency-text"></div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ==========================================================================
+       ▼▼▼ SETTINGS & DATA ▼▼▼
+       ========================================================================== */
+    
+    // 為替レート設定 (Exchange Rates)
+    const rateJpy = 150.0; // 1 USD = 150 JPY
+    const ratePln = 4.10;  // 1 USD = 4.10 PLN (約)
+
+    // 車種データ (JSON)
+    const carData = [
+        {
+            "category": "Mercedes-Benz (LHD)",
+            "models": [
+                { "id": "e63_w211", "name": "Mercedes E63 AMG W211", "start": 2006, "end": 2009, "min": 25000, "max": 42000, "facelift": null },
+                { "id": "e55_w211", "name": "Mercedes E55 AMG W211", "start": 2002, "end": 2006, "min": 15000, "max": 30000, "facelift": null },
+                { "id": "s55_w220", "name": "Mercedes S55 AMG W220", "start": 1999, "end": 2005, "min": 13000, "max": 25000, "facelift": 2003 },
+                { "id": "sl55_r230","name": "Mercedes SL55 AMG R230","start": 2001, "end": 2008, "min": 27000, "max": 50000, "facelift": 2006 },
+                { "id": "g55_w463", "name": "Mercedes G55 AMG W463", "start": 2002, "end": 2011, "min": 40000, "max": 75000, "facelift": 2007 }
+            ]
+        },
+        {
+            "category": "Other European (LHD)",
+            "models": [
+                { "id": "p996",   "name": "Porsche 911 (996)",  "start": 1998, "end": 2004, "min": 25000, "max": 45000, "facelift": 2002 },
+                { "id": "m5_e60", "name": "BMW M5 E60 (V10)",   "start": 2005, "end": 2010, "min": 30000, "max": 55000, "facelift": 2007 }
+            ]
+        },
+        {
+            "category": "JDM LEGENDS (Japan)",
+            "models": [
+                { "id": "r34_gt",    "name": "Nissan Skyline R34 (Non-GTR)", "start": 1998, "end": 2002, "min": 30000, "max": 60000, "facelift": 2000 },
+                { "id": "supra_mk4", "name": "Toyota Supra A80", "start": 1993, "end": 2002, "min": 45000, "max": 90000, "facelift": 1997 },
+                { "id": "s15",       "name": "Nissan Silvia S15", "start": 1999, "end": 2002, "min": 25000, "max": 50000, "facelift": null }
+            ]
+        }
+    ];
+
+    /* ==========================================================================
+       LOGIC
+       ========================================================================== */
+    let currentLang = 'ja';
+
+    // Elements
+    const yearRange = document.getElementById('yearRange');
+    const yearVal = document.getElementById('yearVal');
+    const yearBadge = document.getElementById('yearBadge');
+    const faceliftInfo = document.getElementById('faceliftInfo');
+    const mileageRange = document.getElementById('mileageRange');
+    const mileageVal = document.getElementById('mileageVal');
+    const modelSelect = document.getElementById('modelSelect');
+    const inputJpy = document.getElementById('inputJpy');
+
+    // Display Boxes
+    const estPriceBox = document.getElementById('estPriceBox');
+    const targetPriceBox = document.getElementById('targetPriceBox');
+
+    // Init
+    function initModels() {
+        modelSelect.innerHTML = "";
+        carData.forEach(group => {
+            let optgroup = document.createElement('optgroup');
+            optgroup.label = group.category;
+            group.models.forEach(car => {
+                let option = document.createElement('option');
+                option.value = JSON.stringify(car); 
+                option.innerText = car.name;
+                optgroup.appendChild(option);
+            });
+            modelSelect.appendChild(optgroup);
+        });
+        updateModel(); 
+    }
+
+    const txt = {
+        ja: {
+            est: "現地での想定販売価格", target: "仕入れ目標価格 (日本)", cost: "実際の仕入れ価格を入力 (円)",
+            trans: "輸送費", duty: "関税 (10%)", exc: "物品税 (18.6%)", vat: "VAT (23%)", tot: "ポーランド着地コスト",
+            early: "前期型", late: "後期型", fl_info: "※後期型(Facelift)開始年: "
+        },
+        en: {
+            est: "Est. Selling Price (Poland)", target: "Target Buy Price (Japan)", cost: "Actual Purchase Price (JPY)",
+            trans: "Transport", duty: "Duty (10%)", exc: "Excise (18.6%)", vat: "VAT (23%)", tot: "Total Landed Cost",
+            early: "Early Model", late: "Late Model (Facelift)", fl_info: "*Facelift Year: "
+        }
+    };
+
+    function toggleLang() {
+        currentLang = (currentLang === 'ja') ? 'en' : 'ja';
+        document.getElementById('btn-ja').className = `lang-option ${currentLang === 'ja' ? 'active' : ''}`;
+        document.getElementById('btn-en').className = `lang-option ${currentLang === 'en' ? 'active' : ''}`;
+        
+        const t = txt[currentLang];
+        document.getElementById('lbl-est-sell').innerText = t.est;
+        document.getElementById('lbl-target-buy').innerText = t.target;
+        document.getElementById('lbl-input-cost').innerText = t.cost;
+        document.getElementById('lbl-transport').innerText = t.trans;
+        document.getElementById('lbl-duty').innerText = t.duty;
+        document.getElementById('lbl-excise').innerText = t.exc;
+        document.getElementById('lbl-vat').innerText = t.vat;
+        document.getElementById('lbl-total').innerText = t.tot;
+        
+        updateCalculations();
+    }
+
+    function updateModel() {
+        const car = JSON.parse(modelSelect.value);
+        yearRange.min = car.start;
+        yearRange.max = car.end;
+        yearRange.value = Math.floor((car.start + car.end) / 2);
+        
+        if(car.facelift) {
+            faceliftInfo.innerText = txt[currentLang].fl_info + car.facelift;
+        } else {
+            faceliftInfo.innerText = "";
+        }
+        
+        updateCalculations();
+    }
+
+    function updateCalculations() {
+        const car = JSON.parse(modelSelect.value);
+        const year = parseInt(yearRange.value);
+        const mileage = parseInt(mileageRange.value);
+        const t = txt[currentLang];
+        
+        yearVal.innerText = year;
+        mileageVal.innerText = mileage.toLocaleString() + ' km';
+
+        // --- Price Calculation ---
+        let minP = car.min;
+        let maxP = car.max;
+        let priceRange = maxP - minP;
+
+        let mileageScore = 1 - (mileage / 200000);
+        if(mileageScore < 0) mileageScore = 0;
+
+        let finalScore = 0;
+        let isLateModel = false;
+
+        if (car.facelift) {
+            if (year >= car.facelift) {
+                isLateModel = true;
+                finalScore = 0.4 + (mileageScore * 0.6); 
+                yearBadge.innerText = t.late;
+                yearBadge.className = "badge badge-late";
+            } else {
+                isLateModel = false;
+                finalScore = mileageScore * 0.6;
+                yearBadge.innerText = t.early;
+                yearBadge.className = "badge badge-early";
+            }
+        } else {
+            yearBadge.innerText = "";
+            yearBadge.className = "";
+            let yearSpan = car.end - car.start;
+            let yearScore = (yearSpan > 0) ? (year - car.start) / yearSpan : 0.5;
+            finalScore = (mileageScore * 0.7) + (yearScore * 0.3);
+        }
+
+        let estimatedUsd = minP + (priceRange * finalScore);
+        let targetUsd = estimatedUsd * 0.52;
+
+        // Render Big Price Boxes (All Currencies)
+        estPriceBox.innerHTML = renderPriceBlock(estimatedUsd, 'main');
+        targetPriceBox.innerHTML = renderPriceBlock(targetUsd, 'target');
+
+        // --- Cost Calc ---
+        let inputPrice = parseInt(inputJpy.value);
+        if(!inputPrice) inputPrice = 0;
+        let transport = 305000;
+        let cif = inputPrice + transport;
+        let duty = cif * 0.10;
+        let excise = (cif + duty) * 0.186; 
+        let vat = (cif + duty + excise) * 0.23;
+        let total = cif + duty + excise + vat;
+
+        // Render Cost Rows (All Currencies, small format)
+        document.getElementById('valTransport').innerHTML = renderRowPrice(transport/rateJpy);
+        document.getElementById('valDuty').innerHTML = renderRowPrice(duty/rateJpy);
+        document.getElementById('valExcise').innerHTML = renderRowPrice(excise/rateJpy);
+        document.getElementById('valVat').innerHTML = renderRowPrice(vat/rateJpy);
+        document.getElementById('valTotal').innerHTML = renderRowPrice(total/rateJpy);
+    }
+
+    // Helper: Render the Big Price Box
+    function renderPriceBlock(usd, type) {
+        let jpy = usd * rateJpy;
+        let pln = usd * ratePln;
+        
+        // Format
+        let sUsd = '$' + Math.floor(usd).toLocaleString();
+        let sJpy = '¥' + Math.floor(jpy).toLocaleString();
+        let sPln = Math.floor(pln).toLocaleString() + ' zł';
+
+        return `
+            <div class="price-main">${sUsd}</div>
+            <div class="price-sub">
+                ${sJpy} <span class="divider">/</span> ${sPln}
+            </div>
+        `;
+    }
+
+    // Helper: Render the Small Table Rows
+    function renderRowPrice(usd) {
+        let jpy = usd * rateJpy;
+        let pln = usd * ratePln;
+        
+        if (currentLang === 'ja') {
+            // JPY main
+            return `
+                <span class="mc-main">¥${Math.floor(jpy).toLocaleString()}</span>
+                <span class="mc-sub">$${Math.floor(usd).toLocaleString()} / ${Math.floor(pln).toLocaleString()} zł</span>
+            `;
+        } else {
+            // USD main
+            return `
+                <span class="mc-main">$${Math.floor(usd).toLocaleString()}</span>
+                <span class="mc-sub">¥${Math.floor(jpy).toLocaleString()} / ${Math.floor(pln).toLocaleString()} zł</span>
+            `;
+        }
+    }
+
+    // Start
+    initModels();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1009 @@
+// AI Chat Widget for Daisho Chemical GLOBAL - Site-wide injection
+(function () {
+    'use strict';
+
+    // Multi-language dictionary for UI text - All nine ISO codes
+    const labels = {
+        en: {
+            title: 'Daisho Chemical AI Assistant',
+            placeholder: 'Ask me anything…',
+            typing: 'AI is typing...',
+            send: 'Send',
+            close: 'Close',
+            welcomeMessage: 'Hello! How can I help you today?',
+          tooltip: 'Feel free to ask me anything!',
+  
+            presetQuestions: [
+                'Can you suggest and develop good additives based on soil conditions?',
+                'Are there any good retarders?',
+                'Do you have good admixtures suitable for cohesive soils?',
+                'Could you tell me about your track record?'
+     ],
+            presetAnswers: [
+                'Yes, we can suggest and develop additives based on detailed soil analyses.',
+                'We offer several high-performance retarders suitable for different conditions.',
+                'Indeed, we have admixtures designed specifically for cohesive soils.',
+                'Of course! We have successfully supplied projects in many regions with excellent results.'
+       
+            ]
+        },
+        ja: {
+            title: '大翔化学AIアシスタント',
+            placeholder: '何でも聞いてください…',
+            typing: 'AIが入力中...',
+            send: '送信',
+            close: '閉じる',
+            welcomeMessage: 'こんにちは！どのようなご質問でしょうか？',
+              presetQuestions: [
+                '土壌条件に基づいて良い添加剤を提案・開発できますか？',
+                '良い遅延剤はありますか？',
+                '粘性土に適した良い混和剤はありますか？',
+                '御社の実績を教えてください。'
+            ]
+        },
+        zh: {
+            title: '大正化学AI助手',
+            placeholder: '请随时提问…',
+            typing: 'AI正在输入...',
+            send: '发送',
+            close: '关闭',
+            welcomeMessage: '您好！我可以为您提供什么帮助？',
+            presetQuestions: [
+                '您能否提供土壤稳定剂的信息？',
+                '有什么好的缓凝剂适用于建筑项目？',
+                '您有适合粘性土的混凝土添加剂的建议吗？',
+                '能告诉我您在类似项目中的经验吗？'
+            ]
+        },
+        ko: {
+            title: '다이쇼 케미칼 AI 어시스턴트',
+            placeholder: '무엇이든 물어보세요…',
+            typing: 'AI가 입력 중...',
+            send: '보내기',
+            close: '닫기',
+            welcomeMessage: '안녕하세요! 어떻게 도와드릴까요？',
+            presetQuestions: [
+                '토양 안정화를 위한 첨가제에 대한 정보를 제공할 수 있나요?',
+                '건설 프로젝트에 효과적인 지연제가 있나요?',
+                '점성토에 적합한 혼화재에 대한 추천이 있나요?',
+                '유사한 프로젝트에서의 경험에 대해 공유할 수 있나요?'
+            ]
+        },
+ es: {
+            title: 'Asistente IA Daisho Chemical',
+            placeholder: 'Pregúntame cualquier cosa…',
+            typing: 'La IA está escribiendo...',
+            send: 'Enviar',
+            close: 'Cerrar',
+            welcomeMessage: '¡Hola! ¿Cómo puedo ayudarte?',
+            tooltip: '¡No dudes en preguntarme lo que sea!',
+            presetQuestions: [
+                '¿Puede sugerir y desarrollar buenos aditivos según las condiciones del suelo?',
+                '¿Existen buenos retardadores?',
+                '¿Tiene buenos aditivos adecuados para suelos cohesivos?',
+                '¿Podría hablarme sobre su experiencia o trayectoria?'
+            ]
+        },
+        fr: {
+            title: 'Assistant IA Daisho Chemical',
+            placeholder: 'Demandez-moi tout…',
+            typing: "L'IA est en train d'écrire...",
+            send: 'Envoyer',
+            close: 'Fermer',
+            welcomeMessage: 'Bonjour ! Comment puis-je vous aider ?',
+            tooltip: 'N\'hésitez pas à me poser des questions !',
+            presetQuestions: [
+                'Pouvez-vous proposer et développer de bons additifs en fonction des conditions du sol ?',
+                'Existe-t-il de bons retardateurs ?',
+                'Avez-vous de bons adjuvants adaptés aux sols cohésifs ?',
+                'Pouvez-vous me parler de vos références ou réalisations ?'
+            ]
+        },
+        de: {
+            title: 'Daisho Chemical KI-Assistent',
+            placeholder: 'Fragen Sie mich alles…',
+            typing: 'KI schreibt...',
+            send: 'Senden',
+            close: 'Schließen',
+            welcomeMessage: 'Hallo! Wie kann ich Ihnen helfen?',
+            tooltip: 'Stellen Sie mir gerne Fragen!',
+            presetQuestions: [
+                'Können Sie gute Additive basierend auf Bodenverhältnissen vorschlagen und entwickeln?',
+                'Gibt es gute Verzögerer (Retarder)?',
+                'Haben Sie gute Zusatzmittel, die für bindige Böden geeignet sind?',
+                'Können Sie mir Ihre bisherigen Referenzen nennen?'
+            ]
+        },
+        nl: {
+            title: 'Daisho Chemical AI Assistent',
+            placeholder: 'Vraag me alles…',
+            typing: 'AI is aan het typen...',
+            send: 'Verstuur',
+            close: 'Sluiten',
+            welcomeMessage: 'Hallo! Hoe kan ik u helpen?',
+            tooltip: 'Stel gerust uw vragen!',
+            presetQuestions: [
+                'Kunt u goede additieven voorstellen en ontwikkelen op basis van bodemcondities?',
+                'Zijn er goede vertragers beschikbaar?',
+                'Heeft u goede hulpstoffen geschikt voor cohesieve gronden?',
+                'Kunt u me iets vertellen over uw ervaring of referenties?'
+            ]
+        },
+        pl: {
+            title: 'Asystent AI Daisho Chemical',
+            placeholder: 'Zapytaj mnie o cokolwiek…',
+            typing: 'AI pisze...',
+            send: 'Wyślij',
+            close: 'Zamknij',
+            welcomeMessage: 'Cześć! W czym mogę pomóc?',
+            tooltip: 'Śmiało zadawaj pytania!',
+            presetQuestions: [
+                'Czy możesz zaproponować i opracować dobre dodatki w zależności od warunków gruntowych?',
+                'Czy są dostępne dobre opóźniacze?',
+                'Czy masz dobre domieszki odpowiednie do gruntów spoistych?',
+                'Czy możesz mi opowiedzieć o swoich dotychczasowych realizacjach?'
+            ]
+        }
+    };
+
+    // Global widget instance
+    let daishoChatWidget = null;
+
+    class DaishoChatWidget {
+        constructor() {
+            // Get language from document.documentElement.lang
+            this.lang = document.documentElement.lang || 'en';
+
+            // Fallback to English if language not supported
+            if (!labels[this.lang]) {
+                this.lang = 'en';
+            }
+
+            this.socket = null;
+            this.isOpen = false;
+            this.chatElement = null;
+            this.messagesContainer = null;
+            this.inputField = null;
+            this.sendButton = null;
+            this.hasInteracted = false;
+            this.hasSentFirstMessage = false;
+            this.sessionId = this.generateSessionId();
+            this.userId = this.getUserId();
+
+            this.init();
+        }
+
+        // Generate unique session ID
+        generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Get or create user ID (stored in localStorage)
+        getUserId() {
+            let userId = localStorage.getItem('daisho_user_id');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('daisho_user_id', userId);
+            }
+            return userId;
+        }
+
+        // Log events to database
+        logEvent(eventType, data) {
+            const logData = {
+                sessionId: this.sessionId,
+                userId: this.userId,
+                eventType: eventType,
+                timestamp: new Date().toISOString(),
+                language: this.lang,
+                userAgent: navigator.userAgent,
+                url: window.location.href,
+                ...data
+            };
+
+            // Send to server for database storage
+            if (this.socket && this.socket.connected) {
+                this.socket.emit('logEvent', logData);
+            } else {
+                // Fallback: store in localStorage and send later
+                const pendingLogs = JSON.parse(localStorage.getItem('daisho_pending_logs') || '[]');
+                pendingLogs.push(logData);
+                localStorage.setItem('daisho_pending_logs', JSON.stringify(pendingLogs));
+            }
+
+            // Console log for debugging
+            console.log('Daisho Chat Event:', logData);
+        }
+
+        // Send pending logs when connection is established
+        sendPendingLogs() {
+            const pendingLogs = JSON.parse(localStorage.getItem('daisho_pending_logs') || '[]');
+            if (pendingLogs.length > 0) {
+                pendingLogs.forEach(logData => {
+                    this.socket.emit('logEvent', logData);
+                });
+                localStorage.removeItem('daisho_pending_logs');
+            }
+        }
+
+        init() {
+            this.createStyles();
+            this.createChatElement();
+            this.connectSocket();
+            this.setupEventListeners();
+        }
+
+        // Create CSS styles for the widget
+        createStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                #daisho-chat {
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    z-index: 10000;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                }
+
+                .daisho-chat-bubble {
+                    width: 96px;
+                    height: 96px;
+                    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+                    border-radius: 50%;
+                    color: white;
+                    font-size: 24px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+                    transition: all 0.3s ease;
+                    border: none;
+                    padding: 0;
+                    overflow: hidden;
+                }
+
+                .daisho-chat-bubble:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+                }
+
+                .daisho-agent-avatar {
+                    width: 90px;
+                    height: 90px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    object-position: 50% 15%;
+                    border: 2.5px solid #fff;
+                    background: #fff;
+                    display: block;
+                    margin: 0 auto;
+                }
+
+                .daisho-chat-window {
+                    position: absolute;
+                    bottom: 96px;
+                    right: 0;
+                    width: 350px;
+                    height: 500px;
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                    border: 1px solid #e1e5e9;
+                    display: none;
+                    flex-direction: column;
+                    animation: slideUp 0.3s ease-out;
+                }
+
+                .daisho-chat-window.open {
+                    display: flex;
+                }
+
+                @keyframes slideUp {
+                    from {
+                        transform: translateY(20px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+
+                .daisho-chat-header {
+                    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+                    color: white;
+                    padding: 16px;
+                    border-radius: 12px 12px 0 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+
+                .daisho-chat-title {
+                    font-weight: 600;
+                    font-size: 16px;
+                }
+
+                .daisho-chat-close {
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 20px;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 24px;
+                    height: 24px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    transition: background 0.2s;
+                }
+
+                .daisho-chat-close:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                }
+
+                .daisho-chat-messages {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+
+                .daisho-message {
+                    max-width: 85%;
+                    padding: 12px 16px;
+                    border-radius: 18px;
+                    font-size: 14px;
+                    line-height: 1.4;
+                    word-wrap: break-word;
+                }
+
+                .daisho-message.user {
+                    background: #2563eb;
+                    color: white;
+                    align-self: flex-end;
+                    border-bottom-right-radius: 4px;
+                }
+
+                .daisho-message.bot {
+                    background: #f3f4f6;
+                    color: #374151;
+                    align-self: flex-start;
+                    border-bottom-left-radius: 4px;
+                }
+
+                .daisho-message.error {
+                    background: #fee2e2;
+                    color: #991b1b;
+                    align-self: flex-start;
+                    border-bottom-left-radius: 4px;
+                }
+
+                .daisho-typing {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px 16px;
+                    color: #6b7280;
+                    font-size: 14px;
+                    align-self: flex-start;
+                }
+
+                .daisho-typing-dots {
+                    display: flex;
+                    gap: 4px;
+                }
+
+                .daisho-typing-dot {
+                    width: 6px;
+                    height: 6px;
+                    background: #6b7280;
+                    border-radius: 50%;
+                    animation: daisho-typing 1.4s infinite;
+                }
+
+                .daisho-typing-dot:nth-child(2) {
+                    animation-delay: 0.2s;
+                }
+
+                .daisho-typing-dot:nth-child(3) {
+                    animation-delay: 0.4s;
+                }
+
+                @keyframes daisho-typing {
+                    0%, 60%, 100% {
+                        opacity: 0.3;
+                    }
+                    30% {
+                        opacity: 1;
+                    }
+                }
+
+                .preset-questions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    padding: 16px;
+                    max-height: 120px;
+                    overflow-y: auto;
+                }
+
+                .preset-question {
+                    background: #f3f4f6;
+                    color: #374151;
+                    padding: 8px 12px;
+                    border-radius: 18px;
+                    font-size: 13px;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    border: 1px solid #e5e7eb;
+                    flex: 1 1 auto;
+                    text-align: center;
+                    min-width: 150px;
+                }
+
+                .preset-question:hover {
+                    background: #e5e7eb;
+                }
+
+                .daisho-chat-input {
+                    padding: 16px;
+                    border-top: 1px solid #e5e7eb;
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                }
+
+                .daisho-chat-input input {
+                    flex: 1;
+                    padding: 12px 16px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 24px;
+                    font-size: 14px;
+                    outline: none;
+                    transition: border-color 0.2s;
+                }
+
+                .daisho-chat-input input:focus {
+                    border-color: #2563eb;
+                }
+
+                .daisho-send-button {
+                    background: #2563eb;
+                    color: white;
+                    border: none;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: background 0.2s;
+                }
+
+                .daisho-send-button:hover {
+                    background: #1d4ed8;
+                }
+
+                .daisho-send-button:disabled {
+                    background: #9ca3af;
+                    cursor: not-allowed;
+                }
+
+
+                .preset-questions {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    padding: 16px;
+                }
+
+                .preset-question {
+                    background: #f3f4f6;
+                    color: #374151;
+                    padding: 8px 16px;
+                    border-radius: 18px;
+                    font-size: 14px;
+                    cursor: pointer;
+                }
+
+                .daisho-chat-tooltip {
+                    position: absolute;
+                    bottom: 110px;
+                    right: 0;
+                    background: #2563eb;
+                    color: #fff;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    white-space: nowrap;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                    opacity: 0;
+                    transform: translateY(10px);
+                    transition: all 0.3s ease;
+                    pointer-events: none;
+                }
+                
+                .daisho-chat-tooltip.visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+
+                .preset-question:hover {
+                    background: #e5e7eb;
+                }
+                /* Mobile responsive */
+                @media (max-width: 768px) {
+                    .daisho-chat-window {
+                        width: 320px;
+                        height: 450px;
+                    }
+                    
+                    #daisho-chat {
+                        bottom: 15px;
+                        right: 15px;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Create the floating chat bubble element
+        createChatElement() {
+            const ui = labels[this.lang];
+
+            // Create main container
+            this.chatElement = document.createElement('div');
+            this.chatElement.id = 'daisho-chat';
+            const bubble = document.createElement('button');
+            bubble.className = 'daisho-chat-bubble';
+ //           bubble.innerHTML = '<img src="agent_bubble1.jpg" alt="Agent" class="daisho-agent-avatar">';
+           bubble.innerHTML = '<img src="/client/agent_bubble1.jpg" alt="Agent" class="daisho-agent-avatar">';
+ 
+            bubble.setAttribute('aria-label', ui.title);
+
+            // Create chat window
+            const window = document.createElement('div');
+            window.className = 'daisho-chat-window';
+            window.innerHTML = `
+                <div class="daisho-chat-header">
+                    <div class="daisho-chat-title">${ui.title}</div>
+                    <button class="daisho-chat-close" aria-label="${ui.close}">&times;</button>
+                </div>
+                <div class="daisho-chat-messages"></div>
+                <div class="preset-questions" style="display: none;"></div>
+                <div class="daisho-chat-input">
+                    <input type="text" placeholder="${ui.placeholder}" maxlength="500" autocomplete="off">
+            <div id="daisho-chat-tooltip" class="daisho-chat-tooltip">
+                Feel free to ask me anything!</div> 
+    
+                    <button class="daisho-send-button" aria-label="${ui.send}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            // Append elements
+            this.chatElement.appendChild(bubble);
+            this.chatElement.appendChild(window);
+            document.body.appendChild(this.chatElement);
+
+            // Store references
+            this.chatBubble = bubble;
+            this.chatWindow = window;
+            this.messagesContainer = window.querySelector('.daisho-chat-messages');
+            this.presetQuestionsContainer = window.querySelector('.preset-questions');
+            this.inputField = window.querySelector('.daisho-chat-input input');
+            this.sendButton = window.querySelector('.daisho-send-button');
+            this.closeButton = window.querySelector('.daisho-chat-close');
+
+            this.renderPresetQuestions();
+       // Create tooltip element
+            const tooltip = document.createElement('div');
+            tooltip.id = 'daisho-chat-tooltip';
+            tooltip.className = 'daisho-chat-tooltip';
+            tooltip.textContent = ui.tooltip || 'Feel free to ask me anything!';
+
+            this.chatElement.appendChild(bubble);
+            this.chatElement.appendChild(tooltip);
+            this.chatElement.appendChild(window);
+
+            // Show tooltip after short delay
+            setTimeout(() => {
+                tooltip.classList.add('visible');
+            }, 1000);
+
+            // Hide tooltip on bubble click
+            bubble.addEventListener('click', () => {
+                tooltip.classList.remove('visible');
+            });
+
+        }
+
+        renderPresetQuestions() {
+            const ui = labels[this.lang];
+            this.presetQuestionsContainer.innerHTML = '';
+        
+            ui.presetQuestions.forEach((question) => {
+                const presetQuestion = document.createElement('div');
+                presetQuestion.className = 'preset-question';
+                presetQuestion.textContent = question;
+                presetQuestion.tabIndex = 0; // keyboard accessibility
+                presetQuestion.setAttribute('role', 'button');
+                presetQuestion.setAttribute('aria-label', question);
+        
+                const askPreset = () => {
+                    this.hidePresetQuestions();
+                    this.addMessage(question, 'user');
+                    this.inputField.value = '';
+                    this.sendButton.disabled = true;
+                    this.showTypingIndicator();
+        
+                    // Log preset question selection
+                    this.logEvent('preset_question_selected', {
+                        message: question,
+                        questionIndex: ui.presetQuestions.indexOf(question),
+                        messageLength: question.length
+                    });
+        
+                    // Lookup the answer from presetAnswers
+                    const answerIndex = ui.presetQuestions.indexOf(question);
+                    if (answerIndex !== -1) {
+                        const answer = ui.presetAnswers[answerIndex];
+                        this.addMessage(answer, 'bot');
+                        this.hideTypingIndicator();
+                    }
+        
+                    // ↓ AIへは送らないようにコメントアウト
+                    // this.socket.emit('userMessage', {
+                    //     msg: question,
+                    //     lang: this.lang
+                    // });
+                    // this.hasSentFirstMessage = true;
+                };
+        
+                presetQuestion.addEventListener('click', askPreset);
+                presetQuestion.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        askPreset();
+                        e.preventDefault();
+                    }
+                });
+        
+                this.presetQuestionsContainer.appendChild(presetQuestion);
+            });
+        }
+        
+
+        // Connect to Socket.IO at your domain
+        connectSocket() {
+            // Try to connect to the current domain first, fallback to localhost:3001
+            const serverUrl = window.location.protocol + '//' + window.location.host;
+
+            this.socket = io(serverUrl, {
+                transports: ['websocket', 'polling'],
+                timeout: 5000
+            });
+
+            this.socket.on('connect', () => {
+                console.log('Connected to Daisho Chemical chat server');
+                    this.showWelcomeMessage();
+
+                this.logEvent('connection_established', {
+                    serverUrl: serverUrl,
+                    connectionTime: new Date().toISOString()
+                });
+                this.sendPendingLogs();
+            });
+
+            this.socket.on('disconnect', () => {
+                console.log('Disconnected from chat server');
+                this.logEvent('connection_lost', {
+                    disconnectionTime: new Date().toISOString()
+                });
+            });
+
+            this.socket.on('connect_error', (error) => {
+                console.warn('Failed to connect to chat server:', error);
+                this.logEvent('connection_error', {
+                    error: error.message,
+                    serverUrl: serverUrl
+                });
+                // Fallback to localhost for development
+                if (serverUrl !== 'http://localhost:3001') {
+                    this.connectToFallback();
+                }
+            });
+
+            // Listen for botMessage events
+            this.socket.on('botMessage', (data) => {
+                this.hideTypingIndicator();
+                this.addMessage(data.reply, data.error ? 'error' : 'bot');
+                this.sendButton.disabled = false;
+
+                // Log bot response
+                this.logEvent('bot_response', {
+                    message: data.reply,
+                    hasError: !!data.error,
+                    responseTime: new Date().toISOString(),
+                    messageLength: data.reply.length
+                });
+            });
+        }
+
+        // Fallback connection for development
+        connectToFallback() {
+            console.log('Attempting fallback connection to localhost:3001');
+            this.socket = io('http://localhost:3001');
+
+            this.socket.on('connect', () => {
+                this.showWelcomeMessage();
+
+                console.log('Connected to development chat server');
+                this.logEvent('fallback_connection_established', {
+                    serverUrl: 'http://localhost:3001'
+                });
+                this.sendPendingLogs();
+            });
+
+            this.socket.on('botMessage', (data) => {
+                this.hideTypingIndicator();
+                this.addMessage(data.reply, data.error ? 'error' : 'bot');
+                this.sendButton.disabled = false;
+
+                // Log bot response
+                this.logEvent('bot_response', {
+                    message: data.reply,
+                    hasError: !!data.error,
+                    responseTime: new Date().toISOString(),
+                    messageLength: data.reply.length
+                });
+            });
+        }
+
+        // Setup event listeners
+        setupEventListeners() {
+            // Chat bubble click - expand to chat window
+            this.chatBubble.addEventListener('click', () => {
+                this.openChat();
+            });
+
+            // Close button
+            this.closeButton.addEventListener('click', () => {
+                this.closeChat();
+            });
+
+            // Send button
+            this.sendButton.addEventListener('click', () => {
+                this.sendMessage();
+            });
+
+            // Enter key in input
+            this.inputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.sendMessage();
+                }
+            });
+
+            // Show preset questions when user interacts with input
+            this.inputField.addEventListener('focus', () => {
+                if (!this.hasInteracted && !this.hasSentFirstMessage) {
+                    this.showPresetQuestions();
+                    this.hasInteracted = true;
+
+                    // Log preset questions shown
+                    this.logEvent('preset_questions_shown', {
+                        questionsCount: labels[this.lang].presetQuestions.length
+                    });
+                }
+            });
+
+            this.inputField.addEventListener('input', () => {
+                if (!this.hasInteracted && !this.hasSentFirstMessage) {
+                    this.showPresetQuestions();
+                    this.hasInteracted = true;
+
+                    // Log preset questions shown
+                    this.logEvent('preset_questions_shown', {
+                        questionsCount: labels[this.lang].presetQuestions.length
+                    });
+                }
+            });
+
+            // Also open preset questions if user clicks in the messages area
+            this.messagesContainer.addEventListener('click', () => {
+                if (!this.hasInteracted && !this.hasSentFirstMessage) {
+                    this.showPresetQuestions();
+                    this.hasInteracted = true;
+
+                    // Log preset questions shown
+                    this.logEvent('preset_questions_shown', {
+                        questionsCount: labels[this.lang].presetQuestions.length
+                    });
+                }
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (e) => {
+                if (this.isOpen && !this.chatElement.contains(e.target)) {
+                    this.closeChat();
+                }
+            });
+        }
+
+        // Open chat window
+        openChat() {
+            this.isOpen = true;
+            this.chatWindow.classList.add('open');
+            this.chatBubble.style.display = 'none';
+                this.showPresetQuestions();
+
+
+            // Reset interaction state when reopening
+            this.hasInteracted = false;
+            this.hasSentFirstMessage = false;
+
+
+            // Log chat opened
+            this.logEvent('chat_opened', {
+                openTime: new Date().toISOString()
+            });
+
+            // Show welcome message immediately
+            this.showWelcomeMessage();
+
+            setTimeout(() => {
+                this.inputField.focus();
+            }, 100);
+        }
+
+        // Close chat window
+        closeChat() {
+            this.isOpen = false;
+            this.chatWindow.classList.remove('open');
+            this.chatBubble.style.display = 'flex';
+            // Reset interaction state when closing
+            this.hasInteracted = false;
+            this.hasSentFirstMessage = false;
+            // Clear messages when closing
+            this.messagesContainer.innerHTML = '';
+            this.hidePresetQuestions();
+
+            // Log chat closed
+            this.logEvent('chat_closed', {
+                closeTime: new Date().toISOString()
+            });
+        }
+
+        // Send message via Socket.IO
+        sendMessage() {
+            const message = this.inputField.value.trim();
+            if (!message || this.sendButton.disabled) return;
+
+            // Hide preset questions after first message
+            this.hidePresetQuestions();
+
+            // Append user text to the chat log
+            this.addMessage(message, 'user');
+            this.inputField.value = '';
+            this.sendButton.disabled = true;
+
+            // Log user message
+            this.logEvent('user_message', {
+                message: message,
+                messageLength: message.length,
+                isFirstMessage: !this.hasSentFirstMessage
+            });
+
+            // Show typing indicator
+            this.showTypingIndicator();
+
+            // Emit userMessage via Socket.IO
+            this.socket.emit('userMessage', {
+                msg: message,
+                lang: this.lang
+            });
+
+            this.hasSentFirstMessage = true;
+        }
+
+        // Add message to chat log
+        addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `daisho-message ${type}`;
+            messageDiv.textContent = text;
+
+            this.messagesContainer.appendChild(messageDiv);
+            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        }
+
+        // Show typing indicator
+        showTypingIndicator() {
+            this.hideTypingIndicator();
+
+            const ui = labels[this.lang];
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'daisho-typing';
+            typingDiv.innerHTML = `
+                <span>${ui.typing}</span>
+                <div class="daisho-typing-dots">
+                    <div class="daisho-typing-dot"></div>
+                    <div class="daisho-typing-dot"></div>
+                    <div class="daisho-typing-dot"></div>
+                </div>
+            `;
+
+            this.messagesContainer.appendChild(typingDiv);
+            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        }
+
+        // Hide typing indicator
+        hideTypingIndicator() {
+            const typingIndicator = this.messagesContainer.querySelector('.daisho-typing');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        hidePresetQuestions() {
+            if (this.presetQuestionsContainer) {
+                this.presetQuestionsContainer.style.display = 'none';
+            }
+        }
+
+        showPresetQuestions() {
+            if (this.presetQuestionsContainer) {
+                this.presetQuestionsContainer.style.display = 'flex';
+
+                // Scroll to preset questions smoothly if overflowing
+                setTimeout(() => {
+                    this.presetQuestionsContainer.scrollIntoView({behavior: "smooth", block: "nearest"});
+                }, 100);
+            }
+        }
+
+        // Show welcome message
+        showWelcomeMessage() {
+            const ui = labels[this.lang];
+            // If welcome message already present in messages, don't add again
+            const existingWelcome = Array.from(this.messagesContainer.querySelectorAll('.daisho-message.bot'))
+                .some(div => div.textContent === ui.welcomeMessage);
+            if (existingWelcome) return;
+            setTimeout(() => {
+                this.addMessage(ui.welcomeMessage, 'bot');
+
+                // Log welcome message shown
+                this.logEvent('welcome_message_shown', {
+                    message: ui.welcomeMessage
+                });
+            }, 250);
+        }
+    }
+
+    // Initialize widget when DOM is ready
+    function initWidget() {
+        if (daishoChatWidget) return; // Prevent multiple instances
+
+        daishoChatWidget = new DaishoChatWidget();
+
+        // Expose globally for debugging
+        window.daishoChatWidget = daishoChatWidget;
+    }
+
+    // Auto-initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWidget);
+    } else {
+        initWidget();
+    }
+
+})();

@@ -1,0 +1,842 @@
+{
+  "ja": {
+    "site_title": "株式会社大翔化学研究所 (Daisho Chemical R&D)",
+    "hero_title": "現場の数だけ、正解がある。",
+    "hero_desc": "カタログの既製品で諦めていませんか？あなたの現場専用の「処方箋」を開発します。",
+    "mode_select_title": "検索モードを選択",
+    "mode_field_title": "現場・工法から探す",
+    "mode_field_desc": "現場の悩みから解決策を見つける",
+    "mode_product_title": "商品名・素材から探す",
+    "mode_product_desc": "具体的な材料名から探す",
+    "table_headers": { "name": "製品名", "desc": "概要", "wow": "強み", "pkg": "荷姿", "usage": "用途" },
+    "sections": {
+      "ground": { "title": "1. 地盤改良・アンカー", "desc": "「固まらない土はない」。粘性土対応から急傾斜地対策まで。" },
+      "shield": { "title": "2. シールド・トンネル", "desc": "大深度地下や長距離推進のトラブルを防ぐケミカルソリューション。" },
+      "marine": { "title": "3. 港湾・海洋・防災", "desc": "海を汚さず、確実に充填する。水中施工のプロフェッショナル技術。" },
+      "repair": { "title": "4. 補修・メンテナンス", "desc": "インフラを「治す」技術。吹付、左官、注入まで。" },
+      "concrete": { "title": "5. コンクリート・一般", "desc": "土木の基礎を支える混和剤とグラウト技術。" }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / スーパーリターダー",
+        "desc": "アンカーセメントミルク注入用遅延型分散剤。分散性と低ブリージングの両立を実現し、長時間流動性を保持します。",
+        "problem": "未添加の場合、時間の経過と共に流動性が低下し、圧送負荷の増大や充填不良のリスクがあります。",
+        "wow": "長時間流動保持 & 低添加量", "pkg": "要問合せ", "dosage": "セメント重量 × 0.2%～", "usage": "グラウンドアンカー、急傾斜地対策"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OPフローシリーズ (OP1/OP2)",
+        "desc": "OPTジェット工法用混和剤。通常型(S)と液状化対策用揺変性型(L)の2種。排泥量を抑制します。",
+        "problem": "汎用品ではスラリー量が増大し、産廃処分費の高騰や地盤変位を招く恐れがあります。",
+        "wow": "清水建設・ライト工業共同開発", "pkg": "ローリー / 1m3コンテナ", "dosage": "土質により変動", "usage": "薬液注入工、ジェットグラウト工"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD剤 (セメント急結材)",
+        "desc": "アンカー・ロックボルト用注入材の可塑状団結を促進。亀裂性の高い地盤でも逸失を防ぎます。",
+        "problem": "亀裂の多い地盤では注入材がどこまでも流出してしまい、定着不良や材料費の浪費に繋がります。",
+        "wow": "崩壊性地盤での確実な注入", "pkg": "箱・袋 (バッチ別梱包)", "dosage": "セメント重量 × 5～10%", "usage": "グラウンドアンカー、急傾斜地対策"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (粘性土用混和剤)",
+        "desc": "地盤改良、ジェットグラウト、DSM向け。難改良土である粘性土の混合性を高め、強度発現を改善します。",
+        "problem": "粘性土（粘土）はセメントと混ざりにくく、改良体に未混合部分（ダマ）ができ強度が不足します。",
+        "wow": "粘性土の混合性・強度改善", "pkg": "要問合せ", "dosage": "対象土1m3あたり 2～5kg", "usage": "地盤改良、ジェットグラウト、DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "ベントナイト (DK-BENTONITE)",
+        "desc": "場所打ち杭やシールド作泥土に不可欠な高品質天然粘土鉱物。API規格準拠品もあり。",
+        "problem": "低品質な安定液では掘削壁が崩壊し、工事の中断や埋め戻し事故が発生するリスクがあります。",
+        "wow": "安定した造壁性とコスト", "pkg": "フレコン / 25kg袋", "dosage": "水1m3あたり 20～50kg", "usage": "場所打ち杭、シールド作泥土"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25 (ディープ25)",
+        "desc": "粘性土掘削助剤。粘土の抱きつき（供回り）を防ぎ、ダマを解消して改良体の強度を飛躍的に高めます。",
+        "problem": "粘土がヘッドに抱きつき（供回り）、削孔停止や最悪の場合はヘッド脱落（損失）事故を引き起こします。",
+        "wow": "ダマ解消 & 強度向上", "pkg": "粉末 / 液体", "dosage": "土質により調整", "usage": "粘性土掘削、地盤改良"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-バックフィル (裏込め材)",
+        "desc": "シールド用可塑性グラウト。圧送時は低粘性、注入後は即ゲル化。可使時間を秒単位でコントロール。",
+        "problem": "長距離圧送中に配管が閉塞（パンク）したり、充填不足による地盤沈下事故が起きるリスクがあります。",
+        "wow": "配管閉塞ゼロ & 即時ゲル化", "pkg": "ローリー / プラント", "dosage": "A液:B液 = 1:1 (容積比)", "usage": "シールド裏込め、空洞充填"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-アクアヴィスコ (水中不分離)",
+        "desc": "強力な粘性を付与する水中不分離性混和剤。汚濁防止膜なしでも材料分離を防ぎます。",
+        "problem": "水中打設時にセメントが流出し、強度が発現しないだけでなく、深刻な海洋汚染を引き起こします。",
+        "wow": "強力な増粘 & 海洋汚染防止", "pkg": "粉末袋 / 水溶性袋", "dosage": "1m3あたり 1.5kg～3.0kg", "usage": "水中コンクリート、海上ポンプ圧送"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-リペアモルタル (断面修復)",
+        "desc": "厚塗りしてもダレない高強度補修モルタル。天井面や垂直面でもボタ落ちしません。",
+        "problem": "一般モルタルでは天井面から剥がれ落ち、施工効率が悪化するうえ、早期にひび割れが再発します。",
+        "wow": "天井でも落ちない保形性", "pkg": "25kg袋", "dosage": "そのまま使用 (プレミックス)", "usage": "左官補修、吹付補修"
+      }
+    ],
+    "cta": { "title": "その土、まだ諦めないでください", "btn": "土壌分析・配合依頼（無料相談）" }
+  },
+  "en": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "The Answer lies in the Soil.",
+    "hero_desc": "Don't settle for catalog products. We formulate the perfect prescription for your site.",
+    "mode_select_title": "Select Search Mode",
+    "mode_field_title": "By Field / Method",
+    "mode_field_desc": "Find solutions based on site challenges",
+    "mode_product_title": "By Product Name",
+    "mode_product_desc": "Search by specific material names",
+    "table_headers": { "name": "Product", "desc": "Overview", "wow": "WOW Factor", "pkg": "Pkg", "usage": "Usage" },
+    "sections": {
+      "ground": { "title": "1. Ground Improvement", "desc": "Custom solidification agents for any soil type." },
+      "shield": { "title": "2. Shield & Tunnel (TBM)", "desc": "Chemical solutions to maximize TBM performance." },
+      "marine": { "title": "3. Port & Marine", "desc": "Anti-washout technologies for underwater construction." },
+      "repair": { "title": "4. Repair & Maintenance", "desc": "Shotcrete and repair mortars for infrastructure longevity." },
+      "concrete": { "title": "5. Concrete & General", "desc": "Admixtures and grouts for fundamental civil engineering." }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / Super Retarder",
+        "desc": "Retarding dispersant for anchor cement milk. Balances dispersion & low bleeding.",
+        "problem": "Without it, fluidity decreases over time, risking pump blockage and incomplete filling.",
+        "wow": "Long-term Fluidity & Low Dosage", "pkg": "Inquire", "dosage": "C x 0.2-1.0%", "usage": "Ground Anchors, Slope Stabilization"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow Series",
+        "desc": "Admixture for OPT Jet Method. Reduces sludge and displacement.",
+        "problem": "Standard mixtures produce excessive sludge, increasing disposal costs and ground displacement risks.",
+        "wow": "Joint Dev with Shimizu Corp", "pkg": "Lorry / Container", "dosage": "Variable by soil", "usage": "Chemical Grouting, Jet Grouting"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD Agent (Accelerator)",
+        "desc": "Promotes plastic consolidation for anchor grouting. Prevents loss in cracked ground.",
+        "problem": "In fractured ground, grout flows away endlessly, causing anchoring failure and material waste.",
+        "wow": "Reliable Grouting in Cracked Soil", "pkg": "Bag (Batch specific)", "dosage": "C x 5-10%", "usage": "Ground Anchors, Slope Stabilization"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (For Clay)",
+        "desc": "Special admixture for cohesive soil improvement. Improves mixing efficiency and strength.",
+        "problem": "Clay soils clump together and resist mixing with cement, leading to weak spots and failure.",
+        "wow": "Improves Mixing in Sticky Clay", "pkg": "Inquire", "dosage": "2-5kg per m3 soil", "usage": "Ground Improvement, Jet Grouting"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "DK-BENTONITE",
+        "desc": "High-quality natural clay for slurry walls and shield tunneling. API standard available.",
+        "problem": "Poor quality slurry leads to trench wall collapse and catastrophic site accidents.",
+        "wow": "High Stability & Cost Effective", "pkg": "Big Bag / 25kg Bag", "dosage": "20-50kg per m3 water", "usage": "Cast-in-place piles, Slurry shield"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25",
+        "desc": "Anti-clogging additive for viscous soil. Dissolves lumps to ensure full mixing and strength.",
+        "problem": "Clay clogging (co-rotation) causes machine stoppage and risks head loss (tool detachment).",
+        "wow": "Dissolves Lumps & Increases Strength", "pkg": "Powder / Liquid", "dosage": "Variable", "usage": "Viscous Soil Excavation"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL Grout",
+        "desc": "Plasticity grout for TBM backfilling. Pumps easily, gels instantly.",
+        "problem": "Risk of pipe blockage during pumping and ground settlement due to incomplete filling.",
+        "wow": "Zero Pipe Blockage", "pkg": "Lorry / Plant", "dosage": "A:B = 1:1", "usage": "Shield backfilling"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO",
+        "desc": "Anti-washout admixture. Prevents segregation underwater.",
+        "problem": "Concrete separates underwater, losing strength and causing severe marine pollution.",
+        "wow": "Strong Viscosity & Eco-friendly", "pkg": "Bag / Soluble Bag", "dosage": "1.5-3.0kg per m3", "usage": "Underwater concrete"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR",
+        "desc": "High-strength non-sag mortar. Stays on ceilings without dripping.",
+        "problem": "Ordinary mortar drips from overhead surfaces and cracks easily after curing.",
+        "wow": "Non-sag on Ceilings", "pkg": "25kg Bag", "dosage": "Pre-mixed", "usage": "Shotcrete, Trowel repair"
+      }
+    ],
+    "cta": { "title": "Don't give up on your soil.", "btn": "Request Analysis (Free)" }
+  },
+  "es": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "La respuesta está en el suelo.",
+    "hero_desc": "No se conforme con productos de catálogo. Formulamos la receta perfecta para su obra.",
+    "mode_select_title": "Modo de búsqueda",
+    "mode_field_title": "Por Campo / Método",
+    "mode_field_desc": "Encuentre soluciones a problemas de obra",
+    "mode_product_title": "Por Producto",
+    "mode_product_desc": "Buscar por nombre de material",
+    "table_headers": { "name": "Producto", "desc": "Resumen", "wow": "Punto Fuerte", "pkg": "Envase", "usage": "Uso" },
+    "sections": {
+      "ground": { "title": "1. Mejora del Terreno", "desc": "Soluciones para suelos cohesivos y anclajes." },
+      "shield": { "title": "2. Túneles (TBM)", "desc": "Soluciones químicas para maximizar el rendimiento de la TBM." },
+      "marine": { "title": "3. Puerto y Marino", "desc": "Tecnologías anti-lavado para construcción submarina." },
+      "repair": { "title": "4. Reparación", "desc": "Hormigón proyectado y morteros de reparación." },
+      "concrete": { "title": "5. Hormigón y General", "desc": "Aditivos y lechadas para ingeniería civil." }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / Super Retardante",
+        "desc": "Dispersante retardante para lechada de anclaje. Mantiene la fluidez por largo tiempo.",
+        "problem": "Sin él, la fluidez disminuye, arriesgando el bloqueo de la bomba.",
+        "wow": "Fluidez Prolongada", "pkg": "Consultar", "dosage": "C x 0.2-1.0%", "usage": "Anclajes, Taludes"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow Series",
+        "desc": "Aditivo para Jet Grouting. Reduce lodos y desplazamiento del suelo.",
+        "problem": "El exceso de lodo aumenta los costos de eliminación y el riesgo de desplazamiento.",
+        "wow": "Desarrollado con Shimizu Corp", "pkg": "Camión / Contenedor", "dosage": "Variable", "usage": "Jet Grouting"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD Agent (Acelerante)",
+        "desc": "Promueve la consolidación plástica en anclajes. Previene pérdidas en suelos fracturados.",
+        "problem": "En suelo fracturado, la lechada se pierde, causando fallas en el anclaje.",
+        "wow": "Inyección segura en suelo fracturado", "pkg": "Saco (Lote específico)", "dosage": "C x 5-10%", "usage": "Anclajes, Taludes"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (Para Arcilla)",
+        "desc": "Aditivo especial para mejorar la mezcla en suelos cohesivos (arcilla).",
+        "problem": "La arcilla no se mezcla bien con el cemento, creando puntos débiles.",
+        "wow": "Mejora mezcla en arcilla", "pkg": "Consultar", "dosage": "2-5kg / m3 suelo", "usage": "Jet Grouting, DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "DK-BENTONITE",
+        "desc": "Bentonita de alta calidad para muros pantalla. Norma API disponible.",
+        "problem": "El lodo de mala calidad provoca el colapso de las paredes de la zanja.",
+        "wow": "Alta Estabilidad y Económico", "pkg": "Big Bag / Saco 25kg", "dosage": "20-50kg / m3 agua", "usage": "Muros pantalla, Pilotes"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25",
+        "desc": "Aditivo anti-atasco para suelos viscosos. Disuelve grumos para mayor resistencia.",
+        "problem": "La arcilla se pega al cabezal, deteniendo la perforación y arriesgando la pérdida de la herramienta.",
+        "wow": "Disuelve Grumos y Aumenta Resistencia", "pkg": "Polvo / Líquido", "dosage": "Variable", "usage": "Excavación en arcilla"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL Grout",
+        "desc": "Mortero plástico para relleno de TBM. Bombea fácil, gelifica al instante.",
+        "problem": "Riesgo de bloqueo de tuberías y asentamiento del terreno.",
+        "wow": "Cero Bloqueo de Tuberías", "pkg": "Camión cisterna", "dosage": "A:B = 1:1", "usage": "Relleno TBM"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO",
+        "desc": "Aditivo anti-lavado. Previene la segregación bajo el agua.",
+        "problem": "El hormigón se separa bajo el agua, perdiendo fuerza y contaminando.",
+        "wow": "Fuerte Viscosidad", "pkg": "Saco / Saco Soluble", "dosage": "1.5-3.0kg / m3", "usage": "Hormigón sumergido"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR",
+        "desc": "Mortero de reparación de alta resistencia. No se descuelga en techos.",
+        "problem": "El mortero común gotea y se agrieta fácilmente.",
+        "wow": "No gotea en techos", "pkg": "Saco 25kg", "dosage": "Premezclado", "usage": "Reparación, Proyectado"
+      }
+    ],
+    "cta": { "title": "No abandone su suelo.", "btn": "Solicitar Análisis" }
+  },
+  "fr": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "La réponse est dans le sol.",
+    "hero_desc": "Ne vous contentez pas de produits catalogue. Nous formulons la prescription parfaite pour votre chantier.",
+    "mode_select_title": "Choisir le mode de recherche",
+    "mode_field_title": "Par Domaine / Méthode",
+    "mode_field_desc": "Trouver des solutions aux problèmes de chantier",
+    "mode_product_title": "Par Nom de Produit",
+    "mode_product_desc": "Rechercher par nom de matériau",
+    "table_headers": { "name": "Produit", "desc": "Aperçu", "wow": "Point Fort", "pkg": "Cond.", "usage": "Usage" },
+    "sections": {
+      "ground": { "title": "1. Amélioration des Sols", "desc": "Solutions pour sols cohésifs et ancrages." },
+      "shield": { "title": "2. Tunnelier (TBM)", "desc": "Solutions chimiques pour maximiser la performance des tunneliers." },
+      "marine": { "title": "3. Portuaire & Marin", "desc": "Technologies anti-délavage pour la construction sous-marine." },
+      "repair": { "title": "4. Réparation", "desc": "Béton projeté et mortiers de réparation." },
+      "concrete": { "title": "5. Béton & Général", "desc": "Adjuvants et coulis pour le génie civil." }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / Super Retardateur",
+        "desc": "Dispersant retardateur pour coulis d'ancrage. Maintient la fluidité longtemps.",
+        "problem": "Sans cela, la fluidité diminue, risquant le blocage de la pompe.",
+        "wow": "Fluidité Longue Durée", "pkg": "Sur demande", "dosage": "C x 0.2-1.0%", "usage": "Ancrages"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow Series",
+        "desc": "Adjuvant pour Jet Grouting. Réduit les boues et le déplacement.",
+        "problem": "L'excès de boue augmente les coûts d'élimination et les risques de déplacement.",
+        "wow": "Dév. avec Shimizu Corp", "pkg": "Camion / Conteneur", "dosage": "Variable", "usage": "Jet Grouting"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD Agent (Accélérateur)",
+        "desc": "Favorise la consolidation plastique pour l'ancrage.",
+        "problem": "En sol fissuré, le coulis s'échappe, causant l'échec de l'ancrage.",
+        "wow": "Injection sûre en sol fissuré", "pkg": "Sac (par lot)", "dosage": "C x 5-10%", "usage": "Ancrages"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (Pour Argile)",
+        "desc": "Adjuvant spécial pour améliorer le mélange dans les sols cohésifs.",
+        "problem": "L'argile ne se mélange pas bien au ciment, créant des points faibles.",
+        "wow": "Améliore mélange argile", "pkg": "Sur demande", "dosage": "2-5kg / m3 sol", "usage": "Jet Grouting, DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "DK-BENTONITE",
+        "desc": "Bentonite de haute qualité pour parois moulées. Norme API disponible.",
+        "problem": "Une boue de mauvaise qualité entraîne l'effondrement des parois.",
+        "wow": "Haute Stabilité & Économique", "pkg": "Big Bag / Sac 25kg", "dosage": "20-50kg / m3 eau", "usage": "Parois moulées"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25",
+        "desc": "Adjuvant anti-colmatage pour sol visqueux. Dissout les grumeaux pour augmenter la résistance.",
+        "problem": "Le colmatage par l'argile arrête le forage et risque la perte de l'outil.",
+        "wow": "Dissout Grumeaux & Augmente Résistance", "pkg": "Poudre / Liquide", "dosage": "Variable", "usage": "Excavation en argile"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL Grout",
+        "desc": "Coulis plastique pour remplissage TBM. Gélifie instantanément.",
+        "problem": "Risque de blocage des tuyaux et de tassement du sol.",
+        "wow": "Zéro Blocage de Tuyau", "pkg": "Camion-citerne", "dosage": "A:B = 1:1", "usage": "Remplissage TBM"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO",
+        "desc": "Adjuvant anti-délavage. Empêche la ségrégation sous l'eau.",
+        "problem": "Le béton se sépare sous l'eau, perdant sa force et polluant.",
+        "wow": "Forte Viscosité", "pkg": "Sac / Sac Soluble", "dosage": "1.5-3.0kg / m3", "usage": "Béton immergé"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR",
+        "desc": "Mortier de réparation haute résistance. Ne coule pas au plafond.",
+        "problem": "Le mortier ordinaire coule et se fissure facilement.",
+        "wow": "Ne coule pas au plafond", "pkg": "Sac 25kg", "dosage": "Prémélangé", "usage": "Réparation, Projeté"
+      }
+    ],
+    "cta": { "title": "N'abandonnez pas votre sol.", "btn": "Demander une analyse" }
+  },
+  "de": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "Die Antwort liegt im Boden.",
+    "hero_desc": "Geben Sie sich nicht mit Katalogprodukten zufrieden. Wir entwickeln das perfekte Rezept für Ihre Baustelle.",
+    "mode_select_title": "Suchmodus wählen",
+    "mode_field_title": "Nach Feld / Methode",
+    "mode_field_desc": "Lösungen für Baustellenprobleme finden",
+    "mode_product_title": "Nach Produktname",
+    "mode_product_desc": "Nach Materialnamen suchen",
+    "table_headers": { "name": "Produkt", "desc": "Überblick", "wow": "Stärke", "pkg": "Verpackung", "usage": "Anwendung" },
+    "sections": {
+      "ground": { "title": "1. Baugrundverbesserung", "desc": "Lösungen für bindige Böden, Hangsicherung und Anker." },
+      "shield": { "title": "2. Schildvortrieb (TBM)", "desc": "Chemische Lösungen zur Maximierung der TBM-Leistung." },
+      "marine": { "title": "3. Hafen & Marine", "desc": "Unterwasserbeton-Technologien gegen Auswaschung." },
+      "repair": { "title": "4. Instandsetzung", "desc": "Spritzbeton und Reparaturmörtel für langlebige Infrastruktur." },
+      "concrete": { "title": "5. Beton & Allgemein", "desc": "Zusatzmittel und Mörtel für den Tiefbau." }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / Superverzögerer",
+        "desc": "Verzögerer für Ankermörtel. Erhält Fließfähigkeit lange.",
+        "problem": "Ohne dies nimmt die Fließfähigkeit ab, Pumpenverstopfung droht.",
+        "wow": "Lange Fließfähigkeit", "pkg": "Auf Anfrage", "dosage": "Z x 0.2-1.0%", "usage": "Anker, Hangsicherung"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow Serie",
+        "desc": "Zusatzmittel für Jet Grouting. Reduziert Schlamm.",
+        "problem": "Übermäßiger Schlamm erhöht Entsorgungskosten und Risiken.",
+        "wow": "Entwickelt mit Shimizu Corp", "pkg": "Tankwagen / Container", "dosage": "Variabel", "usage": "Jet Grouting"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD (Beschleuniger)",
+        "desc": "Fördert plastische Konsolidierung. Verhindert Verlust in klüftigem Boden.",
+        "problem": "In rissigem Boden fließt Mörtel weg, Anker versagen.",
+        "wow": "Sichere Injektion in klüftigem Fels", "pkg": "Sack", "dosage": "Z x 5-10%", "usage": "Anker"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (Für Lehmboden)",
+        "desc": "Spezialzusatz für bindige Böden. Verbessert Mischbarkeit.",
+        "problem": "Lehm vermischt sich schlecht mit Zement, Schwachstellen entstehen.",
+        "wow": "Verbessert Mischung in Lehm", "pkg": "Auf Anfrage", "dosage": "2-5kg / m3 Boden", "usage": "Jet Grouting, DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "DK-BENTONITE",
+        "desc": "Hochwertiges Bentonit für Schlitzwände. API-Standard.",
+        "problem": "Schlechte Suspension führt zum Einsturz der Grabenwände.",
+        "wow": "Hohe Stabilität & Effizient", "pkg": "Big Bag / 25kg Sack", "dosage": "20-50kg / m3 Wasser", "usage": "Schlitzwände"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25",
+        "desc": "Anti-Verklebungsmittel für bindige Böden. Löst Klumpen für höhere Festigkeit.",
+        "problem": "Tonverklebungen am Bohrkopf stoppen den Vortrieb und riskieren Werkzeugverlust.",
+        "wow": "Löst Klumpen & erhöht Festigkeit", "pkg": "Pulver / Flüssig", "dosage": "Variabel", "usage": "Aushub in Tonböden"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL Grout",
+        "desc": "Plastischer Mörtel für TBM. Geliert sofort.",
+        "problem": "Gefahr von Rohrverstopfung und Bodensetzung.",
+        "wow": "Keine Rohrverstopfung", "pkg": "Tankwagen", "dosage": "A:B = 1:1", "usage": "TBM Verpressung"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO",
+        "desc": "Unterwasser-Compound gegen Auswaschung.",
+        "problem": "Beton entmischt sich unter Wasser, verliert Festigkeit und verschmutzt.",
+        "wow": "Starke Viskosität", "pkg": "Sack / Wasserlöslich", "dosage": "1.5-3.0kg / m3", "usage": "Unterwasserbeton"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR",
+        "desc": "Hochfester Reparaturmörtel. Tropft nicht.",
+        "problem": "Normaler Mörtel tropft und reißt leicht.",
+        "wow": "Haftet über Kopf", "pkg": "25kg Sack", "dosage": "Vorgemischt", "usage": "Instandsetzung"
+      }
+    ],
+    "cta": { "title": "Geben Sie Ihren Boden nicht auf.", "btn": "Bodenanalyse anfordern" }
+  },
+  "zh": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "答案就在土壤中。",
+    "hero_desc": "不要满足于目录产品。我们为您的工地开发专用“处方”。",
+    "mode_select_title": "选择搜索模式",
+    "mode_field_title": "按现场/工法搜索",
+    "mode_field_desc": "根据现场问题寻找解决方案",
+    "mode_product_title": "按产品名称搜索",
+    "mode_product_desc": "按具体材料名称搜索",
+    "table_headers": { "name": "产品名称", "desc": "概要", "wow": "最大优势", "pkg": "包装", "usage": "用途" },
+    "sections": {
+      "ground": { "title": "1. 地基处理/锚索", "desc": "“没有固化不了的土”。应对粘性土及陡坡治理。" },
+      "shield": { "title": "2. 盾构/隧道", "desc": "防止大深度地下及长距离推进故障的化学解决方案。" },
+      "marine": { "title": "3. 港口/海洋", "desc": "不污染海洋，可靠填充。水下施工的专业技术。" },
+      "repair": { "title": "4. 修复/维护", "desc": "“治愈”基础设施的技术。喷射、抹灰、注浆。" },
+      "concrete": { "title": "5. 混凝土/通用", "desc": "支撑土木基础的外加剂和注浆技术。" }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / 超级缓凝剂",
+        "desc": "锚索水泥浆用缓凝分散剂。长时间保持流动性。",
+        "problem": "不使用时流动性下降，面临泵管堵塞和填充不完全的风险。",
+        "wow": "长时间流动保持", "pkg": "请咨询", "dosage": "水泥重量 × 0.2-1.0%", "usage": "锚索, 边坡"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow系列 (OP1/OP2)",
+        "desc": "OPT旋喷工法用外加剂。减少排泥量及周边位移。",
+        "problem": "普通泥浆排泥量大，增加处理成本并可能导致地层位移。",
+        "wow": "清水建设・Raito工业共同开发", "pkg": "槽车 / 集装箱", "dosage": "因土质而异", "usage": "旋喷注浆"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD剂 (速凝剂)",
+        "desc": "促进锚索注浆材料的塑性固结。防止在裂隙地层中流失。",
+        "problem": "在破碎地层中，浆液会无限制流失，导致锚固失效和材料浪费。",
+        "wow": "破碎地层中的可靠注浆", "pkg": "袋装 (按批次)", "dosage": "水泥重量 × 5-10%", "usage": "锚索"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (粘性土专用)",
+        "desc": "专为地基处理、旋喷、DSM开发。改善难改良粘性土的混合性。",
+        "problem": "粘性土难以与水泥混合，导致搅拌不均，强度不足。",
+        "wow": "改善粘性土混合性", "pkg": "请咨询", "dosage": "每立方土 2-5kg", "usage": "旋喷, DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "膨润土 (DK-BENTONITE)",
+        "desc": "灌注桩及盾构泥浆必不可少的高品质天然粘土。符合API标准。",
+        "problem": "劣质泥浆会导致槽壁坍塌，引发工程事故。",
+        "wow": "稳定的造壁性", "pkg": "吨袋 / 25kg袋", "dosage": "每立方水 20-50kg", "usage": "灌注桩, 盾构"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25 (深层25)",
+        "desc": "粘性土掘削助剂。消除泥团以确保混合均匀，从而显著提高强度。",
+        "problem": "粘土“抱钻”会导致钻孔停止，严重时发生钻头脱落（丢失）事故。",
+        "wow": "消除泥团 & 提高强度", "pkg": "粉末 / 液体", "dosage": "因土质而异", "usage": "粘土层掘削"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL (壁后注浆)",
+        "desc": "盾构壁后注浆用塑性浆液。注入后瞬间胶凝。",
+        "problem": "长距离输送易堵管，或因填充不足导致地面沉降。",
+        "wow": "管道零堵塞", "pkg": "槽车 / 现场拌合", "dosage": "A液:B液 = 1:1", "usage": "壁后注浆"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO (水下不分散)",
+        "desc": "赋予混凝土强粘性，水中不分散。",
+        "problem": "水下浇筑时水泥流失，强度下降并造成严重海洋污染。",
+        "wow": "强增粘 & 防止海洋污染", "pkg": "粉末袋 / 水溶袋", "dosage": "每立方 1.5-3.0kg", "usage": "水下混凝土"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR (修复砂浆)",
+        "desc": "厚涂不垂流的高强修复砂浆。保形性极佳。",
+        "problem": "普通砂浆在天花板面易滴落，且固化后易开裂。",
+        "wow": "天花板面不垂流", "pkg": "25kg袋", "dosage": "预混料", "usage": "修复, 喷射"
+      }
+    ],
+    "cta": { "title": "不要放弃那片土壤。", "btn": "申请土壤分析（免费咨询）" }
+  },
+  "ko": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "해답은 흙 속에 있습니다.",
+    "hero_desc": "카탈로그 제품으로 포기하지 마십시오. 귀하의 현장에 맞는 전용 '처방전'을 개발합니다.",
+    "mode_select_title": "검색 모드 선택",
+    "mode_field_title": "현장·공법으로 찾기",
+    "mode_field_desc": "현장의 고민에서 해결책 찾기",
+    "mode_product_title": "제품명으로 찾기",
+    "mode_product_desc": "구체적인 재료명으로 찾기",
+    "table_headers": { "name": "제품명", "desc": "개요", "wow": "강점", "pkg": "포장", "usage": "용도" },
+    "sections": {
+      "ground": { "title": "1. 지반 개량·앵커", "desc": "점성토 대응부터 급경사지 대책까지." },
+      "shield": { "title": "2. 쉴드·터널", "desc": "대심도 지하 및 장거리 추진 트러블 방지." },
+      "marine": { "title": "3. 항만·해양", "desc": "해양 오염 없이 확실하게 충전하는 수중 시공 기술." },
+      "repair": { "title": "4. 보수·유지보수", "desc": "인프라를 '치유'하는 기술. 숏크리트, 미장, 주입." },
+      "concrete": { "title": "5. 콘크리트·일반", "desc": "토목 기초를 지탱하는 혼화제 및 그라우트." }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / 슈퍼 리타더",
+        "desc": "앵커 시멘트 밀크용 지연형 분산제. 장시간 유동성을 유지.",
+        "problem": "미첨가 시 유동성 저하로 펌프 막힘 및 충전 불량 위험 발생.",
+        "wow": "장시간 유동 유지", "pkg": "문의", "dosage": "시멘트 중량 × 0.2-1.0%", "usage": "앵커, 사면"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow 시리즈",
+        "desc": "OPT 제트 공법용 혼화제. 배니량 및 주변 변위를 저감.",
+        "problem": "일반 배합은 배니량이 많아 처리 비용 증가 및 지반 변위를 초래.",
+        "wow": "시미즈건설 공동개발", "pkg": "로리 / 컨테이너", "dosage": "토질에 따라 변동", "usage": "제트 그라우팅"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD 제 (급결제)",
+        "desc": "앵커 주입재의 가소성 압밀 촉진. 균열 지반에서의 유실 방지.",
+        "problem": "균열 지반에서는 주입재가 끝없이 유실되어 정착 불량 발생.",
+        "wow": "균열 지반 확실 주입", "pkg": "포대 (배치별)", "dosage": "시멘트 중량 × 5-10%", "usage": "앵커"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (점성토용)",
+        "desc": "난개량 토질인 점성토의 혼합성 및 강도 개선.",
+        "problem": "점성토는 시멘트와 잘 섞이지 않아 개량체 강도 부족 초래.",
+        "wow": "점성토 혼합 개선", "pkg": "문의", "dosage": "토양 1m3당 2-5kg", "usage": "제트 그라우팅, DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "DK-BENTONITE",
+        "desc": "현장타설말뚝 및 쉴드 이수용 고품질 벤토나이트. API 규격 준수.",
+        "problem": "저품질 이수는 굴착벽 붕괴 및 공사 사고를 유발.",
+        "wow": "안정된 조벽성", "pkg": "톤백 / 25kg백", "dosage": "물 1m3당 20-50kg", "usage": "현장타설말뚝"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25 (딥25)",
+        "desc": "점성토 굴착 보조제. 점토의 '공회전'을 방지하고 덩어리를 해소하여 강도를 비약적으로 향상.",
+        "problem": "점토가 헤드에 달라붙어 굴착이 멈추거나 최악의 경우 헤드가 유실되는 사고 위험.",
+        "wow": "덩어리 해소 & 강도 향상", "pkg": "분말 / 액체", "dosage": "토질에 따라 조정", "usage": "점성토 굴착"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL (뒷채움재)",
+        "desc": "쉴드 뒷채움용 가소성 그라우트. 주입 후 즉시 겔화.",
+        "problem": "장거리 압송 중 배관 막힘이나 충전 부족으로 인한 지반 침하 위험.",
+        "wow": "배관 막힘 제로", "pkg": "로리 / 플랜트", "dosage": "A액:B액 = 1:1", "usage": "쉴드 뒷채움"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO (수중불분리)",
+        "desc": "수중에서도 재료 분리를 방지. 오탁방지막 불필요 수준.",
+        "problem": "수중 타설 시 시멘트가 유실되어 강도 저하 및 심각한 해양 오염 발생.",
+        "wow": "강력한 증점", "pkg": "분말 / 수용성 백", "dosage": "1m3당 1.5-3.0kg", "usage": "수중 콘크리트"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR",
+        "desc": "두껍게 발라도 처지지 않는 고강도 보수 몰탈.",
+        "problem": "일반 몰탈은 천장에서 떨어지거나 쉽게 균열이 발생.",
+        "wow": "천장면 처짐 없음", "pkg": "25kg 백", "dosage": "프리믹스", "usage": "단면 보수, 뿜어붙이기"
+      }
+    ],
+    "cta": { "title": "그 흙, 아직 포기하지 마십시오.", "btn": "토양 분석 의뢰 (무료)" }
+  },
+  "it": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "La risposta è nel suolo.",
+    "hero_desc": "Non accontentarti dei prodotti a catalogo. Formuliamo la ricetta perfetta per il tuo cantiere.",
+    "mode_select_title": "Modalità di ricerca",
+    "mode_field_title": "Per Settore / Metodo",
+    "mode_field_desc": "Trova soluzioni ai problemi di cantiere",
+    "mode_product_title": "Per Prodotto",
+    "mode_product_desc": "Cerca per nome del materiale",
+    "table_headers": { "name": "Prodotto", "desc": "Panoramica", "wow": "Punto di Forza", "pkg": "Conf.", "usage": "Uso" },
+    "sections": {
+      "ground": { "title": "1. Miglioramento del Terreno", "desc": "Soluzioni per terreni coesivi e ancoraggi." },
+      "shield": { "title": "2. Tunnel (TBM)", "desc": "Soluzioni chimiche per le TBM." },
+      "marine": { "title": "3. Porto e Marino", "desc": "Tecnologie anti-dilavamento." },
+      "repair": { "title": "4. Riparazione", "desc": "Spritz-beton e malte." },
+      "concrete": { "title": "5. Calcestruzzo", "desc": "Additivi per ingegneria civile." }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / Super Ritardante",
+        "desc": "Disperdente ritardante per ancoraggi. Mantiene la fluidità a lungo.",
+        "problem": "Senza, la fluidità diminuisce, rischiando blocchi della pompa.",
+        "wow": "Fluidità Prolungata", "pkg": "Su richiesta", "dosage": "C x 0.2-1.0%", "usage": "Ancoraggi"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow Series",
+        "desc": "Additivo per Jet Grouting. Riduce i fanghi.",
+        "problem": "L'eccesso di fango aumenta i costi di smaltimento e i rischi.",
+        "wow": "Sviluppato con Shimizu Corp", "pkg": "Cisterna / Container", "dosage": "Variabile", "usage": "Jet Grouting"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD (Accelerante)",
+        "desc": "Promuove il consolidamento plastico negli ancoraggi.",
+        "problem": "In terreni fratturati, la malta si perde, causando il fallimento dell'ancoraggio.",
+        "wow": "Iniezione sicura in fessure", "pkg": "Sacco", "dosage": "C x 5-10%", "usage": "Ancoraggi"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (Per Argilla)",
+        "desc": "Additivo speciale per terreni coesivi. Migliora miscelazione.",
+        "problem": "L'argilla non si mescola bien col cemento, creando punti deboli.",
+        "wow": "Migliora mix in argilla", "pkg": "Su richiesta", "dosage": "2-5kg / m3 suolo", "usage": "Jet Grouting, DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "DK-BENTONITE",
+        "desc": "Bentonite di alta qualità per diaframmi. Standard API.",
+        "problem": "Fanghi di scarsa qualità causano il crollo delle pareti dello scavo.",
+        "wow": "Alta Stabilità", "pkg": "Big Bag / Sacco", "dosage": "20-50kg / m3 acqua", "usage": "Diaframmi"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25",
+        "desc": "Additivo anti-intasamento per terreni viscosi. Dissolve i grumi aumentando la resistenza.",
+        "problem": "L'intasamento da argilla blocca la perforazione e rischia la perdita dell'utensile.",
+        "wow": "Dissolve grumi e aumenta resistenza", "pkg": "Polvere / Liquido", "dosage": "Variabile", "usage": "Scavo in argilla"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL Grout",
+        "desc": "Malta plastica per TBM. Gelifica istantaneamente.",
+        "problem": "Rischio di blocco tubi e cedimento del terreno.",
+        "wow": "Zero Blocchi", "pkg": "Autocisterna", "dosage": "A:B = 1:1", "usage": "TBM Backfill"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO",
+        "desc": "Anti-dilavamento. Previene segregazione sott'acqua.",
+        "problem": "Il calcestruzzo si separa sott'acqua, perdendo forza e inquinando.",
+        "wow": "Forte Viscosità", "pkg": "Sacco / Idrosolubile", "dosage": "1.5-3.0kg / m3", "usage": "Calcestruzzo sommerso"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR",
+        "desc": "Malta riparante ad alta resistenza. Non cola dai soffitti.",
+        "problem": "La malta comune cola e si crepa facilmente.",
+        "wow": "Non cola dal soffitto", "pkg": "Sacco 25kg", "dosage": "Premiscelato", "usage": "Riparazione"
+      }
+    ],
+    "cta": { "title": "Non arrenderti con il tuo terreno.", "btn": "Richiedi Analisi" }
+  },
+  "pl": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "Odpowiedź leży w glebie.",
+    "hero_desc": "Nie zadowalaj się produktami katalogowymi. Opracujemy idealną recepturę dla Twojej budowy.",
+    "mode_select_title": "Tryb wyszukiwania",
+    "mode_field_title": "Wg Dziedziny / Metody",
+    "mode_field_desc": "Znajdź rozwiązania problemów na budowie",
+    "mode_product_title": "Wg Produktu",
+    "mode_product_desc": "Szukaj według nazwy materiału",
+    "table_headers": { "name": "Produkt", "desc": "Opis", "wow": "Zaleta", "pkg": "Opak.", "usage": "Zastosowanie" },
+    "sections": {
+      "ground": { "title": "1. Wzmocnienie Gruntu", "desc": "Rozwiązania dla gruntów spoistych i kotew." },
+      "shield": { "title": "2. Tunele (TBM)", "desc": "Rozwiązania chemiczne dla maszyn TBM." },
+      "marine": { "title": "3. Prace Morskie", "desc": "Technologie anty-wymywające." },
+      "repair": { "title": "4. Naprawy", "desc": "Beton natryskowy i zaprawy naprawcze." },
+      "concrete": { "title": "5. Beton", "desc": "Domieszki do inżynierii lądowej." }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / Super Opóźniacz",
+        "desc": "Opóźniacz do zaczynów kotwiących. Utrzymuje płynność.",
+        "problem": "Bez niego płynność spada, grożąc zatorami pompy.",
+        "wow": "Długotrwała Płynność", "pkg": "Na zapytanie", "dosage": "C x 0.2-1.0%", "usage": "Kotwy"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow Series",
+        "desc": "Domieszka do Jet Grouting. Redukuje szlam.",
+        "problem": "Nadmiar szlamu zwiększa koszty utylizacji i ryzyko przemieszczeń.",
+        "wow": "Oprac. z Shimizu Corp", "pkg": "Cysterna", "dosage": "Zmienne", "usage": "Jet Grouting"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD (Przyspieszacz)",
+        "desc": "Przyspiesza konsolidację plastyczną w kotwach.",
+        "problem": "W spękanym gruncie zaczyn ucieka, powodując awarię kotwienia.",
+        "wow": "Pewna iniekcja w spękaniach", "pkg": "Worek", "dosage": "C x 5-10%", "usage": "Kotwy"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (Do Gliny)",
+        "desc": "Specjalna domieszka do gruntów spoistych.",
+        "problem": "Glina nie miesza się dobrze z cementem, tworząc słabe punkty.",
+        "wow": "Poprawia mieszanie w glinie", "pkg": "Na zapytanie", "dosage": "2-5kg / m3 gruntu", "usage": "Jet Grouting, DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "DK-BENTONITE",
+        "desc": "Wysokiej jakości bentonit do ścian szczelinowych. Standard API.",
+        "problem": "Słaba zawiesina prowadzi do zawalenia ścian wykopu.",
+        "wow": "Wysoka Stabilność", "pkg": "Big Bag", "dosage": "20-50kg / m3 wody", "usage": "Ściany szczelinowe"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25",
+        "desc": "Dodatek przeciwko oblepianiu w gruntach spoistych. Rozpuszcza grudki, zwiększając wytrzymałość.",
+        "problem": "Oblepianie głowicy gliną zatrzymuje wiercenie i grozi utratą narzędzia.",
+        "wow": "Rozpuszcza Grudki & Zwiększa Wytrzymałość", "pkg": "Proszek / Płyn", "dosage": "Zmienne", "usage": "Wiercenie w glinie"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL Grout",
+        "desc": "Plastyczna zaprawa do TBM. Żeluje natychmiast.",
+        "problem": "Ryzyko zatoru rur i osiadania gruntu.",
+        "wow": "Zero Zatorów", "pkg": "Cysterna", "dosage": "A:B = 1:1", "usage": "Wypełnianie TBM"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO",
+        "desc": "Anty-wymywająca. Zapobiega segregacji pod wodą.",
+        "problem": "Beton segreguje się pod wodą, tracąc wytrzymałość i zanieczyszczając.",
+        "wow": "Silna Lepkość", "pkg": "Worek", "dosage": "1.5-3.0kg / m3", "usage": "Beton podwodny"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR",
+        "desc": "Wysokowytrzymała zaprawa naprawcza. Nie spływa z sufitów.",
+        "problem": "Zwykła zaprawa kapie i łatwo pęka.",
+        "wow": "Nie spływa z sufitu", "pkg": "Worek 25kg", "dosage": "Gotowa", "usage": "Naprawy"
+      }
+    ],
+    "cta": { "title": "Nie rezygnuj ze swojego gruntu.", "btn": "Zamów Analizę" }
+  },
+  "vi": {
+    "site_title": "Daisho Chemical R&D",
+    "hero_title": "Câu trả lời nằm trong đất.",
+    "hero_desc": "Đừng chấp nhận các sản phẩm có sẵn. Chúng tôi pha chế công thức hoàn hảo cho công trường của bạn.",
+    "mode_select_title": "Chọn chế độ tìm kiếm",
+    "mode_field_title": "Theo Lĩnh vực / Phương pháp",
+    "mode_field_desc": "Tìm giải pháp từ các vấn đề công trường",
+    "mode_product_title": "Theo Tên sản phẩm",
+    "mode_product_desc": "Tìm theo tên vật liệu cụ thể",
+    "table_headers": { "name": "Sản phẩm", "desc": "Tổng quan", "wow": "Điểm mạnh", "pkg": "Đóng gói", "usage": "Sử dụng" },
+    "sections": {
+      "ground": { "title": "1. Cải tạo đất", "desc": "Giải pháp cho đất dính và neo đất." },
+      "shield": { "title": "2. Hầm (TBM)", "desc": "Giải pháp hóa học tối ưu hóa hiệu suất TBM." },
+      "marine": { "title": "3. Cảng & Biển", "desc": "Công nghệ chống phân tầng dưới nước." },
+      "repair": { "title": "4. Sửa chữa", "desc": "Bê tông phun và vữa sửa chữa." },
+      "concrete": { "title": "5. Bê tông", "desc": "Phụ gia cho kỹ thuật xây dựng dân dụng." }
+    },
+    "products": [
+      {
+        "id": "ack1", "category": "ground", "image": "img/product2.png",
+        "name": "ACK1 / Siêu Chậm Đông",
+        "desc": "Phụ gia phân tán chậm đông cho vữa neo. Duy trì độ chảy lâu dài.",
+        "problem": "Nếu không dùng, độ chảy giảm, gây tắc bơm và lấp đầy không hoàn toàn.",
+        "wow": "Duy trì độ chảy lâu", "pkg": "Liên hệ", "dosage": "Xi măng x 0.2-1.0%", "usage": "Neo đất"
+      },
+      {
+        "id": "opflow", "category": "ground", "image": "img/product2_jet.png",
+        "name": "OP Flow Series",
+        "desc": "Phụ gia cho Jet Grouting. Giảm bùn thải.",
+        "problem": "Quá nhiều bùn thải làm tăng chi phí xử lý và nguy cơ dịch chuyển đất.",
+        "wow": "Hợp tác với Shimizu Corp", "pkg": "Xe bồn", "dosage": "Thay đổi", "usage": "Jet Grouting"
+      },
+      {
+        "id": "rad", "category": "ground", "image": "img/product5_spray.png",
+        "name": "RAD (Đông cứng nhanh)",
+        "desc": "Thúc đẩy cố kết dẻo trong neo đất. Ngăn ngừa mất vữa.",
+        "problem": "Trong đất nứt nẻ, vữa chảy mất, gây thất bại neo.",
+        "wow": "Bơm vữa an toàn trong đất nứt", "pkg": "Bao", "dosage": "Xi măng x 5-10%", "usage": "Neo đất"
+      },
+      {
+        "id": "schem", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "S-chem (Cho Đất Sét)",
+        "desc": "Phụ gia đặc biệt cho đất dính. Cải thiện trộn.",
+        "problem": "Đất sét không trộn đều với xi măng, tạo ra điểm yếu.",
+        "wow": "Cải thiện trộn trong sét", "pkg": "Liên hệ", "dosage": "2-5kg / m3 đất", "usage": "Jet Grouting, DSM"
+      },
+      {
+        "id": "bentonite", "category": "ground", "image": "img/product2.png",
+        "name": "DK-BENTONITE",
+        "desc": "Bentonite chất lượng cao cho tường vây. Có tiêu chuẩn API.",
+        "problem": "Dung dịch kém chất lượng dẫn đến sập vách hố đào.",
+        "wow": "Ổn định cao & Tiết kiệm", "pkg": "Bao lớn / Bao 25kg", "dosage": "20-50kg / m3 nước", "usage": "Tường vây"
+      },
+      {
+        "id": "deep25", "category": "ground", "image": "img/product2_dsm.png",
+        "name": "Deep25",
+        "desc": "Phụ gia chống dính cho đất sét. Làm tan cục đất để tăng cường độ.",
+        "problem": "Đất sét dính vào đầu khoan gây dừng máy và nguy cơ mất dụng cụ khoan.",
+        "wow": "Tan cục đất & Tăng cường độ", "pkg": "Bột / Lỏng", "dosage": "Thay đổi", "usage": "Khoan đất sét"
+      },
+      {
+        "id": "backfill", "category": "shield", "image": "img/product3.png",
+        "name": "DK-BACKFILL Grout",
+        "desc": "Vữa dẻo lấp đầy vỏ hầm TBM. Đông ngay lập tức.",
+        "problem": "Nguy cơ tắc ống bơm và sụt lún mặt đất.",
+        "wow": "Không tắc ống", "pkg": "Xe bồn", "dosage": "A:B = 1:1", "usage": "Lấp đầy TBM"
+      },
+      {
+        "id": "aquavisco", "category": "marine", "image": "img/product4.png",
+        "name": "DK-AQUA VISCO",
+        "desc": "Chống phân tầng dưới nước. Ngăn ngừa tách lớp.",
+        "problem": "Bê tông tách lớp dưới nước, mất cường độ và gây ô nhiễm.",
+        "wow": "Độ nhớt mạnh", "pkg": "Bao / Bao tan", "dosage": "1.5-3.0kg / m3", "usage": "Bê tông dưới nước"
+      },
+      {
+        "id": "repairmortar", "category": "repair", "image": "img/product5_spray.png",
+        "name": "DK-REPAIR MORTAR",
+        "desc": "Vữa sửa chữa cường độ cao. Không chảy xệ trên trần.",
+        "problem": "Vữa thường chảy xệ và dễ nứt.",
+        "wow": "Không chảy xệ trần", "pkg": "Bao 25kg", "dosage": "Trộn sẵn", "usage": "Sửa chữa"
+      }
+    ],
+    "cta": { "title": "Đừng từ bỏ nền đất của bạn.", "btn": "Yêu cầu phân tích" }
+  }
+}

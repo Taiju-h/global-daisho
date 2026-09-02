@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Movable Type 6 翻訳機能実装イメージ（日本語ベース）</title>
+    <style>
+        /* MT6リセット＆ベース */
+        body, h1, h2, h3, p, ul, li, div, input, textarea {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            font-size: 13px;
+        }
+        body { background-color: #f2f2f2; color: #333; }
+        ul { list-style: none; }
+        
+        /* ヘッダー (黒と緑のバー) */
+        .mt-top-bar { background-color: #1a1a1a; color: #999; display: flex; justify-content: space-between; padding: 4px 15px; font-size: 11px; }
+        .mt-top-bar .logo { color: #fff; font-size: 14px; font-weight: bold; }
+        .mt-green-bar { background-color: #5b9b22; color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 6px 15px; }
+        .mt-green-bar .website-name { font-weight: bold; font-size: 14px; }
+        .mt-green-bar .btn-new { background-color: #ffc40d; color: #333; padding: 3px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; border: 1px solid #d3a100; cursor: pointer; }
+
+        /* レイアウト枠 */
+        .wrapper { display: flex; max-width: 1200px; margin: 0 auto; background: #fff; min-height: 800px; }
+        
+        /* 左サイドバー */
+        .sidebar { width: 170px; background-color: #f9f9f9; border-right: 1px solid #e1e1e1; }
+        .sidebar li { border-bottom: 1px solid #e1e1e1; color: #0066cc; }
+        .sidebar li .menu-main { padding: 10px 15px; cursor: pointer; display: flex; justify-content: space-between; }
+        .sidebar li.active .menu-main { background-color: #e6e6e6; color: #333; font-weight: bold; }
+        .sidebar .sub-menu { background: #fff; }
+        .sidebar .sub-menu li { border-bottom: none; }
+        .sidebar .sub-menu li a { display: block; padding: 6px 15px 6px 30px; color: #0066cc; text-decoration: none; }
+        .sidebar .sub-menu li.active a { background-color: #dcedf8; font-weight: bold; color: #333; }
+
+        /* メインコンテンツエリア */
+        .main-content { flex: 1; padding: 20px; display: flex; gap: 20px; }
+        
+        /* 記事編集カラム (中央) */
+        .editor-col { flex: 1; }
+        .page-title { font-size: 18px; font-weight: normal; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-end; }
+        
+        .title-input { width: 100%; padding: 8px; font-size: 16px; border: 1px solid #ccc; margin-bottom: 15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+        
+        /* WYSIWYGエディタ風 */
+        .editor-box { border: 1px solid #ccc; background: #fff; margin-bottom: 20px; }
+        .editor-tabs { border-bottom: 1px solid #ccc; background: #f5f5f5; display: flex; justify-content: space-between; }
+        .tabs-left { display: flex; }
+        .tabs-left div { padding: 8px 15px; border-right: 1px solid #ccc; color: #666; font-size: 12px; }
+        .tabs-left div.active { background: #fff; color: #333; font-weight: bold; border-bottom: 1px solid #fff; margin-bottom: -1px; }
+        .tabs-right { padding: 6px 10px; font-size: 11px; color: #666; }
+        .editor-toolbar { padding: 5px; background: #f9f9f9; border-bottom: 1px solid #ccc; display: flex; gap: 10px; color: #666; font-weight: bold; }
+        .editor-textarea { width: 100%; height: 180px; border: none; padding: 10px; font-size: 13px; line-height: 1.5; resize: vertical; }
+
+        /* ★提案部分：JS翻訳ボタン★ */
+        .translation-action-area {
+            background-color: #fdf6e3;
+            border: 1px solid #f2dcb3;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-radius: 4px;
+        }
+        .btn-translate {
+            background-color: #ff9900;
+            color: #fff;
+            border: 1px solid #cc7a00;
+            padding: 10px 25px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 3px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .btn-translate:hover { background-color: #e68a00; }
+        .trans-note { font-size: 11px; color: #888; margin-top: 8px; }
+
+        /* カスタムフィールドエリア */
+        .custom-fields-area h3 {
+            font-size: 14px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            color: #5b9b22;
+        }
+        .cf-group { margin-bottom: 15px; }
+        .cf-label { font-weight: bold; margin-bottom: 5px; display: block; font-size: 12px; color: #444; }
+        .cf-input-title { width: 100%; padding: 6px; border: 1px solid #ccc; margin-bottom: 5px; background-color: #fafafa;}
+        .cf-textarea { width: 100%; height: 60px; padding: 6px; border: 1px solid #ccc; resize: vertical; background-color: #fafafa;}
+
+        /* 右サイドバー (公開ウィジェット等) */
+        .widget-col { width: 220px; }
+        .widget { border: 1px solid #ccc; background: #f9f9f9; margin-bottom: 15px; }
+        .widget-header { padding: 8px 10px; font-weight: bold; border-bottom: 1px solid #ccc; background: #e6e6e6; font-size: 12px; }
+        .widget-body { padding: 10px; background: #fff; }
+        .status-select { width: 100%; padding: 4px; margin-bottom: 10px; }
+        .btn-publish { background-color: #0066cc; color: #fff; border: 1px solid #0052a3; padding: 6px 20px; font-weight: bold; border-radius: 3px; cursor: pointer; }
+        .btn-preview { background-color: #666; color: #fff; border: 1px solid #444; padding: 6px 15px; font-weight: bold; border-radius: 3px; cursor: pointer; float: right; }
+
+    </style>
+</head>
+<body>
+
+    <div class="mt-top-bar">
+        <div class="logo">Movable Type</div>
+        <div>担当者名 | ヘルプ | サインアウト</div>
+    </div>
+    <div class="mt-green-bar">
+        <div class="website-name">▼ 日本語NEWSサイト（ベース）</div>
+        <div><button class="btn-new">新規作成 ▼</button> ↻ 🔍</div>
+    </div>
+
+    <div class="wrapper">
+        <div class="sidebar">
+            <ul>
+                <li><div class="menu-main">ブログ <span>▼</span></div></li>
+                <li class="active">
+                    <div class="menu-main">記事 <span>▼</span></div>
+                    <ul class="sub-menu">
+                        <li><a href="#">一覧</a></li>
+                        <li class="active"><a href="#">新規</a></li>
+                    </ul>
+                </li>
+                <li><div class="menu-main">カテゴリ</div></li>
+                <li><div class="menu-main">ウェブページ</div></li>
+                <li><div class="menu-main">カスタムフィールド</div></li>
+                <li><div class="menu-main">設定</div></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            
+            <div class="editor-col">
+                <div class="page-title">
+                    記事の作成
+                    <span style="font-size:11px; border:1px solid #ccc; padding:2px 5px; background:#f9f9f9; cursor:pointer;">表示オプション ▼</span>
+                </div>
+                
+                <input type="text" class="title-input" value="新製品の発売およびイベント開催のお知らせ">
+                
+                <div class="editor-box">
+                    <div class="editor-tabs">
+                        <div class="tabs-left">
+                            <div class="active">本文</div>
+                            <div>続き</div>
+                        </div>
+                        <div class="tabs-right">フォーマット: リッチテキスト ▼</div>
+                    </div>
+                    <div class="editor-toolbar">
+                        <span>B</span> <span>I</span> <span>U</span> <span>|</span> <span>🔗</span> <span>🖼️</span> <span>|</span> <span>&lt;/&gt;</span>
+                    </div>
+                    <textarea class="editor-textarea">10月17日に新製品を発売することをお知らせいたします。また、東京で特別イベントを開催いたします。
+
+以下の詳細をご確認の上、ぜひご参加ください。</textarea>
+                </div>
+
+                <div class="translation-action-area">
+                    <button type="button" class="btn-translate" onclick="runTranslation()">
+                        ↓ 日本語本文を他3言語に自動翻訳して下書きコピー ↓
+                    </button>
+                    <div class="trans-note">※DeepL APIを利用します。この時点では公開（再構築）されません。自動翻訳後に各フィールドを手動で修正できます。</div>
+                </div>
+
+                <div class="custom-fields-area">
+                    <h3>多言語出力用フィールド（カスタムフィールド）</h3>
+                    
+                    <div class="cf-group">
+                        <label class="cf-label">英語 (en) - タイトル / 本文</label>
+                        <input type="text" id="en-title" class="cf-input-title" placeholder="翻訳ボタンを押すと自動入力されます">
+                        <textarea id="en-body" class="cf-textarea" placeholder="翻訳ボタンを押すと自動入力されます"></textarea>
+                    </div>
+
+                    <div class="cf-group">
+                        <label class="cf-label">中国語 (zh) - タイトル / 本文</label>
+                        <input type="text" id="zh-title" class="cf-input-title" placeholder="翻訳ボタンを押すと自動入力されます">
+                        <textarea id="zh-body" class="cf-textarea" placeholder="翻訳ボタンを押すと自動入力されます"></textarea>
+                    </div>
+
+                    <div class="cf-group">
+                        <label class="cf-label">韓国語 (ko) - タイトル / 本文</label>
+                        <input type="text" id="ko-title" class="cf-input-title" placeholder="翻訳ボタンを押すと自動入力されます">
+                        <textarea id="ko-body" class="cf-textarea" placeholder="翻訳ボタンを押すと自動入力されます"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget-col">
+                <div class="widget">
+                    <div class="widget-header">ステータス</div>
+                    <div class="widget-body" style="font-size:12px;">新しい記事</div>
+                </div>
+                
+                <div class="widget">
+                    <div class="widget-header">公開</div>
+                    <div class="widget-body">
+                        <div style="font-size:12px; margin-bottom:5px;">ステータス</div>
+                        <select class="status-select">
+                            <option>公開</option>
+                            <option>下書き</option>
+                        </select>
+                        
+                        <div style="margin-top: 15px; padding-top:15px; border-top:1px dashed #ccc;">
+                            <button class="btn-publish">公開</button>
+                            <button class="btn-preview">プレビュー</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function runTranslation() {
+            var btn = document.querySelector('.btn-translate');
+            btn.innerHTML = '翻訳中...';
+            btn.style.backgroundColor = '#ccc';
+            btn.style.borderColor = '#999';
+            
+            // 少し待機してAPI通信っぽく見せる
+            setTimeout(function(){
+                document.getElementById('en-title').value = "New Product Launch and Event Notice";
+                document.getElementById('en-body').value = "We are pleased to announce the release of our new product on October 17th. In addition, we will be hosting a special event in Tokyo.\n\nPlease check the details below and feel free to join us.";
+
+                document.getElementById('zh-title').value = "新产品发布及活动通知";
+                document.getElementById('zh-body').value = "我们高兴地宣布，新产品将于10月17日发布。此外，我们将在东京举办一场特别活动。\n\n请查看以下详情，欢迎参加。";
+
+                document.getElementById('ko-title').value = "신제품 출시 및 행사 안내";
+                document.getElementById('ko-body').value = "10월 17일 신제품 출시를 알려드립니다. 또한 도쿄에서 특별 행사를 개최할 예정입니다.\n\n아래의 상세 내용을 확인하시고 많은 참여 바랍니다.";
+
+                btn.innerHTML = '↓ 日本語本文を他3言語に自動翻訳して下書きコピー ↓';
+                btn.style.backgroundColor = '#ff9900';
+                btn.style.borderColor = '#cc7a00';
+                
+                alert("DeepL APIによる翻訳が完了し、各言語フィールドにセットされました。\n\n※このまま公開ボタンを押せば4言語が一括で静的書き出しされます。手動での修正も可能です。");
+            }, 800);
+        }
+    </script>
+</body>
+</html>

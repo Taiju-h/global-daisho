@@ -1,0 +1,6 @@
+AuthUserFile /home/mgm/mgm2.info/public_html/jet/.htpasswd
+AuthGroupFile /dev/null
+AuthName "Please enter your ID and password"
+AuthType Basic
+require valid-user
+

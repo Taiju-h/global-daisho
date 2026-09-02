@@ -1,0 +1,385 @@
+@charset "utf-8";
+/* daishokagaku CSS Document */
+
+
+
+/*
+=======================================================================
+Contents2 AKIBA
+=======================================================================
+*/
+
+#contents2 .box { margin: 0 0 10px; padding: 10px 10px 20px; border-top: 2px solid #333; }
+
+#contents2 .box p { font-size: 1.4em; margin-bottom: 0.5em; }
+
+#contents2 .box hr { display: none; }
+
+#contents2 .box .hr { margin: 0; padding: 0; font-size: 0; line-height: 0; display: block; height: 4px; background: url(/img/common/bg-hr.png) repeat-x scroll left center; }
+
+#contents2 h2 { color: #4e4848; font-size: 2.2em; font-weight: bold; margin: 0 0 0.5em; padding: 0 0 0 16px; border-left: 8px solid #4e4848; }
+
+#contents2 p { color: #4e4848; font-size: 1.4em; margin-bottom: 0.5em; }
+
+#contents2 .tableA { font-size: 1.4em; margin-bottom: 20px; }
+
+#contents2 .tableA th.t_top {
+    border-top: #b3b3b3 4px solid;
+}
+
+#contents2 .tableA th {
+	border-bottom: #e3e3e3 1px solid;
+	border-left: #e3e3e3 1px solid;
+	text-align: left;
+	background: #f7f7f7;
+	padding: 10px;
+	font-weight: normal;
+	text-align: right;
+	width: 20%;
+}
+
+#contents2 .tableA td.t_top {
+	border-top: #1f74b8 4px solid;
+}
+
+#contents2 .tableA td {
+	border-bottom: #e3e3e3 1px solid;
+	border-right: #e3e3e3 1px solid;
+	text-align: left;
+	padding: 10px;
+}
+
+#contents2 img.left { margin: 0 10px 20px 0; }
+
+
+#contents2 img.right { margin: 0 0 20px 10px; }
+
+ol.message li { font-size: 2em; }
+
+/*
+
+
+
+/*
+=======================================================================
+Redefinition
+=======================================================================
+*/
+
+* { margin: 0; }
+
+body {
+	background: #f3f3f3;
+	color: #131313;
+	font-size: 62.5%;/* 16px * 62.5% = 10px */
+	font-family: verdana, helvetica, arial, Meiryo, 'メイリオ', 'MS PGothic', 'ＭＳ Ｐゴシック', 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', Osaka, sans-serif;
+	line-height: 1.7;
+}
+
+form { margin: 0; }
+
+h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote { margin: 0 0 1.5em 0; font-style: normal; font-weight: normal; }
+
+strong { }
+
+table { border-collapse: collapse; }
+
+a { text-decoration: none; }
+
+a:hover { text-decoration: underline; }
+
+a img { border: 0; opacity: 1; filter: alpha(opacity=70); }
+
+a:hover img { opacity: 0.7; filter: alpha(opacity=100); }
+
+/*
+=======================================================================
+Generic
+=======================================================================
+*/
+
+.clr { clear: both; width: 1px; height: 1px; margin: 0 -1px -1px 0; padding: 0; border: 0; font-size: 0; line-height: 0; overflow: hidden;/* <div class="clr">&nbsp;</div> */ }
+
+.pkg:after {
+    content: " ";
+	display: block;
+	visibility: hidden;
+	clear: both;
+	height: 0.1px;
+	font-size: 0.1em;
+	line-height: 0;
+}
+
+* html .pkg { display: inline-block; }
+/* hides from ie-mac  \*/
+* html .pkg { height: 1%; }
+.pkg { display: block; }
+/* */
+
+/*
+=======================================================================
+Layout
+=======================================================================
+*/
+
+body { text-align: center; } /* center on ie */
+
+#wrapper, #header, #contents { position: relative; }
+
+#contents2 { position: relative; }
+
+#header-inner, #contents-inner { position: static; }
+
+#contents-inner2 { position: static; }
+
+#footer { position: absolute; }
+
+.left { float: left; }
+.right { float: right;/* after use <div class="clr">&nbsp;</div> */ }
+
+#wrapper {
+  margin: 0;
+	width: 100%;
+	background: #fff;
+	word-break: break-all;/* ie only */
+}
+
+
+#header, #contents, #footer {  }
+
+#header-inner, #contents-inner, #footer-inner { width: 0 auto; margin: 0 auto;/* center on everything else */ }
+#contents-inner2 { width: 100%; margin-left: 0 auto; text-align: left;/* center on everything else */ }
+
+#header { margin: 0 0 10px; padding: 0 0 10px; background: url(/img/common/bg-line.png) repeat-x left bottom; }
+
+#header-inner { text-align: left; padding-top: 10px; }
+
+#contents { padding: 10px 0 50px; background: #FFF url(/img/common/bg-line.png) repeat-x left bottom; }
+
+#contents2 { padding: 10px 0 50px; background: #FFF url(/img/common/bg-line.png) repeat-x left bottom; }
+
+#contents-inner { text-align: left; background: url(/img/common/bg.png) no-repeat right bottom; }
+
+#contents-inner2 { text-align: left;}
+
+#footer { width: 100%; }
+
+#footer-inner { margin-top: 10px; }
+
+/*
+=======================================================================
+Header
+=======================================================================
+*/
+
+#header h1 { margin: 8px 0 22px; padding: 0; }
+
+#header ul { margin: 0; padding: 0; }
+
+#header ul li { margin: 0; padding: 0; float: left; line-height: 0; list-style: none; }
+
+#lang{
+    /*position: absolute;*/
+    /*right: 1em;*/
+    /*top: 10px;*/
+    line-height: 2;
+    height: 2em;
+    margin: 0 0 0 2em;
+    font-size: 1.2em;
+    border: 1px solid #ccc;
+    padding: .25em .5em;
+    border-radius: 4px;
+    box-shadow: 1px 1px 3px #ccc;
+    color: #009;
+    background: #f7f7f7;
+    background: -moz-linear-gradient(top,  #f7f7f7 0%, #e6e6e6 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f7f7f7), color-stop(100%,#e6e6e6));
+    background: -webkit-linear-gradient(top,  #f7f7f7 0%,#e6e6e6 100%);
+    background: -o-linear-gradient(top,  #f7f7f7 0%,#e6e6e6 100%);
+    background: -ms-linear-gradient(top,  #f7f7f7 0%,#e6e6e6 100%);
+    background: linear-gradient(to bottom,  #f7f7f7 0%,#e6e6e6 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f7f7', endColorstr='#e6e6e6',GradientType=0 );
+}
+
+#lang:hover{
+    text-decoration: none;
+}
+/*
+=======================================================================
+Contents
+=======================================================================
+*/
+
+#contents .box { margin: 0 0 10px; padding: 10px 10px 20px; border-top: 2px solid #333; }
+
+#contents .box p { font-size: 1.4em; margin-bottom: 0.5em; }
+
+#contents .box hr { display: none; }
+
+#contents .box .hr { margin: 0; padding: 0; font-size: 0; line-height: 0; display: block; height: 4px; background: url(/img/common/bg-hr.png) repeat-x scroll left center; }
+
+#contents h2 { color: #4e4848; font-size: 2.2em; font-weight: bold; margin: 0 0 0.5em; padding: 0 0 0 16px; border-left: 8px solid #4e4848; }
+
+#contents p { color: #4e4848; font-size: 1.4em; margin-bottom: 0.5em; }
+
+#contents .tableA { font-size: 1.4em; margin-bottom: 20px; }
+
+#contents .tableA th.t_top {
+    border-top: #b3b3b3 4px solid;
+}
+
+#contents .tableA th {
+	border-bottom: #e3e3e3 1px solid;
+	border-left: #e3e3e3 1px solid;
+	text-align: left;
+	background: #f7f7f7;
+	padding: 10px;
+	font-weight: normal;
+	text-align: right;
+	width: 20%;
+}
+
+#contents .tableA td.t_top {
+	border-top: #1f74b8 4px solid;
+}
+
+#contents .tableA td {
+	border-bottom: #e3e3e3 1px solid;
+	border-right: #e3e3e3 1px solid;
+	text-align: left;
+	padding: 10px;
+}
+
+#contents img.left { margin: 0 10px 20px 0; }
+
+
+#contents img.right { margin: 0 0 20px 10px; }
+
+ol.message li { font-size: 2em; }
+
+/*
+=======================================================================
+Common
+=======================================================================
+*/
+
+.vertical { margin: 0 0.5em; }
+
+.point{  
+    border-left:7px solid #ccc;  
+    border-bottom:1px dashed #ccc;  
+    padding:.6em .8em  
+}  
+
+label {
+    background: white;
+    color: #fff;
+    padding: 10px;
+    display: block;
+    margin: 0;
+    border: 1px solid #fff;
+}
+
+input[type="checkbox"].on-off{
+    display: none;
+}
+
+.menu ul {
+    -webkit-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -ms-transition: all 0.5s;
+    -o-transition: all 0.5s;
+    transition: all 0.5s;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.menu li {
+    padding: 5px;
+}
+
+input[type="checkbox"].on-off + ul{
+    height: 0;
+    overflow: hidden;
+}
+
+input[type="checkbox"].on-off:checked + ul{
+    height: 200px;
+}
+
+.point2{
+    position: relative;
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0 0 1.5em;
+    padding: 0.5em 0.5em 0.5em 2.0em;
+    border-bottom: 2px solid #B92A2C;
+}
+ 
+.point2:before{
+    content: "□";
+    font-size: 200%;
+    position: absolute;
+    color: #ff6b6e;
+    top: -0.8em;
+    left: 0.3em;
+    height: 12px;
+    width: 12px;
+}
+ 
+.point2:after{
+    content: "□";
+    font-size: 200%;
+    position: absolute;
+    color: #B92A2C;
+    top: -0.5em;
+    left: 0;
+    height: 12px;
+    width: 12px;
+}
+
+.flex{
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -o-flex;
+    display: flex;
+}
+/*.cursor: pointer;*/
+/*.cursor: hand;*/
+
+/*
+=======================================================================
+Footer
+=======================================================================
+*/
+
+#footer h6 { margin-bottom: 0.5em; font-size: 1.2em; font-family: Verdana, helvetica, 'MS PGothic', Osaka, sans-serif; }
+
+
+
+
+#sidebar{
+	width:200px;
+	
+}
+
+
+#contactblock{
+    flex: 1;
+    font-family: "Arial Black", Gadget, sans-serif;
+    font-weight: 900;
+    color: #009;
+    font-size: 24px;
+    text-align: right;
+}
+
+
+#contactblock strong{
+	font-family:"ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+	font-weight:900;
+	color:#666;
+	font-size:14px;
+	
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="content-style-type" content="text/css" />
+<meta http-equiv="content-script-type" content="text/javascript" />
+
+<link rel="stylesheet" href="/css/dskkstyle.css" type="text/css" />
+
+<meta http-equiv="imagetoolbar" content="no" />
+<meta http-equiv="pragma" content="no-cache" />
+<meta http-equiv="cache-control" content="no-cache" />
+
+<meta name="robots" content="INDEX,FOLLOW" />
+<meta name="copyright" content="大翔化学研究所" />
+<meta name="author" content="MZ4" />
+<meta name="keywords" content="大翔化学研究所,求人,急募,幹部候補,薬品,土木,正社員" />
+<meta name="description" content="大翔化学研究所のホームページです。現在幹部候補を急募中です。正社員での求人となります。業種は土木（化学）の技術営業職、薬品の研究開発および販売です。" />
+
+
+<link rel="start" href="/" title="Home" />
+
+<title>【事業製品】大翔化学研究所</title>
+</head>
+
+<body>
+
+<?php require_once $_SERVER['DOCUMENT_ROOT']."/inc/header.php" ;?>
+
+<div id="contents">
+<div id="contents-inner" class="pkg">
+
+<h2>事業製品</h2>
+
+
+
+
+<p> ロービングウォール安定化材 吹き付工 </p>
+<p><img src="/img/img-fukitsuke.jpg" width="320" height="240" class="left" />写真は低アルカリタイプの法面吹付材</p>
+
+<div class="clr">&nbsp;</div>
+
+<p><img src="/img/img-opt.jpg" width="320" height="240" class="left" />OPTジェット用混和剤<br /> 
+OPフローS<br />
+OPフローL<br />
+</p>
+<div class="clr">&nbsp;</div>
+
+<!--end contents-inner --></div>
+<!--end contents --></div>
+
+<?php require_once $_SERVER['DOCUMENT_ROOT']."/inc/footer.php" ;?>
+
+</body>
+</html>

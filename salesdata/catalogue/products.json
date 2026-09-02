@@ -1,0 +1,109 @@
+{
+  "products": [
+    {
+      "name": "S-Chem",
+      "category": "Ground Improvement",
+      "description": "For ground improvement, jet grouting, and DSM. Enhances the mixability of clay-rich, hard-to-treat soils and increases their final strength.",
+      "features": [
+        "Turns stiff soil into fluid material without adding water",
+        "Improved excavability",
+        "Simultaneous increase in strength (+73% vs untreated)"
+      ]
+    },
+    {
+      "name": "Deeper 25",
+      "category": "Auxiliary Agent",
+      "description": "Auxiliary agent for clay-based excavations. Prevents clay from sticking, eliminates clods, and significantly improves the strength of stabilized soil.",
+      "features": [
+        "Maximum shield protection",
+        "Shock absorption",
+        "Extended cutter life",
+        "Prevents clogging in mixed ground"
+      ]
+    },
+    {
+      "name": "ACK1 - Super Retarder",
+      "category": "Retarder",
+      "description": "Set-retarding dispersant for cement grout. Provides long-lasting fluidity, reduces bleed water, and ensures stable, high-quality ground reinforcement.",
+      "features": [
+        "Long-term fluidity (6-8h)",
+        "Full final strength",
+        "Eliminates segregation and bleeding"
+      ]
+    },
+    {
+      "name": "D-Retardant",
+      "category": "Retarder",
+      "description": "A set-retarding agent for cement-soil mixtures, capable of delaying the setting time by up to 48 hours.",
+      "features": [
+        "48h full workability",
+        "Full final strength",
+        "Perfect for large DSM columns and long tunnel sections"
+      ]
+    },
+    {
+      "name": "RAD",
+      "category": "Accelerator",
+      "description": "Supports rapid and plastic setting of cement grouts for ground anchors, performing effectively even in highly fractured ground.",
+      "features": [
+        "Instant gelation",
+        "Complete void filling",
+        "Stops outflow in fractured rock"
+      ]
+    },
+    {
+      "name": "D-Fluid",
+      "category": "Superplasticizer",
+      "description": "A high-performance superplasticizer that reduces the water content in cement grout. Improves fluidity while maintaining high strength.",
+      "features": [
+        "Superior fluidity",
+        "Reduces water demand by up to 50%",
+        "Excellent pumpability"
+      ]
+    },
+    {
+      "name": "Bentonite",
+      "category": "Clay Mineral",
+      "description": "High-quality natural clay minerals essential for constructing cast-in-place piles and slurry-supported diaphragm walls.",
+      "features": [
+        "Reliable wall support",
+        "Water control (low-permeability filter-cake)"
+      ]
+    },
+    {
+      "name": "DK-Backfill",
+      "category": "DK Series",
+      "description": "Instant gelation without pipe clogging - perfect annulus and tail-void filling in TBM and shield tunnelling."
+    },
+    {
+      "name": "DK-Repair Mortar",
+      "category": "DK Series",
+      "description": "High-strength repair mortar - maintains shape, no sagging or dripping even on overhead and vertical surfaces."
+    },
+    {
+      "name": "Aquavisco",
+      "category": "DK Series",
+      "description": "Zero particle segregation under water - concrete retains full cohesion. No clouding and zero environmental impact."
+    },
+    {
+      "name": "OP-Flow Series",
+      "category": "Jet Grouting",
+      "description": "Used in the OPT Jet method, OP-Flow improves grout fluidity, reduces slump loss, and enables uniform ground improvement.",
+      "variants": [
+        {
+          "type": "Type S",
+          "description": "Dark-brown liquid - extreme fluidity at 300 l/min and uniform soil improvement."
+        },
+        {
+          "type": "Type L",
+          "description": "Milky-white thixotropic liquid - instantly stops liquefaction and sudden viscosity increase in soft soils."
+        }
+      ],
+      "features": [
+        "Reduced spoil and grout waste",
+        "Lower cement consumption",
+        "Clean job site"
+      ]
+    }
+  ]
+}

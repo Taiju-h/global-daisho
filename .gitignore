@@ -1,0 +1,3 @@
+/__deploy/
+*.log
+.DS_Store

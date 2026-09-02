@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="content-style-type" content="text/css" />
+        <meta http-equiv="content-script-type" content="text/javascript" />
+
+        <link rel="stylesheet" href="/css/dskkstyle.css" type="text/css" />
+
+        <meta http-equiv="imagetoolbar" content="no" />
+        <meta http-equiv="pragma" content="no-cache" />
+        <meta http-equiv="cache-control" content="no-cache" />
+
+        <meta name="robots" content="INDEX,FOLLOW" />
+        <meta name="copyright" content="大翔化学研究所" />
+        <meta name="author" content="MZ4" />
+        <meta name="keywords" content="大翔化学研究所,求人,急募,幹部候補,薬品,土木,正社員" />
+        <meta name="description" content="大翔化学研究所のホームページです。現在幹部候補を急募中です。正社員での求人となります。業種は土木（化学）の技術営業職、薬品の研究開発および販売です。" />
+
+
+        <link rel="start" href="/" title="Home" />
+
+        <title>【主要取引先】大翔化学研究所</title>
+    </head>
+
+    <body>
+
+        <?php require_once $_SERVER['DOCUMENT_ROOT'] . "/inc/header.php"; ?>
+
+        <div id="contents">
+            <div id="contents-inner" class="pkg">
+
+                <h2>主要取引先</h2>
+                <table width="100%" border="1" class="tableA" summary="主要取引先">
+                    <tr>
+                        <th width="13%" class="t_top">&nbsp;</th>
+                        <td width="87%" class="t_top">(株)大林組<br />
+                            花王(株)<br />
+                            清水建設(株)<br />
+                            ライト工業(株)
+                        </td>
+                    </tr>
+                </table>
+                <div style="text-align:right">   (敬称略、五十音順)</div>
+                <!--end contents-inner --></div>
+            <!--end contents --></div>
+
+        <?php require_once $_SERVER['DOCUMENT_ROOT'] . "/inc/footer.php"; ?>
+
+    </body>
+</html>

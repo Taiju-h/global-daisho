@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daisho Brochure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #003366;
+            --secondary-color: #00AEEF;
+            --accent-color: #E6F7FF;
+            --text-color: #333;
+            --light-text: #666;
+            --bg-color: #F4F7F6;
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            padding: 60px;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+        }
+
+        section {
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid #eee;
+        }
+
+        section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: 2.2em;
+            border-left: 5px solid var(--secondary-color);
+            padding-left: 20px;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        h3 {
+            font-size: 1.5em;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        h4 {
+            font-size: 1.2em;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+
+        .hero-subtitle {
+            text-align: center;
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: 300;
+            margin-top: -10px;
+            margin-bottom: 40px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: var(--secondary-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: #fff;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: 500;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: var(--accent-color);
+        }
+
+        ul, ol {
+            margin-bottom: 20px;
+            padding-left: 25px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            color: var(--light-text);
+        }
+
+        address {
+            font-style: normal;
+            margin-top: 30px;
+            line-height: 1.8;
+            background: var(--accent-color);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border-left: 5px solid var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        figure {
+            margin: 0;
+        }
+
+        figcaption {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .contact-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .contact-section li {
+            margin-bottom: 5px;
+        }
+
+        .contact-group {
+            margin-bottom: 25px;
+        }
+
+        .contact-group strong {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            h2 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<main>
+
+<section id="page-1">
+    <h1>DAISHO CHEMICAL R&D</h1>
+    <p class="hero-subtitle">Innovation, Research & Engineering</p>
+</section>
+
+<section id="page-2">
+    <h2>Discover Our World</h2>
+    <h3>Japanese Innovation. Global Expertise.</h3>
+    <p>Daisho Chemical R&D is a Japanese company with over 30 years of experience in developing and supplying chemical additives and technologies for ground improvement and geotechnical engineering.</p>
+    <p>Our foundation lies in continuous research and development, which has made us not only a solutions provider but also a true partner in creating value for our clients.</p>
+    <p>Our greatest strength is the combination of an experienced technical team and a personalized, collaborative approach - offering top-quality consulting, diverse expertise, and the flexibility required to meet the demands of the industry.</p>
+</section>
+
+<section id="page-3">
+    <h2>What Sets Us Apart</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Practice</h3>
+            <p>We have spent decades testing and refining additives specifically designed to address real-world civil engineering challenges - from deep foundations to complex urban infrastructure.</p>
+        </div>
+        <div class="card">
+            <h3>Research</h3>
+            <p>We continuously develop specialized chemical admixtures and ground-improvement technologies.</p>
+            <p>Our work includes the creation of the OPT Jet method and advanced formulations engineered to adapt to diverse soil conditions.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-4">
+    <h2>Why Trust Daisho</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Production</h3>
+            <p>We deliver quality that pays off. Our high-performance chemical solutions are cost-effective, practical, and ready for large-scale use directly on the construction site.</p>
+        </div>
+        <div class="card">
+            <h3>Partnership</h3>
+            <p>We believe success is achieved together. Our approach is based on close collaboration and standing side-by-side with geotechnical companies to achieve the optimal outcome for every project.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-5">
+    <h2>Discover Our Products</h2>
+    <h3>Products:</h3>
+    <div class="grid-container">
+        <div class="card">
+            <h4>S-Chem</h4>
+            <p>For ground improvement, jet grouting, and DSM. Enhances the mixability of clay-rich, hard-to-treat soils and increases their final strength.</p>
+        </div>
+        <div class="card">
+            <h4>Deeper 25</h4>
+            <p>Auxiliary agent for clay-based excavations. Prevents clay from sticking, eliminates clods, and significantly improves the strength of stabilized soil.</p>
+        </div>
+        <div class="card">
+            <h4>ACK1 - Super Retarder</h4>
+            <p>Set-retarding dispersant for cement grout. Provides long-lasting fluidity, reduces bleed water, and ensures stable, high-quality ground reinforcement.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-6">
+    <h2>Discover Our Products</h2>
+    <h3>Products:</h3>
+    <div class="grid-container">
+        <div class="card">
+            <h4>D-Retardant</h4>
+            <p>A set-retarding agent for cement-soil mixtures, capable of delaying the setting time by up to 48 hours.</p>
+        </div>
+        <div class="card">
+            <h4>RAD</h4>
+            <p>Supports rapid and plastic setting of cement grouts for ground anchors, performing effectively even in highly fractured ground.</p>
+        </div>
+        <div class="card">
+            <h4>D-Fluid</h4>
+            <p>A high-performance superplasticizer that reduces the water content in cement grout. Improves fluidity while maintaining high strength.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-7">
+    <h2>Discover Our Products</h2>
+    <h3>Products:</h3>
+    <div class="grid-container">
+        <div class="card">
+            <h4>Bentonite</h4>
+            <p>High-quality natural clay minerals essential for constructing cast-in-place piles and slurry-supported diaphragm walls.</p>
+        </div>
+        <div class="card">
+            <h4>DK Series</h4>
+            <p>Chemical solutions used in demanding conditions such as TBM tunneling, ports, marinas, and in the repair and strengthening of infrastructure.</p>
+        </div>
+        <div class="card">
+            <h4>OP Flow Series</h4>
+            <p>Used in the OPT Jet method, OP-Flow improves grout fluidity, reduces slump loss, and enables uniform ground improvement.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-8">
+    <h2>S-Chem - we turn stiff soil into a perfectly fluid material without adding water.</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Without S-CHEM</h3>
+            <p>Traditional slurry: high viscosity, low efficiency, heavily coated equipment. Sticky clay drastically reduces performance and increases tool wear.</p>
+            <p>Difficult cleaning directly extends cycle times and raises operating costs.</p>
+        </div>
+        <div class="card">
+            <h3>With S-CHEM</h3>
+            <p>Slurry with S-Chem: optimum fluidity, significantly cleaner equipment, lower energy consumption. Reduced resistance during drilling and mixing.</p>
+            <p>Lower tool wear and reduced volume of excavated spoil. Equipment stays clean, dramatically cutting downtime.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-9">
+    <h2>S-Chem - improved excavability with simultaneous increase in strength</h2>
+    <figure>
+        <figcaption>Compressive strength [kPa]</figcaption>
+        <table>
+            <thead>
+                <tr>
+                    <th>Condition</th>
+                    <th>Compressive Strength (kPa)</th>
+                    <th>Difference</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Without S-Chem</td>
+                    <td>796 kPa</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>With S-Chem</td>
+                    <td>1377 kPa</td>
+                    <td>+73%</td>
+                </tr>
+            </tbody>
+        </table>
+    </figure>
+    <div class="grid-container">
+        <div class="card">
+            <h4>Without S-Chem</h4>
+            <p>Non-uniform structure and lower final strength. The key drawback of conventional plasticizers is a significant drop in soil-cement strength.</p>
+        </div>
+        <div class="card">
+            <h4>With S-Chem</h4>
+            <p>Uniform structure and higher strength at the same time. Our chemical formulations are specifically engineered to actively reinforce the soil-cement matrix, delivering higher strength at equal or reduced cement content.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-10">
+    <h2>DEEPER 25 - maximum shield protection</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Shock absorption</h3>
+            <p>A special polymer forms an elastic-resilient "cushion" between the cutterhead face and the disc cutter ring.</p>
+            <p>This layer effectively absorbs and dampens impact energy when striking boulders or hard rock, preventing carbide ring cracking and spalling.</p>
+        </div>
+        <div class="card">
+            <h3>Extended cutter life</h3>
+            <p>By dissipating impact energy, it dramatically reduces ring cracking and uneven wear patterns.</p>
+            <p>As a result, cutter change-out intervals are significantly extended, reducing downtime and overall operating costs.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-11">
+    <h2>DEEPER 25 - maximum shield protection</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Mixed ground</h3>
+            <p>The additive simultaneously prevents clogging in clays and absorbs shocks in hard layers.</p>
+            <p>It maintains stable excavation parameters even in highly variable mixed-face conditions, significantly reducing torque fluctuations and cutterhead vibration.</p>
+        </div>
+        <div class="card">
+            <h3>Extra protection</h3>
+            <p>When sticky clays mix with hard boulders, unexpected cutter damage is common.</p>
+            <p>DEEPER 25 instantly forms a shock-absorbing lubricating layer that buffers peak "pin-loads", reducing metal fatigue and preventing catastrophic cutter failures.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-12">
+    <h2>ACK-1 Super Retarder - long-term fluidity without loss of strength</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Long-term fluidity</h3>
+            <p>Delays cement grout setting while maintaining extremely high fluidity for many hours (even 6-8 h).</p>
+            <p>This ensures uniform filling of voids during ground anchor grouting and mortar injection, with no risk of hose blockage.</p>
+        </div>
+        <div class="card">
+            <h3>Full final strength</h3>
+            <p>Acts as an excellent dispersant - virtually eliminates segregation and bleeding, delivering a perfectly homogeneous hardened grout.</p>
+            <p>Final compressive strength remains equal or higher compared to plain grout.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-13">
+    <h2>D-Retardant - setting delay of soil-cement mixture up to 48 hours</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>48 h full workability</h3>
+            <p>D-Retardant keeps the soil-cement mixture pumpable and fully workable for up to 48 hours - perfect for large DSM columns, railway subgrades and long tunnel sections.</p>
+            <p>Enables relaxed construction scheduling without time pressure.</p>
+        </div>
+        <div class="card">
+            <h3>Full final strength</h3>
+            <p>Guarantees repeatable delay while maintaining final strength equal to or higher than untreated mix.</p>
+            <p>Provides perfect cement-soil blending and eliminates segregation.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-14">
+    <h2>RAD - rapid setting under any ground condition</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Instant gelation</h3>
+            <p>RAD causes instantaneous transition of cement grout from liquid to plastic-gel state directly inside the fracture, completely stopping outflow even in highly permeable and heavily fractured rock.</p>
+        </div>
+        <div class="card">
+            <h3>Complete void filling</h3>
+            <p>Ensures 100% filling of the annulus around the bar or rock bolt, maximum bond strength and full load-bearing capacity - no material loss and no re-grouting required.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-15">
+    <h2>D-Fluid - maximum fluidity with minimum water content</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Superior fluidity</h3>
+            <p>D-Fluid reduces water demand by up to 50% while maintaining extreme fluidity and pumpability of cement milk for many hours.</p>
+        </div>
+        <div class="card">
+            <h3>Excellent pumpability</h3>
+            <p>Grout with D-Fluid flows effortlessly through the longest hoses and smallest nozzles - perfect for ground anchors and sprayed mortar applications.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-16">
+    <h2>Bentonite - reliable excavation stability and safety</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Reliable wall support</h3>
+            <p>Bentonite forms a high-viscosity, thixotropic slurry that effectively supports excavation walls (diaphragm walls, secant/contiguous piles), preventing soil collapse.</p>
+            <p>The trench remains fully stable throughout the entire construction phase.</p>
+        </div>
+        <div class="card">
+            <h3>Water control</h3>
+            <p>Upon hydration, bentonite swells and creates a low-permeability filter-cake on the trench walls, effectively sealing against groundwater inflow and soil fluid loss.</p>
+            <p>Prevents soil loss and soil loss, protects fresh concrete from contamination and ensures long-term structural durability.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-17">
+    <h2>DK Series - stability on land and at sea</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h4>DK-Backfill</h4>
+            <p>DK-Backfill-instant gelation without pipe clogging - perfect annulus and tail-void filling in TBM and shield tunnelling.</p>
+        </div>
+        <div class="card">
+            <h4>DK-Repair Mortar</h4>
+            <p>DK-Repair Mortar - high-strength repair mortar - maintains shape, no sagging or dripping even on overhead and vertical surfaces.</p>
+        </div>
+        <div class="card">
+            <h4>Aquavisco</h4>
+            <p>DK-Aquavisco - zero particle segregation under water - concrete retains full cohesion.</p>
+            <p>No clouding and zero environmental impact - proven technology for ports, marinas and offshore foundations.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-18">
+    <h2>OP-Flow Series - full control in jet grouting</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>Type S & Type L</h3>
+            <p>Type S - dark-brown liquid - extreme fluidity at 300 l/min and uniform soil improvement.</p>
+            <p>Type L - milky-white thixotropic liquid - instantly stops liquefaction and sudden viscosity increase in soft soils.</p>
+        </div>
+        <div class="card">
+            <h3>Innovative advantages</h3>
+            <p>Dramatically reduced spoil and grout waste, sharp and highly repeatable columns even in the most challenging ground conditions.</p>
+            <p>Lower cement consumption at equal or higher strength and clean job site after jetting.</p>
+            <p>Developed for OPT Jet - effective in all types of jet grouting.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-19">
+    <h2>OPT JET - the new era of jet grouting</h2>
+    <p><strong>What is OPT Jet? An integrated system - not just a method.</strong></p>
+    <p>OPT Jet is our proprietary jet grouting system that combines a unique double-fluid jet (ultra-high-pressure water + cement grout) with advanced chemical additives to maximise performance and quality.</p>
+    <p>Our high-performance jet grouting technology enables larger column diameters at lower lifting speeds, delivering significant time and cost savings.</p>
+    <p>With the OPT Jet system and OP-Flow chemistry we achieve larger column diameters, substantial cement savings and drastically reduced spoil volume, lowering disposal costs and improving site logistics.</p>
+    
+    <div class="grid-container">
+        <div class="card">
+            <h3>COST REDUCTION</h3>
+            <ul>
+                <li>Reduced cement and water consumption</li>
+                <li>Lower spoil volume for disposal</li>
+                <li>Reduced equipment wear and breakdowns</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>TIME EFFICIENCY</h3>
+            <ul>
+                <li>Lower resistance - faster drilling and mixing</li>
+                <li>Extended working time thanks to controlled setting</li>
+                <li>Shorter overall construction time and faster project delivery</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>SUPERIOR QUALITY</h3>
+            <ul>
+                <li>Ability to form columns across a wide range of diameters</li>
+                <li>Higher process predictability</li>
+                <li>Excellent result repeatability</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section id="page-20">
+    <h2>Daisho Chemical R&D -advancing geotechnical technology worldwide</h2>
+    
+    <p><strong>Taiju Haneda, CEO, Daisho Chemical R&D</strong></p>
+    
+    <div class="grid-container">
+        <div class="card">
+            <h3>Japanese heritage</h3>
+            <p>"I continue the mission my father began almost 40 years ago - developing chemical additives that genuinely solve real-world geotechnical challenges. This is a heritage of quality, responsibility and innovation."</p>
+            <p>"My vision is to become a global partner in geotechnical engineering."</p>
+        </div>
+        <div class="card">
+            <h3>Sharing knowledge</h3>
+            <p>"The time has come for technology developed in Japan to reach the world. Barriers are gone - today knowledge and innovation must flow freely between countries."</p>
+            <p>"We want to share our technology to help solve actual geotechnical problems - from ground stabilisation and injection works to tunnelling. Our goal is solutions that work on site, not just in the laboratory."</p>
+            <p>"We solve problems through engineering expertise and Japanese precision."</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-21">
+    <h2>Next step? Let's talk!</h2>
+    <div class="grid-container">
+        <div class="card">
+            <h3>1. Discussion</h3>
+            <p>We start with a discussion about your challenges and current needs.</p>
+        </div>
+        <div class="card">
+            <h3>2. Data analysis</h3>
+            <p>We begin with in-depth analysis of local soil samples to fully understand the project-specific conditions.</p>
+        </div>
+        <div class="card">
+            <h3>3. Testing & optimisation</h3>
+            <p>We conduct joint laboratory tests to optimise the mix design and select the right additives to achieve target performance.</p>
+        </div>
+        <div class="card">
+            <h3>4. Implementation & support</h3>
+            <p>We provide full technical support during implementation, ensuring the solution performs as designed under real site conditions.</p>
+        </div>
+    </div>
+</section>
+
+<section id="page-22" class="contact-section">
+    <h2>Worth contacting</h2>
+    
+    <div class="grid-container">
+        <div class="card contact-group">
+            <strong>Europe Representative:</strong>
+            <ul>
+                <li>Artur Dwojewski</li>
+                <li>phone: +48 790 281 445</li>
+                <li>e-mail: artur@daishokagaku.com</li>
+            </ul>
+        </div>
+        
+        <div class="card contact-group">
+            <strong>CEO Daisho Chemical R&D:</strong>
+            <ul>
+                <li>Taiju Haneda</li>
+                <li>phone: +81 90 1739 1621</li>
+                <li>e-mail: t.haneda@daishokagaku.com</li>
+            </ul>
+        </div>
+        
+        <div class="card contact-group">
+            <strong>Asia & Oceania Representative:</strong>
+            <ul>
+                <li>Aplle Carrillo</li>
+                <li>phone: +63 969 215 8655</li>
+                <li>e-mail: apple@daishokagaku.com</li>
+            </ul>
+        </div>
+    </div>
+
+    <address>
+        AU NANYODO BUILDING, 6TH FLOOR<br>
+        11-14-4 HONGO, BUNKYO-KU<br>
+        TOKYO 113-0033 JAPAN
+    </address>
+    
+    <p style="text-align: center; margin-top: 20px;"><strong>WWW:</strong> <a href="https://global.daishokagaku.com/">https://global.daishokagaku.com/</a></p>
+</section>
+
+</main>
+
+</body>
+</html>

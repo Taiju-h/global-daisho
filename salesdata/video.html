@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>株式会社大翔化学研究所</title>
+    <link rel="stylesheet" href="css/style.css"> <style>
+        /* ベーススタイル */
+        body { font-family: "Helvetica Neue", Arial, sans-serif; margin: 0; background-color: #1a1a1a; color: #fff; }
+        
+        /* ゲームライクな選択画面 (Nintendo Style) */
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px 20px;
+            background: linear-gradient(180deg, #004098 0%, #002050 100%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .mode-card {
+            width: 45%;
+            max-width: 500px;
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 5px solid transparent;
+            position: relative;
+        }
+        
+        /* ホバー時の「選択」アクション */
+        .mode-card:hover {
+            transform: scale(1.05) translateY(-10px);
+            border-color: #ffcc00;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.6);
+        }
+        
+        .mode-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            filter: brightness(0.9);
+        }
+        
+        .mode-info {
+            padding: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .mode-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004098;
+        }
+        
+        .mode-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #eee;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* アクティブ状態のスタイル */
+        .mode-card.active {
+            border-color: #d00;
+            background: #fff5f5;
+        }
+
+        /* コンテンツエリア */
+        .content-area {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .section-box {
+            background: #fff;
+            color: #333;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: none; /* 初期状態は非表示、JSで制御 */
+        }
+        
+        .section-box.visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* テーブル */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 15px; text-align: left; }
+        th { background: #f0f8ff; color: #004098; }
+        
+        /* 言語切替ボタン */
+        .lang-switch {
+            position: absolute; top: 20px; right: 20px;
+            z-index: 100;
+        }
+        .lang-btn {
+            background: rgba(255,255,255,0.2); border: 1px solid #fff;
+            color: #fff; padding: 5px 10px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <select id="language-selector" onchange="setLang(this.value)">
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ko">🇰🇷 한국어</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="pl">🇵🇱 Polski</option>
+        <option value="vi">🇻🇳 Tiếng Việt</option>
+    </select>
+</div>
+
+<header style="text-align:center; padding:40px 0; background: #000;">
+    <h1 data-i18n="site_title">株式会社大翔化学研究所</h1>
+    <p data-i18n="hero_desc">カタログの既製品で諦めていませんか？</p>
+</header>
+
+<div class="mode-selector" style="color;white">
+   
+    英語  
+    [](https://www.youtube.com/watch?v=Yzxf-RjeBvo)https://youtu.be/HPehr8DuHFc  
+    <br/>日本語  
+    https://youtu.be/Yzxf-RjeBvo  
+    <br/>Italy  
+    https://youtu.be/eF6VcGvnYRc  
+    <br/>Polish  
+    https://youtu.be/alo3h-iTbuM  
+    <br/>De  
+    https://youtu.be/XI3zT8qCVKI  
+    <br/>Fr  
+    https://youtu.be/f2RhVVSHYp0
+    
+    &nbsp;
+    
+    &nbsp;
+    
+    &nbsp;
+</div>
+
+ 
+<script src="js/main.js"></script>
+</body>
+</html>

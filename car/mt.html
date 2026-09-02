@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movable Type 多言語翻訳アシスト機能 開発仕様書</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans CJK JP", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-size: 24px;
+            border-bottom: 3px solid #4A5568;
+            padding-bottom: 10px;
+            color: #2D3748;
+        }
+        h2 {
+            font-size: 18px;
+            margin-top: 30px;
+            border-left: 5px solid #3182CE;
+            padding-left: 10px;
+            color: #2B6CB0;
+        }
+        h3 {
+            font-size: 15px;
+            color: #4A5568;
+            margin-top: 20px;
+        }
+        p, li {
+            font-size: 14px;
+            color: #4A5568;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+        th, td {
+            border: 1px solid #E2E8F0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #EDF2F7;
+            color: #2D3748;
+            width: 25%;
+        }
+        .badge {
+            background-color: #EBF8FF;
+            color: #2B6CB0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .note {
+            background-color: #FFFAF0;
+            border-left: 4px solid #DD6B20;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .note-title {
+            font-weight: bold;
+            color: #DD6B20;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .flow-step {
+            background: #F7FAFC;
+            border: 1px solid #E2E8F0;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Movable Type 多言語翻訳アシスト機能 開発仕様書</h1>
+    <p>本ドキュメントは、Movable Type（以下MT）の管理画面（記事編集画面）において、JavaScriptおよび外部翻訳API（DeepL等）を用いて、効率的かつ低コストで多言語NEWSサイトを構築・運用するための仕様を定義します。</p>
+
+    <h2>1. システム概要と開発方針</h2>
+    <p>再構築時のシステム負荷およびAPI利用コストの肥大化を防ぐため、<strong>「管理画面（JS）主導のキャッシュ方式」</strong>を採用します。自動翻訳は記事編集時にのみ実行され、結果はMTのデータベース（カスタムフィールド）に永続保存（キャッシュ）されます。これにより、フロント側の再構築は完全な静的書き出しとなり、高速かつ安全な運用が可能となります。</p>
+
+    <h2>2. 管理画面仕様（記事編集画面のカスタマイズ）</h2>
+    <p>標準の記事入力欄（英語を想定）のほかに、他言語用のカスタムフィールドを配置し、JavaScriptによる翻訳トリガーボタンを実装します。</p>
+    
+    <h3>■ 配置フィールド構成</h3>
+    <table>
+        <tr>
+            <th>ベース言語（標準欄）</th>
+            <td>タイトル（title）、本文（text） <span class="badge">英語（メイン）</span></td>
+        </tr>
+        <tr>
+            <th>日本語用フィールド</th>
+            <td>カスタムフィールド：日本語タイトル、日本語本文</td>
+        </tr>
+        <tr>
+            <th>中国語用フィールド</th>
+            <td>カスタムフィールド：中国語タイトル、中国語本文</td>
+        </tr>
+        <tr>
+            <th>韓国語用フィールド</th>
+            <td>カスタムフィールド：韓国語タイトル、韓国語本文</td>
+        </tr>
+    </table>
+
+    <h3>■ JavaScript（JS）による翻訳アシスト機能</h3>
+    <ul>
+        <li>記事編集画面内に<strong>「他言語へ一括翻訳」ボタン</strong>を非同期（JS）で生成・配置します。</li>
+        <li>ボタン押下時、ベース言語（英語）の「タイトル」「本文」の文字列を取得し、API（DeepL Pro等）へ非同期リクエストを送信します。</li>
+        <li>返却された各国語の翻訳データを、それぞれのカスタムフィールドへ自動的に流し込み（モックアップ）します。</li>
+        <li><strong>ポストエディット対応：</strong>流し込まれた翻訳テキストは、保存・公開前に担当者が画面上で自由に手動修正可能です。</li>
+    </ul>
+
+    <h2>3. フロントエンド仕様（公開側テンプレート）</h2>
+    <p>1つの記事データから、各言語に対応した独立した静的HTMLを同時に書き出します。</p>
+
+    <h3>■ ディレクトリ構造および出力イメージ</h3>
+    <table>
+        <tr>
+            <th>言語</th>
+            <th>出力先URLパターン</th>
+            <th>使用データソース</th>
+        </tr>
+        <tr>
+            <td>英語（メイン）</td>
+            <td><code>/news/press-release-01.html</code></td>
+            <td>標準のタイトル・本文欄</td>
+        </tr>
+        <tr>
+            <td>日本語</td>
+            <td><code>/ja/news/press-release-01.html</code></td>
+            <td>日本語カスタムフィールド</td>
+        </tr>
+        <tr>
+            <td>中国語</td>
+            <td><code>/zh/news/press-release-01.html</code></td>
+            <td>中国語カスタムフィールド</td>
+        </tr>
+        <tr>
+            <td>韓国語</td>
+            <td><code>/ko/news/press-release-01.html</code></td>
+            <td>韓国語カスタムフィールド</td>
+        </tr>
+    </table>
+    <p>※一覧ページ（インデックスアーカイブ）、カテゴリ別一覧ページも同様に、各言語の配下にそれぞれのデータを元に静的HTMLとして生成されます。</p>
+
+    <h2>4. 処理フロー（運用・再構築の流れ）</h2>
+    <div class="flow-step"><strong>ステップ 1：記事執筆</strong><br>運用担当者が「英語」で通常通りNEWSを入力。</div>
+    <div class="flow-step"><strong>ステップ 2：ワンクリック翻訳（API実行）</strong><br>「他言語へ一括翻訳」ボタンをクリック。数秒で「日・中・韓」の各フィールドに翻訳文が自動挿入される。</div>
+    <div class="flow-step"><strong>ステップ 3：確認・調整</strong><br>必要に応じて、自動翻訳されたテキストを手動で微調整（固有名詞の修正など）。</div>
+    <div class="flow-step"><strong>ステップ 4：保存・公開（再構築）</strong><br>「公開」ボタンを押す。MTはAPIを一切叩くことなく、保存されている各言語フィールドの値を元に4言語分の静的HTMLを一発で書き出す。</div>
+
+    <div class="note">
+        <div class="note-title">【重要】予算（30万円）内に収めるための前提条件</div>
+        <p>本件は開発コストを最適化するため、以下の前提条件の元で構築を行います。</p>
+        <ul>
+            <li><strong>デザイン・レイアウトの共通化：</strong>公開側の各言語（英・日・中・韓）のページレイアウトおよびCSSは完全に共通（コンポーネント化）とし、流し込まれるテキストデータのみを切り替える仕様とします。</li>
+            <li><strong>URL構造の共通化：</strong>カテゴリ名やファイル名（ファイルURLの末尾）は、英語の登録内容（例：category-a/article-01.html）をベースとし、各国語共通のディレクトリ構造を採用します。</li>
+            <li><strong>APIアカウントの直接契約：</strong>DeepL等のAPI利用料（従量課金：月額基本約700円＋利用分）はお客様の実費負担となり、APIアカウントはクライアント（または御社）側でのご契約・ご用意となります。</li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

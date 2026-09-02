@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>水掘り × 膨潤 可視化（3D+2D）</title>
+<style>
+  :root { --bg:#0e1013; --panel:#181b20; --text:#e8f0fe; }
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  #wrap{display:grid;grid-template-rows:auto 1fr auto;grid-template-columns:1fr; height:100vh;}
+  header{padding:10px 14px;background:linear-gradient(180deg,#14171b 0,#0e1013 100%);display:flex;gap:10px;align-items:center}
+  header h1{margin:0;font-size:16px;font-weight:600;letter-spacing:.02em}
+  header .hint{opacity:.75;font-size:12px}
+  main{display:grid;grid-template-columns:1fr 420px;gap:12px;padding:12px}
+  .panel{border:1px solid #22262d;border-radius:12px;background:var(--panel);position:relative;overflow:hidden}
+  #threeHost{min-height:480px; height:calc(100vh - 220px);}  /* 必要なら追加 */
+    #microHost{min-height:480px}
+  #microCanvas{width:100%;height:100%}
+  #readouts{padding:10px 12px; display:grid; gap:10px; grid-template-columns:repeat(3,1fr)}
+  .card{background:#12151a;border:1px solid #22262d;border-radius:10px;padding:10px}
+  .label{font-size:12px;opacity:.8;margin-bottom:4px}
+  .big{font-size:20px;font-weight:700}
+  footer{padding:10px 14px;border-top:1px solid #20242b;font-size:12px;opacity:.8}
+  #legend{position:absolute;left:10px;top:10px;font-size:12px;background:rgba(0,0,0,.4);padding:6px 8px;border-radius:8px}
+
+/* ツールバー（左上の重なり解消） */
+.controls{position:absolute; left:10px; top:10px; display:flex; flex-direction:column; gap:8px; z-index:5}
+.controls .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.controls button{border:none; color:white; border-radius:20px; padding:6px 12px; cursor:pointer}
+#depthHUD{font-size:12px; opacity:.85}
+
+/* 右パネルの lil-gui を固定表示 */
+.lilgui-dock{position:sticky; top:8px; z-index:4}
+
+/* スマホ/タブレット */
+@media (max-width: 900px){
+  main{grid-template-columns:1fr}
+  #threeHost{min-height:56vh; height:auto}
+  #side{min-height:44vh}
+  .controls{position:static; padding:8px 10px}
+}
+/* 右パネル 全幅コントロール */
+.params{padding:10px; display:grid; gap:12px}
+.param{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center}
+.param .label{font-size:12px; opacity:.85}
+.param .val{justify-self:end; font-weight:700; font-size:14px; background:#0f1318; border:1px solid #22262d; padding:4px 10px; border-radius:8px}
+.param .slider{grid-column:1 / -1; width:100%}
+.param .stepper{grid-column:1 / -1; display:flex; gap:8px}
+.param .stepper button{min-width:44px; padding:10px 12px; border-radius:10px; border:1px solid #2a2f36; background:#1b2027; color:#e8f0fe; cursor:pointer}
+.select{grid-column:1 / -1; width:100%; padding:8px 10px; border-radius:8px; border:1px solid #2a2f36; background:#10141a; color:#e8f0fe}
+.toggle{display:flex; align-items:center; gap:8px; font-size:14px}
+.toggle input{transform:scale(1.2)}
+
+/* スマホ幅最適化 */
+@media (max-width: 900px){
+  .param{grid-template-columns:1fr auto}
+  .param .val{font-size:13px}
+  .param .stepper button{min-width:40px; padding:9px 10px}
+}
+.lil-gui{display:none !important}
+
+/* 土パネル */
+.soil-panel{
+  position:absolute; left:10px; top:74px; z-index:6;
+  background:#11161b; border:1px solid #22262d; border-radius:10px; padding:10px; width:300px;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
+}
+.soil-panel .title{font-weight:700; margin-bottom:8px; font-size:13px; opacity:.9}
+.soil-panel .soil-row{display:grid; grid-template-columns:44px 1fr auto; gap:8px; align-items:center; margin:6px 0}
+.soil-panel select, .soil-panel input{
+  background:#0f1318; border:1px solid #2a2f36; color:#e8f0fe; padding:6px 8px; border-radius:8px;
+}
+.soil-panel .note{font-size:11px; opacity:.7; margin-top:4px}
+@media (max-width:900px){
+  .soil-panel{position:static; width:auto; margin:8px 10px}
+}
+
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>水掘り × 膨潤（Bentonite Drilling Mud Visualizer）</h1>
+    <div class="hint">マウス：ドラッグ=回転 / ホイール=ズーム / 右ドラッグ=平行移動</div>
+  </header>
+
+  <main>
+    <!-- 3D：水掘り断面 -->
+    <section class="panel" id="threeHost">
+      <div id="legend">砂質埋土 / OA層 / フィルターケーキ / 泥水</div>
+      <div class="controls">
+        <div class="row">
+          <button id="timePlay" style="background:#2563eb">掘進▶</button>
+          <button id="packBtn"  style="background:#10b981">水締り：再生</button>
+          <button id="playBtn">自動回転：OFF</button>
+          <button id="soilBtn"  style="background:#6b7280">土</button>
+
+        </div>
+        <div class="row">
+          <input id="timeScrub" type="range" min="0" max="6" step="0.01" style="width:260px">
+          <span id="depthHUD">深度 0.00 m</span>
+        </div>
+      </div>
+      
+      <div id="soilPanel" class="soil-panel" hidden>
+        <div class="title">地層（上→中→下）</div>
+      
+        <div class="soil-row">
+          <label>上層</label>
+          <select id="soilTop">
+            <option>ローム/OA</option><option>砂</option><option>シルト</option><option>粘土</option><option>砂礫</option>
+          </select>
+          <input id="soilTopH" type="number" step="0.1" min="0.5" max="6" value="2.0"> m
+        </div>
+      
+        <div class="soil-row">
+          <label>中層</label>
+          <select id="soilMid">
+            <option selected>砂</option><option>ローム/OA</option><option>シルト</option><option>粘土</option><option>砂礫</option>
+          </select>
+          <input id="soilMidH" type="number" step="0.1" min="0.5" max="6" value="2.4"> m
+        </div>
+      
+        <div class="soil-row">
+          <label>下層</label>
+          <select id="soilBot">
+            <option>粘土</option><option>ローム/OA</option><option>砂</option><option>シルト</option><option>砂礫</option>
+          </select>
+          <input id="soilBotH" type="number" step="0.1" min="0.5" max="6" value="2.0"> m
+        </div>
+      
+        <div class="note">合計 ≈ 2×T（いま T=3.2 → 6.4m）に近いほど見た目のバランスが良いです。</div>
+      </div>
+      
+      <!-- 推奨メッシュ表示（スクラブの右あたりに出す） -->
+      <span id="meshRecHUD" style="font-size:12px;opacity:.85;margin-left:10px;"></span>
+      
+      
+
+      <canvas id="threeCanvas"></canvas>
+    </section>
+
+    <!-- 右パネル：GUIと2D微視スケール -->
+    <section class="panel" id="side">
+        <div id="params" class="params">
+            <div class="param">
+              <div class="label">ベントナイト (%)</div>
+              <div class="val" id="v_bentonite_pct"></div>
+              <input id="s_bentonite_pct" class="slider" type="range" min="2" max="8" step="0.1">
+              <div class="stepper">
+                <button data-d="-1">−</button><button data-d="1">＋</button>
+              </div>
+            </div>
+          
+            <div class="param">
+              <div class="label">膨潤率 (×)</div>
+              <div class="val" id="v_swell_ratio"></div>
+              <input id="s_swell_ratio" class="slider" type="range" min="1" max="8" step="0.1">
+              <div class="stepper">
+                <button data-d="-1">−</button><button data-d="1">＋</button>
+              </div>
+            </div>
+          
+            <div class="param">
+              <div class="label">塩分影響</div>
+              <div class="val" id="v_salinity"></div>
+              <input id="s_salinity" class="slider" type="range" min="0" max="1" step="0.01">
+              <div class="stepper">
+                <button data-d="-1">−</button><button data-d="1">＋</button>
+              </div>
+            </div>
+          
+            <div class="param">
+              <div class="label">メッシュ</div>
+              <div class="val" id="v_mesh"></div>
+              <select id="sel_mesh" class="select">
+                <option>150</option><option>180</option><option selected>200</option><option>250</option><option>300</option>
+              </select>
+            </div>
+          
+            <div class="param">
+              <div class="label">流速</div>
+              <div class="val" id="v_flow_mps"></div>
+              <input id="s_flow_mps" class="slider" type="range" min="0" max="1" step="0.01">
+              <div class="stepper">
+                <button data-d="-1">−</button><button data-d="1">＋</button>
+              </div>
+            </div>
+          
+            <label class="toggle">
+              <input id="chk_cycle" type="checkbox"> 乾湿サイクル
+            </label>
+          </div>
+          
+      <div id="microHost" class="panel" style="height:56%">
+        <canvas id="microCanvas"></canvas>
+      </div>
+
+      <div id="guiDock" class="lilgui-dock"></div>
+
+
+      <div id="readouts">
+        <div class="card">
+          <div class="label">Marsh秒（目安）</div>
+          <div id="valMarsh" class="big">— s</div>
+        </div>
+        <div class="card">
+          <div class="label">フィルターロス（30分, 目安）</div>
+          <div id="valFL" class="big">— mL</div>
+        </div>
+        <div class="card">
+          <div class="label">ケーキ厚（目安）</div>
+          <div id="valCake" class="big">— mm</div>
+        </div>
+        <div class="card">
+            <div class="label">孔壁近傍 空隙率 n（目安）</div>
+            <div id="valPor" class="big">—</div>
+          </div>
+          <div class="card">
+            <div class="label">相対透水係数 k<sub>rel</sub>（目安）</div>
+            <div id="valPerm" class="big">—</div>
+          </div>
+      
+      </div>
+    </section>
+  </main>
+
+  <footer>※ 数式は教育用の簡易モデル（感覚合わせ用）。実設計には現場試験・仕様に基づく調整が必要。</footer>
+</div>
+
+<!-- libs -->
+<script type="module">
+/* ===== Imports ===== */
+import * as THREE from 'https://unpkg.com/three@0.160.1/build/three.module.js';
+import { OrbitControls } from 'https://esm.sh/three@0.160.1/examples/jsm/controls/OrbitControls.js';
+import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
+
+//import {OrbitControls} from 'https://unpkg.com/three@0.160.1/examples/jsm/controls/OrbitControls.js';  
+
+/* ===== State (1か所で全スライダー管理) ===== */
+const S = {
+  bentonite_pct: 5.0,     // ベントナイト固形分 %
+  swell_ratio: 4.0,       // 膨潤率（乾燥時比の体積倍率, 1–8x想定）
+  salinity: 0.1,          // 塩分影響（0=淡水, 1=強塩水）
+  flow_mps: 0.6,          // 泥水流速（相対）, 0–1
+  mesh: 200,              // 目開きの指標
+  autoRotate: false,
+  cycleWetDry:false,      // 乾湿サイクル（粒子が息するように）
+  packLevel: 0,       // 砂の締まり進行度（0〜1）
+
+   playDrill: true,   // 掘進 再生/停止（起動時から回したいなら true）
+   depth_m: 0,        // 現在深度[m]
+   rate_mps: 6/5,     // 6 m を 5 秒で → 1.2 m/s
+   maxDepth_m: 6,     // スライダーmaxと一致
+   loopDrill: true    // 端まで行ったら0mへ即リセット
+
+   
+};
+
+
+
+/* ===== GUI ===== */
+const gui = new GUI();
+const guiDock = document.getElementById('guiDock');
+if (guiDock) {
+  guiDock.appendChild(gui.domElement);
+  gui.domElement.style.width = '280px';
+}
+
+gui.title('泥水・膨潤 パラメータ');
+gui.add(S, 'bentonite_pct', 2, 8, 0.1).name('ベントナイト (%)').onChange(updateAll);
+gui.add(S, 'swell_ratio', 1, 8, 0.1).name('膨潤率 (×)').onChange(updateAll);
+gui.add(S, 'salinity', 0, 1, 0.01).name('塩分影響').onChange(updateAll);
+gui.add(S, 'mesh', [150,180,200,250,300]).name('メッシュ').onChange(updateAll);
+gui.add(S, 'flow_mps', 0, 1, 0.01).name('流速').onChange(updateAll);
+gui.add(S, 'cycleWetDry').name('乾湿サイクル').onChange(updateAll);
+
+/* ===== 3D Scene（断面） ===== */
+const threeHost = document.getElementById('threeHost');
+const threeCanvas = document.getElementById('threeCanvas');
+const renderer = new THREE.WebGLRenderer({canvas:threeCanvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0e1013);
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+camera.position.set(8,8,13);
+const controls = new OrbitControls(camera, threeCanvas);
+controls.enableDamping = true;
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0x202020, 1.0);
+scene.add(hemi);
+const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+dir.position.set(5,10,3);
+scene.add(dir);
+
+// 地層ブロック
+const W = 16;
+const T = 3.2; // 上下層厚さ
+const OAcolor = 0x4f6372;
+const SANDcolor = 0xbf9a72;
+
+const matSand = new THREE.MeshPhysicalMaterial({color:SANDcolor, transparent:true, opacity:0.55, roughness:0.9});
+const matOA = new THREE.MeshPhysicalMaterial({color:OAcolor, transparent:true, opacity:0.5, roughness:0.85});
+const sand = new THREE.Mesh(new THREE.BoxGeometry(W,T,W), matSand);
+sand.position.y = T/2;
+scene.add(sand);
+const oa = new THREE.Mesh(new THREE.BoxGeometry(W,T,W), matOA);
+oa.position.y = -T/2;
+scene.add(oa);
+
+// 掘削ビット位置をリングで表示（下へ移動していく）
+const bitRing = new THREE.Mesh(
+  new THREE.TorusGeometry(0.85, 0.06, 16, 48),
+  new THREE.MeshStandardMaterial({color:0x9ad1ff, emissive:0x103a6b, emissiveIntensity:0.6, roughness:0.4})
+);
+bitRing.rotation.x = Math.PI/2;
+scene.add(bitRing);
+
+
+// 砂粒のパッキング可視化
+// 泥水ジェット（下向きの流れを粒で表現）
+const jetN = 120;
+const jetGeo = new THREE.SphereGeometry(0.06, 8, 8);
+const jetMat = new THREE.MeshBasicMaterial({color:0x9ad1ff, transparent:true, opacity:0.6});
+const jets = [];
+for (let i=0;i<jetN;i++){
+  const m = new THREE.Mesh(jetGeo, jetMat.clone());
+  m.visible = false;
+  m.userData.vy = 0;
+  scene.add(m);
+  jets.push(m);
+}
+
+const SAND_N = 600;
+const grainGeo = new THREE.SphereGeometry(0.10, 12, 12);
+const grainMat = new THREE.MeshStandardMaterial({color:0x8f7b62, roughness:0.9, metalness:0});
+const grains = new THREE.InstancedMesh(grainGeo, grainMat, SAND_N);
+grains.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(grains);
+
+// 粒子の初期配置（孔壁周りのリング帯）
+const grainBase = [];
+for(let i=0;i<SAND_N;i++){
+  const ang = Math.random()*Math.PI*2;
+  const r = 0.9 + Math.random()*1.1;
+  const y = -T + Math.random()* (T*2);
+  grainBase.push({ang, r, y, s: 0.9+Math.random()*0.4, p: 0});
+
+}
+
+
+// 柱状体（改良体/杭）
+const colR = 0.62;
+const embed = 1.0; // 根入れ 1 m
+const colH = T*2 + embed;
+const colMat = new THREE.MeshPhysicalMaterial({color:0xcccccc, roughness:0.6});
+const column = new THREE.Mesh(new THREE.CylinderGeometry(colR,colR,colH,64), colMat);
+column.position.y = embed/2;
+scene.add(column);
+
+// 泥水シース（色/透明度が粘度・濃度・塩分で変化）
+const mudMat = new THREE.MeshPhysicalMaterial({color:0x4aa6ff, transparent:true, opacity:0.18, roughness:0.95});
+const mud = new THREE.Mesh(new THREE.CylinderGeometry(colR*1.45,colR*1.45,colH*1.06,64), mudMat);
+scene.add(mud);
+
+// フィルターケーキ：厚みを動的変更（リング）
+const cakeGroup = new THREE.Group();
+scene.add(cakeGroup);
+function buildCake(thickness=0.02) {
+  cakeGroup.clear();
+  const rInner = colR*1.45;
+  const rOuter = rInner + thickness;
+  const geo = new THREE.CylinderGeometry(rOuter, rOuter, colH*1.06, 64, 1, true);
+  const m = new THREE.MeshPhysicalMaterial({color:0x96c1ff, transparent:true, opacity:0.33, side:THREE.DoubleSide});
+  const cakeShell = new THREE.Mesh(geo, m);
+  // 内側をくり抜く（擬似）：見た目優先で内半径を薄くする面を追加
+  const inner = new THREE.Mesh(new THREE.CylinderGeometry(rInner, rInner, colH*1.061, 64), 
+                               new THREE.MeshBasicMaterial({color:0x000000, opacity:0.0, transparent:true}));
+  cakeGroup.add(cakeShell, inner);
+}
+buildCake();
+
+/* ===== 2D Micro（粒子膨潤） ===== */
+const microCanvas = document.getElementById('microCanvas');
+const mctx = microCanvas.getContext('2d');
+let particles = [];
+const N = 160;
+
+function makeParticles(){
+  particles = [];
+  for(let i=0;i<N;i++){
+    const x = Math.random();
+    const y = Math.random();
+    const r0 = 2 + Math.random()*3; // 乾燥時半径
+    const k = 0.5 + Math.random()*0.5; // 収縮/膨潤の個体差
+    particles.push({x,y,r0,k,phase:Math.random()*Math.PI*2});
+  }
+}
+makeParticles();
+ let targetParticleScale = 1;   // 👈 ここに先出し宣言
+/* ===== Readouts ===== */
+const valMarsh = document.getElementById('valMarsh');
+const valFL = document.getElementById('valFL');
+const valCake = document.getElementById('valCake');
+const valPor  = document.getElementById('valPor');
+const valPerm = document.getElementById('valPerm');
+
+
+/* ===== Models（簡易） =====
+  直感に合わせて単純化した指標を算出：
+  - Marsh秒 ~ f(濃度, 塩分, メッシュ)
+  - フィルターロス ~ g(濃度, 膨潤率, 塩分)
+  - ケーキ厚 ~ h(濃度, 膨潤率, 流速, メッシュ)
+*/
+function clamp(v,a,b){return Math.min(Math.max(v,a),b);}
+function map(v,a,b,c,d){return c+(v-a)*(d-c)/(b-a);}
+
+function computeMarsh(){
+  const pct = S.bentonite_pct;        // 2–8
+  const sal = S.salinity;             // 0–1
+  const mesh = S.mesh;                // 150–300
+  const base = 20 + (pct-2)*6.5;      // 濃度起因
+  const saltPenalty = 1 + sal*0.25;   // 塩で増粘/分散変化 → だいたい遅く
+  const meshAdj = 1 + (200-mesh)/400; // 目開き粗いと微粒が抜けやすく粘度低下
+  const marsh = base * saltPenalty * meshAdj;
+  return clamp(marsh, 18, 90);
+}
+function computeFilterLoss(){
+  // 濃いほど小、膨潤強いほど小、塩分でやや悪化
+  const pct = S.bentonite_pct;
+  const swell = S.swell_ratio;
+  const sal = S.salinity;
+  let fl = 40 - (pct-2)*4 - (swell-1)*2 + sal*8;
+  return clamp(fl, 6, 120);
+}
+function computeCakeThicknessMM(){
+  // 濃度↑, 膨潤↑で厚く。流速↑で若干薄く。細かいメッシュほどケーキ細密化→薄め。
+  const pct = S.bentonite_pct;
+  const swell = S.swell_ratio;
+  const flow = S.flow_mps;
+  const mesh = S.mesh;
+  let mm = 0.6 + (pct-2)*0.25 + (swell-1)*0.18 - flow*0.25 + (200-mesh)*0.002;
+  
+  return clamp(mm, 0.2, 6);
+}
+
+function computePorosity(){
+  // 代表値：ビット±0.6m & r<1.6m の粒で p の平均をとり、n に写像
+  const yBit = bitRing.position.y;
+  let sum=0, cnt=0;
+  for(let i=0;i<SAND_N;i++){
+    const b = grainBase[i];
+    if (Math.abs(b.y - yBit) < 0.6 && b.r < 1.6){ sum += b.p; cnt++; }
+  }
+  const pbar = cnt? (sum/cnt) : 0;
+  const n0 = 0.40, nMin = 0.22;
+  const n = n0 - (n0 - nMin) * pbar;
+  return clamp(n, nMin, n0);
+}
+function computeKrel(n){
+  const f = (Math.pow(n,3))/Math.pow(1-n,2);
+  const f0 = (Math.pow(0.40,3))/Math.pow(1-0.40,2);
+  return clamp(f/f0, 0.05, 1.0);
+}
+
+
+
+/* ===== Update (3D & 2D & Readouts) ===== */
+function updateAll(){
+  // 3D 泥水の色/透明度（濃度・Marsh・塩分で演出）
+  const marsh = computeMarsh();
+  const vis = clamp((marsh-18)/72, 0, 1);
+  const color = new THREE.Color().setHSL(0.58, 0.8, 0.45 - vis*0.2);
+  mud.material.color.copy(color);
+  mud.material.opacity = 0.12 + vis*0.20;
+
+  // ケーキ厚
+  const cakeMM = computeCakeThicknessMM();
+  const cakeThk = cakeMM/1000 * 16; // 見た目スケール係数（任意）
+  buildCake(cakeThk);
+
+  // 2D 粒子の目標半径（膨潤率・塩分の効果でターゲット変化）
+  targetParticleScale = calcParticleScale();
+
+  // Readouts
+  valMarsh.textContent = `${computeMarsh().toFixed(0)} s`;
+  const n = computePorosity();
+valPor.textContent  = n.toFixed(2);
+valPerm.textContent = computeKrel(n).toFixed(2);
+
+  valFL.textContent = `${computeFilterLoss().toFixed(0)} mL`;
+  valCake.textContent = `${computeCakeThicknessMM().toFixed(2)} mm`;
+  const depthHUD = document.getElementById('depthHUD');
+  if (depthHUD) depthHUD.textContent = `深度 ${S.depth_m.toFixed(2)} m`;
+
+}
+updateAll();
+
+/* ===== Particle Swell Animation ===== */
+//let targetParticleScale = 1;
+function calcParticleScale(){
+  // 膨潤率に塩分影響で係数を掛ける（塩分が高いと膨潤阻害）
+  const effective = 1 + (S.swell_ratio-1) * (1 - 0.5*S.salinity);
+  return clamp(effective, 1, 8);
+}
+function drawMicro(ts){
+  // canvasサイズ
+  const r = microCanvas.getBoundingClientRect();
+  if(microCanvas.width !== r.width || microCanvas.height !== r.height){
+    microCanvas.width = r.width; microCanvas.height = r.height;
+  }
+  const w = microCanvas.width, h = microCanvas.height;
+  mctx.clearRect(0,0,w,h);
+
+  // 背景グラデ（塩分高いほど寒色寄り）
+  const grd = mctx.createLinearGradient(0,0,0,h);
+  const salt = S.salinity;
+  grd.addColorStop(0, `rgba(${Math.round(10+40*salt)}, ${Math.round(40+80*(1-salt))}, ${Math.round(70+140)}, 1)`);
+  grd.addColorStop(1, `rgba(12,16,20,1)`);
+  mctx.fillStyle = grd; mctx.fillRect(0,0,w,h);
+
+  // 流速の矢印（簡易）
+  const flow = S.flow_mps;
+  const arrows = Math.round(6 + flow*12);
+  mctx.strokeStyle = 'rgba(255,255,255,0.25)'; mctx.lineWidth = 2;
+  for(let i=0;i<arrows;i++){
+    const y = (i+1)*(h/(arrows+1));
+    const len = 60 + flow*120;
+    const x0 = 16, x1 = x0 + len;
+    mctx.beginPath(); mctx.moveTo(x0,y); mctx.lineTo(x1,y); mctx.stroke();
+    // 矢尻
+    mctx.beginPath(); mctx.moveTo(x1,y); mctx.lineTo(x1-10,y-5); mctx.lineTo(x1-10,y+5); mctx.closePath(); mctx.fillStyle='rgba(255,255,255,0.25)'; mctx.fill();
+  }
+
+  // 膨潤：各粒子半径をイージングで目標に寄せる
+  const breathe = S.cycleWetDry ? (0.05*Math.sin(ts*0.002)) : 0;
+  const scaleTarget = targetParticleScale + breathe;
+  mctx.globalCompositeOperation = 'lighter';
+  for(const p of particles){
+    // 個体差＆ゆらぎ
+    p.phase += 0.02 + Math.random()*0.01;
+    const k = p.k;
+    // 現在半径（追従用に r を持たせる）
+    if(p.r === undefined) p.r = p.r0;
+    const target = p.r0 * scaleTarget * (0.8 + 0.4*k);
+    p.r += (target - p.r)*0.08; // イージング
+
+    // 描画
+    const cx = p.x*w, cy = p.y*h;
+    const grad = mctx.createRadialGradient(cx,cy,0, cx,cy,p.r);
+    const c1 = `rgba(110,200,255,0.35)`, c2 = `rgba(60,140,255,0.15)`, c3 = `rgba(30,60,160,0.08)`;
+    grad.addColorStop(0, c1); grad.addColorStop(0.6, c2); grad.addColorStop(1, c3);
+    mctx.fillStyle = grad; 
+    mctx.beginPath(); mctx.arc(cx,cy,p.r,0,Math.PI*2); mctx.fill();
+  }
+  mctx.globalCompositeOperation = 'source-over';
+
+  // 画面注記
+  mctx.fillStyle='rgba(255,255,255,0.8)';
+  mctx.font='12px system-ui';
+  mctx.fillText(`微視スケール：粒子膨潤（膨潤率×${S.swell_ratio.toFixed(1)} / 塩分=${S.salinity.toFixed(2)})`, 10, 18);
+}
+
+/* ===== Resize ===== */
+function resize(){
+  const r = threeHost.getBoundingClientRect();
+  renderer.setSize(r.width, r.height);
+  camera.aspect = r.width / r.height;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+/* ===== Buttons & Events ===== */
+const playBtn = document.getElementById('playBtn');
+if (playBtn){
+  playBtn.addEventListener('click', ()=>{
+    S.autoRotate = !S.autoRotate;
+    playBtn.textContent = `自動回転：${S.autoRotate ? 'ON' : 'OFF'}`;
+    playBtn.classList.toggle('paused', !S.autoRotate);
+  });
+}
+
+const packBtn = document.getElementById('packBtn');
+if (packBtn){
+  packBtn.addEventListener('click', ()=>{
+    S.packPlay = !S.packPlay;
+    packBtn.textContent = `水締り：${S.packPlay ? '再生中' : '再生'}`;
+    packBtn.style.background = S.packPlay ? '#059669' : '#10b981';
+    if(!S.packPlay) S.packLevel = 0; // 停止時はリセット（好みで）
+  });
+}
+S.playDrill = true;  // 自動スタートしたい時だけ
+
+const playBtnDrill = document.getElementById('timePlay');
+const scrub = document.getElementById('timeScrub');
+const depthHud = document.getElementById('depthHUD');
+if (playBtnDrill) playBtnDrill.textContent = S.playDrill ? '掘進⏸' : '掘進▶';
+
+
+if (playBtnDrill){
+  playBtnDrill.addEventListener('click', ()=>{
+    S.playDrill = !S.playDrill;
+    playBtnDrill.textContent = S.playDrill ? '掘進⏸' : '掘進▶';
+  });
+}
+if (scrub){
+  scrub.addEventListener('input', (e)=>{
+    S.depth_m = Math.min(Math.max(parseFloat(e.target.value)||0, 0), S.maxDepth_m);
+    S.playDrill = false; // スクラブしたら一時停止
+    if (depthHud) depthHud.textContent = `深度 ${S.depth_m.toFixed(2)} m`;
+  });
+}
+
+
+// 掘進＆水締り 更新
+const tmpM = new THREE.Matrix4();
+function updateSandPack(dt){
+  // 掘進：時間更新 & スライダー同期
+  if (S.playDrill) {
+
+      // 端まで行ったら0mへリセット（ループ）
+  if (S.loopDrill && S.depth_m >= S.maxDepth_m - 1e-6) {
+    S.depth_m = 0;
+    const sc = document.getElementById('timeScrub');
+    if (sc) sc.value = S.depth_m;
+    // 見せ方重視：締まり進行もリセット（毎サイクル“新鮮”に）
+    for (let i = 0; i < SAND_N; i++) grainBase[i].p = 0;
+  }
+
+
+    S.depth_m = Math.min(S.depth_m + S.rate_mps * dt, S.maxDepth_m);
+    const sc = document.getElementById('timeScrub');
+    if (sc) sc.value = S.depth_m;
+  }
+
+  // ビット位置（下へ移動）
+    const yBit = THREE.MathUtils.clamp(T - S.depth_m, -T, T + embed);
+
+// ジェット更新（ビットから下へ流れる粒）
+for (let i=0;i<jets.length;i++){
+  const m = jets[i];
+  const born = !m.visible || m.position.y < yBit - 1.4;
+  if (born){
+    const ang = Math.random()*Math.PI*2;
+    const r = colR*1.05 + Math.random()*0.1;
+    m.position.set(Math.cos(ang)*r, yBit + 0.05, Math.sin(ang)*r);
+    m.userData.vy = -(0.6 + Math.random()*0.8); // 下向き速度
+    m.material.opacity = 0.55;
+    m.visible = true;
+  }else{
+    m.position.y += m.userData.vy * dt;
+    m.material.opacity *= 0.96;
+  }
+}
+
+
+
+bitRing.position.set(0, yBit, 0);
+
+  // 進行係数（粘度/流速/メッシュの簡易合成）
+  const marsh = computeMarsh();
+  const baseRate = 0.9*S.flow_mps + 0.5*(marsh/90) + (S.mesh<=180?0.35:0.15);
+  const kRate = 0.12 * baseRate;
+
+  for (let i=0;i<SAND_N;i++){
+    const b = grainBase[i];
+
+    // ビット近傍だけ効く：縦±1.2m & r<2.0付近で強く
+    const dy = Math.abs(b.y - yBit);
+    const gY = THREE.MathUtils.smoothstep(1.2, 0.25, 1.2 - dy);
+    const gR = THREE.MathUtils.smoothstep(2.0, 0.8, 2.0 - b.r);
+    const infl = Math.max(0, gY*gR);
+
+    // 締まり進行度 p を蓄積（0→1）
+    b.p = clamp(b.p + kRate*infl*dt, 0, 1);
+
+    // 孔壁側へ寄る＋沈下＋微縮
+    const rNow = b.r - (b.r-0.75)*b.p;
+    const yNow = b.y - 0.35*b.p;
+    const x = Math.cos(b.ang)*rNow;
+    const z = Math.sin(b.ang)*rNow;
+    const s = b.s*(1 - 0.25*b.p);
+
+    tmpM.makeTranslation(x, yNow, z).scale(new THREE.Vector3(s,s,s));
+    grains.setMatrixAt(i, tmpM);
+
+    const c = 0.56 - 0.25*b.p;
+    if (grains.setColorAt) grains.setColorAt(i, new THREE.Color(c, c*0.9, c*0.75));
+  }
+  grains.instanceMatrix.needsUpdate = true;
+  if (grains.instanceColor) grains.instanceColor.needsUpdate = true;
+}
+
+/* ===== Animate (3D) ===== */
+let rot = 0;
+function render(ts){
+  requestAnimationFrame(render);
+  if (S.autoRotate){
+    rot += 0.0035;
+    scene.rotation.y = rot;
+  }
+  controls.update();
+
+  // 掘進＆水締りの更新（関数は既に定義済みのものを呼ぶ）
+  updateSandPack(0.016); // dtは固定でOK
+
+  renderer.render(scene, camera);
+  drawMicro(ts);
+}
+render();
+ 
+/* ===== Full-width control bindings (右パネルUI) ===== */
+function numberText(key, v){
+  if(key==='mesh') return String(v);
+  if(key==='salinity' || key==='flow_mps') return v.toFixed(2);
+  return v.toFixed(1);
+}
+
+function bindRange(key, step){
+  const s = document.getElementById('s_'+key);
+  const v = document.getElementById('v_'+key);
+  if(!s||!v) return;
+  const clamp = (x,min,max)=>Math.min(Math.max(x,min),max);
+
+  const fromState = ()=>{
+    s.value = S[key];
+    v.textContent = numberText(key, +S[key]);
+  };
+  const toState = ()=>{
+    S[key] = +s.value;
+    v.textContent = numberText(key, +S[key]);
+    updateAll();
+  };
+
+  s.addEventListener('input', toState);
+
+  const wrap = s.closest('.param');
+  if(wrap){
+    wrap.querySelectorAll('button[data-d]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const d = +btn.dataset.d;
+        const min = +s.min, max = +s.max;
+        const next = clamp(+s.value + d*step, min, max);
+        s.value = next;
+        toState();
+      });
+    });
+  }
+  fromState();
+}
+
+function bindSelectMesh(){
+  const sel = document.getElementById('sel_mesh');
+  const v = document.getElementById('v_mesh');
+  if(!sel||!v) return;
+  const fromState = ()=>{
+    sel.value = String(S.mesh);
+    v.textContent = String(S.mesh);
+  };
+  const toState = ()=>{
+    S.mesh = parseInt(sel.value,10);
+    v.textContent = String(S.mesh);
+    updateAll();
+  };
+  sel.addEventListener('change', toState);
+  fromState();
+}
+
+function bindToggle(){
+  const chk = document.getElementById('chk_cycle');
+  if(!chk) return;
+  const fromState = ()=>{ chk.checked = !!S.cycleWetDry; };
+  const toState = ()=>{ S.cycleWetDry = chk.checked; updateAll(); };
+  chk.addEventListener('change', toState);
+  fromState();
+}
+
+/* 起動時にUIと同期 */
+bindRange('bentonite_pct', 0.1);
+bindRange('swell_ratio',   0.1);
+bindRange('salinity',      0.01);
+bindRange('flow_mps',      0.01);
+bindSelectMesh();
+bindToggle();
+
+/* === 3層レイヤー：土質プリセット & 推奨メッシュ === */
+const SOILS = {
+  '砂':        { color:0xbf9a72, n0:0.40, nMin:0.22, cake:0.9,  recMesh:200 },
+  'シルト':    { color:0x9c8776, n0:0.46, nMin:0.28, cake:1.1,  recMesh:250 },
+  '粘土':      { color:0x6e5f58, n0:0.50, nMin:0.32, cake:1.25, recMesh:300 },
+  'ローム/OA': { color:0x4f6372, n0:0.45, nMin:0.27, cake:1.05, recMesh:250 },
+  '砂礫':      { color:0xbfa67a, n0:0.35, nMin:0.20, cake:0.8,  recMesh:180 }
+};
+
+/* 3層の定義（上→中→下）。高さ[m]の合計は scene 高さ(=2*T) 付近にしてください。 */
+let LAYERS = [
+  { name:'上層', type:'ローム/OA', h:2.0 },
+  { name:'中層', type:'砂',       h:2.4 },
+  { name:'下層', type:'粘土',     h:2.0 }
+];
+
+/* 現在層に依存する係数（porosity用の基準とケーキ係数） */
+let CUR = { n0:0.40, nMin:0.22, cake:1.0, recMesh:200, label:'—' };
+
+/* 既存の地層メッシュを3層に作り直す */
+let strataGroup = new THREE.Group();
+scene.add(strataGroup);
+
+function rebuildStrata(){
+  strataGroup.clear();
+  // 原点を中心に、上へ正・下へ負。上端=+T, 下端=-T
+  let yTop = T; // 上端
+  for(const layer of LAYERS){
+    const c = SOILS[layer.type] || SOILS['砂'];
+    const h = layer.h;
+    const box = new THREE.Mesh(
+      new THREE.BoxGeometry(W, h, W),
+      new THREE.MeshPhysicalMaterial({ color:c.color, transparent:true, opacity:0.55, roughness:0.9 })
+    );
+    // ボックスの中心Y
+    const yCenter = yTop - h/2;
+    box.position.y = yCenter;
+    strataGroup.add(box);
+    yTop -= h;
+  }
+}
+rebuildStrata();
+
+/* 現在深度の“いる層”を取得（掘削リングのYで判定） */
+function activeLayerByY(yBit){
+  let yTop = T;
+  for(const layer of LAYERS){
+    const yBottom = yTop - layer.h;
+    if (yBit <= yTop && yBit >= yBottom){
+      const s = SOILS[layer.type] || SOILS['砂'];
+      return { ...layer, ...s, yTop, yBottom };
+    }
+    yTop = yBottom;
+  }
+  // どれでもなければ一番近い層
+  const last = LAYERS[LAYERS.length-1];
+  const s = SOILS[last.type] || SOILS['砂'];
+  return { ...last, ...s };
+}
+
+/* 推奨メッシュHUD更新（存在すれば） */
+function setMeshHUD(txt){
+  const hud = document.getElementById('meshRecHUD');
+  if (hud) hud.textContent = txt;
+}
+
+/* 既存 updateSandPack の最後で呼ぶためのフックを上書き */
+const _updateSandPack = updateSandPack;
+updateSandPack = function(dt){
+  _updateSandPack(dt); // 既存の処理をまず実行（ビット位置更新など）
+
+  // いまのビット高さから層を決めて係数適用
+  const yBit = bitRing.position.y;
+  const L = activeLayerByY(yBit);
+  CUR.n0 = L.n0; CUR.nMin = L.nMin; CUR.cake = L.cake; CUR.recMesh = L.recMesh; CUR.label = L.type;
+
+  setMeshHUD(`現在層: ${L.type}｜推奨メッシュ: ${L.recMesh}`);
+
+  // 見た目にも少し効かせる：泥水色をわずかにブレンド
+  const col = new THREE.Color(L.color);
+  mud.material.color.lerp(col, 0.10);
+
+  // 推奨メッシュに自動で切替えたい場合は下1行のコメントを外す
+  // S.mesh = L.recMesh;
+};
+
+/* 既存モデルの一部を“現在層”でスケール */
+const _computeCakeThicknessMM = computeCakeThicknessMM;
+computeCakeThicknessMM = function(){
+  return _computeCakeThicknessMM() * CUR.cake;
+};
+const _computePorosity = computePorosity;
+computePorosity = function(){
+  // 層ベースの基準値に置換
+  const yBit = bitRing.position.y;
+  let sum=0, cnt=0;
+  for(let i=0;i<SAND_N;i++){
+    const b = grainBase[i];
+    if (Math.abs(b.y - yBit) < 0.6 && b.r < 1.6){ sum += b.p; cnt++; }
+  }
+  const pbar = cnt? (sum/cnt) : 0;
+  const n = CUR.n0 - (CUR.n0 - CUR.nMin) * pbar;
+  return Math.min(Math.max(n, CUR.nMin), CUR.n0);
+};
+
+/* 右パネルの全幅スライダーと同期済みなので updateAll() の中身はそのままでOK */
+
+
+/* === 土UIのバインド（同一モジュール内） === */
+(function bindSoilUI(){
+  const soilBtn   = document.getElementById('soilBtn');
+  const soilPanel = document.getElementById('soilPanel');
+  if (soilBtn && soilPanel){
+    soilBtn.addEventListener('click', ()=> soilPanel.hidden = !soilPanel.hidden);
+  }
+  const apply = ()=>{
+    LAYERS = [
+      { name:'上層', type: document.getElementById('soilTop').value, h: parseFloat(document.getElementById('soilTopH').value)||2.0 },
+      { name:'中層', type: document.getElementById('soilMid').value, h: parseFloat(document.getElementById('soilMidH').value)||2.4 },
+      { name:'下層', type: document.getElementById('soilBot').value, h: parseFloat(document.getElementById('soilBotH').value)||2.0 }
+    ];
+    rebuildStrata();
+  };
+  ['soilTop','soilMid','soilBot','soilTopH','soilMidH','soilBotH'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', apply);
+  });
+})();
+
+/* ===== Init Done ===== */
+</script>
+</body>
+</html>

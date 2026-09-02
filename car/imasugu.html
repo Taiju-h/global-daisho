@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>いますぐ鑑定・決済フローとポイント不具合の図解</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9fa;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .explanation {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .bug-box {
+            background: #fff0f0;
+            border-left: 5px solid #e74c3c;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+        .bug-title {
+            color: #c0392b;
+            font-weight: bold;
+            margin-top: 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            sequence: { showSequenceNumbers: true }
+        });
+    </script>
+</head>
+<body>
+
+    <h1>いますぐ鑑定（IMASUGU）機能・決済フローチャート</h1>
+    
+    <div class="explanation">
+        <p>以下の図は、ユーザーが「いますぐ鑑定」を選択してから決済が完了するまでのシステム内部の動きを表しています。<br>
+        <span style="color:#e74c3c; font-weight:bold;">赤色のノート（メモ）</span>部分が、ポイント不具合を引き起こしている直接の原因箇所です。</p>
+    </div>
+
+    <div class="mermaid">
+        sequenceDiagram
+            autonumber
+            actor User as ユーザー
+            participant Y1 as yoyaku()<br>yoyakunow()
+            participant Y2 as yoyakuimasugu()
+            participant BP as booking_prepare()
+            participant YF as yoyakuform()
+            participant PAY as 決済システム<br>(PAYGENT等)
+            participant OD as orderd()
+            participant DB as データベース
+
+            User->>Y1: 「いますぐ鑑定」アクセス<br>(immediate=1等)
+            
+            rect rgb(255, 230, 230)
+            Note right of Y1: 【バグ①】パラメータ欠落<br>リダイレクト時にimmediate=1が消える。<br>※古いセッション(Emailhs)も残ったまま
+            end
+            
+            Y1->>Y2: リダイレクト (パラメータなし)
+            Y2-->>User: 予約条件入力画面<br>（※バグ①のせいで通常予約と誤認する事がある）
+            User->>BP: 予約条件を送信
+            BP->>DB: 仮押さえ作成 (tmp_reservations)
+            BP->>YF: 予約データをセッション(Emailhs)に保存<br>yoyakuformへリダイレクト
+            YF-->>User: 確認・ポイント利用入力画面
+            User->>YF: 「ポイントを利用する」送信
+            YF->>DB: 予約情報(emailh)をINSERT/UPDATE<br>※ここでは正しいポイント数が記録される
+            YF->>PAY: 決済画面へリダイレクト
+            
+            PAY-->>OD: 決済完了コールバック
+            
+            rect rgb(255, 230, 230)
+            Note right of OD: 【バグ②】引数デフォルト値による上書き<br>URLにポイント数がない場合、$usePoints=0 となり<br>DBの正しいポイント利用額を「0」に上書きしてしまう。
+            Note right of OD: 【バグ③】ポイント消費処理の停止<br>epointsテーブルの残高を減らす(useする)SQLが<br>まるごとコメントアウトされている。
+            end
+
+            OD->>DB: emailhをUPDATE<br>(usepoints=0, mworkst_id=63)
+            OD->>User: send_end2() へ遷移 (予約完了)
+    </div>
+
+    <div class="explanation">
+        <h2>なぜ「いますぐ鑑定」でポイント不具合が起きるのか（まとめ）</h2>
+        
+        <div class="bug-box">
+            <p class="bug-title">バグ①：入口での「パラメータ消失」と「セッションお化け」</p>
+            <p><code>yoyaku()</code> から <code>yoyakuimasugu()</code> へ遷移する際、URLの <code>immediate=1</code> が消えてしまいます。システムが「これは通常予約だ」と勘違いし、過去に途中でやめた予約のセッションデータと混ざって、ポイント割引の計算や適用条件がおかしくなります。</p>
+        </div>
+
+        <div class="bug-box">
+            <p class="bug-title">バグ②：決済後の「ポイント利用額 0円」強制上書き</p>
+            <p>決済が終わって戻ってくる <code>orderd($id = 0, $usePoints = 0)</code> メソッドにて、せっかくDBに保存した「利用ポイント数」が、引数の初期値である <code>0</code> によって強制的に上書き（UPDATE）されています。</p>
+        </div>
+
+        <div class="bug-box">
+            <p class="bug-title">バグ③：実際のポイント残高を減らす処理が「コメントアウト」されている</p>
+            <p><code>orderd()</code> メソッドの最下部で、ユーザーのポイント履歴（epointsテーブル）に「利用（use）」を記録して残高を減らすSQLが、丸ごとコメントアウト（無効化）されています。システム上、ポイントが減る仕組みが物理的に塞がれています。</p>
+        </div>
+    </div>
+
+</body>
+</html>

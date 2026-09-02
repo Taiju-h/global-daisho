@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brabio風 ガントチャートプロトタイプ</title>
+    <style>
+        /* --- 基本スタイル --- */
+        body { font-family: "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background: #f0f0f0; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* レイアウト枠 */
+        #app-container { display: flex; flex: 1; overflow: hidden; border-top: 1px solid #ccc; }
+        
+        /* 左サイドバー（タスク名） */
+        #sidebar { width: 250px; background: #fff; border-right: 2px solid #aaa; z-index: 10; display: flex; flex-direction: column; }
+        .sidebar-header { height: 60px; background: #e0e0e0; border-bottom: 1px solid #ccc; box-sizing: border-box; }
+        .task-row-label { height: 40px; line-height: 40px; padding-left: 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .task-row-label:hover { background: #f9f9f9; color: #0066cc; cursor: pointer; }
+
+        /* 右メインエリア（カレンダー） */
+        #timeline-wrapper { flex: 1; overflow: hidden; position: relative; cursor: grab; background: #fff; user-select: none; }
+        #timeline-wrapper:active { cursor: grabbing; }
+
+        /* カレンダーヘッダー */
+        #calendar-header { display: flex; height: 60px; background: #f5f5f5; border-bottom: 1px solid #ccc; position: relative; }
+        .date-cell { border-right: 1px solid #ddd; text-align: center; font-size: 11px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; height: 100%; }
+        .date-cell.weekend { background-color: #f0f8ff; color: #0066cc; }
+        .date-cell.sunday { background-color: #fff0f0; color: #cc0000; }
+        .date-cell.holiday { background-color: #ffeebb; color: #d35400; } /* 祝日色 */
+        
+        /* グリッド本体 */
+        #calendar-body { position: relative; }
+        .grid-row { height: 40px; border-bottom: 1px solid #eee; position: relative; }
+        .grid-line { position: absolute; top: 0; bottom: 0; border-right: 1px solid #f0f0f0; height: 100%; }
+        
+        /* 現在の日付ハイライト */
+        .today-line { position: absolute; top: 0; bottom: 0; width: 2px; background: #2ecc71; z-index: 5; opacity: 0.7; pointer-events: none; }
+
+        /* --- タスクバー (Draggable & Resizable) --- */
+        .task-bar {
+            position: absolute;
+            height: 24px;
+            top: 8px; /* 行の中央寄せ */
+            background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 20;
+            color: #fff;
+            font-size: 11px;
+            line-height: 24px;
+            padding-left: 5px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        /* リサイズ用のハンドル（右端） */
+        .resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 10px;
+            height: 100%;
+            cursor: e-resize;
+            background: rgba(0,0,0,0.1);
+        }
+        .resize-handle:hover { background: rgba(0,0,0,0.3); }
+
+        /* --- デバッグ/開発用エリア --- */
+        #debug-panel { height: 150px; background: #333; color: #0f0; font-family: monospace; padding: 10px; overflow-y: auto; border-top: 2px solid #555; font-size: 12px; }
+        h3 { margin: 0 0 5px 0; color: #fff; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div style="padding: 10px; background: #ddd; display: flex; justify-content: space-between; align-items: center;">
+    <strong>プロジェクト管理ツール (プロトタイプ)</strong>
+    <span style="font-size: 12px; color: #555;">※カレンダー部分はドラッグでスクロール可能。バーの右端をドラッグで期間変更可能。</span>
+</div>
+
+<div id="app-container">
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <div style="padding: 10px; font-weight:bold;">タスク一覧</div>
+        </div>
+        <div id="task-list-container">
+            </div>
+    </div>
+
+    <div id="timeline-wrapper">
+        <div id="timeline-content" style="position: relative;">
+            <div id="calendar-header">
+                </div>
+            <div id="calendar-body">
+                </div>
+            <div id="current-day-line" class="today-line"></div>
+        </div>
+    </div>
+</div>
+
+<div id="debug-panel">
+    <h3>システム連携用 JSONデータ出力 (操作するとここに反映されます)</h3>
+    <pre id="json-output">Wait for update...</pre>
+</div>
+
+<script>
+    /**
+     * ==========================================
+     * 1. データ定義 (JSON構造のモック)
+     * システム開発会社にはこの構造を渡すことを想定
+     * ==========================================
+     */
+    
+    // 設定関連
+    const config = {
+        cellWidth: 40, // 1日の幅(px)
+        startDate: "2025-11-01", // 表示開始日
+        totalDays: 120, // 表示する総日数（約4ヶ月分）
+    };
+
+    // 祝日データ (JSONで拡張可能)
+    const holidays = {
+        "2025-11-03": "文化の日",
+        "2025-11-23": "勤労感謝の日",
+        "2025-12-31": "年末休み",
+        "2026-01-01": "元日",
+        "2026-01-02": "年始休み",
+        "2026-01-03": "年始休み",
+        "2026-01-12": "成人の日",
+        "2026-02-11": "建国記念の日",
+        "2026-02-23": "天皇誕生日"
+    };
+
+    // タスクデータ (ここに更新がかかります)
+    let tasks = [
+        { "id": 1, "name": "プロジェクトの説明", "start": "2025-12-01", "days": 1, "color": "#e74c3c", "progress": 0 },
+        { "id": 2, "name": "モックの作成依頼", "start": "2025-12-08", "days": 14, "color": "#9b59b6", "progress": 50 },
+        { "id": 3, "name": "モックの評価", "start": "2025-12-24", "days": 3, "color": "#3498db", "progress": 0 },
+        { "id": 4, "name": "モックの動的化", "start": "2026-01-05", "days": 10, "color": "#2980b9", "progress": 0 },
+        { "id": 5, "name": "動的化ガントチャートの評価", "start": "2026-01-19", "days": 5, "color": "#2980b9", "progress": 0 }
+    ];
+
+    /**
+     * ==========================================
+     * 2. アプリケーションロジック
+     * ==========================================
+     */
+
+    const timelineWrapper = document.getElementById('timeline-wrapper');
+    const timelineContent = document.getElementById('timeline-content');
+    const headerEl = document.getElementById('calendar-header');
+    const bodyEl = document.getElementById('calendar-body');
+    const sidebarEl = document.getElementById('task-list-container');
+    const jsonOutput = document.getElementById('json-output');
+
+    // 日付操作用ヘルパー
+    function addDays(dateStr, days) {
+        const d = new Date(dateStr);
+        d.setDate(d.getDate() + days);
+        return d;
+    }
+    
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    function getDayDiff(startStr, endStr) {
+        const d1 = new Date(startStr);
+        const d2 = new Date(endStr);
+        return (d2 - d1) / (1000 * 60 * 60 * 24);
+    }
+
+    // 初期化描画
+    function init() {
+        renderCalendar();
+        renderTasks();
+        updateJsonOutput(); // 初期状態のJSONを表示
+        scrollToToday();
+    }
+
+    // カレンダーとグリッドの描画
+    function renderCalendar() {
+        const baseDate = new Date(config.startDate);
+        let headerHtml = '';
+        let gridHtml = ''; // 背景の縦線用
+
+        // 全体の幅を設定
+        const totalWidth = config.totalDays * config.cellWidth;
+        timelineContent.style.width = `${totalWidth}px`;
+
+        for (let i = 0; i < config.totalDays; i++) {
+            const currentDate = new Date(baseDate);
+            currentDate.setDate(baseDate.getDate() + i);
+            const dateStr = formatDate(currentDate);
+            const dayOfWeek = currentDate.getDay(); // 0:Sun, 6:Sat
+            
+            // クラス判定（土日祝）
+            let classes = ['date-cell'];
+            if (dayOfWeek === 0) classes.push('sunday');
+            else if (dayOfWeek === 6) classes.push('weekend');
+            if (holidays[dateStr]) classes.push('holiday');
+
+            // ヘッダーセル
+            const dayLabel = ['日','月','火','水','木','金','土'][dayOfWeek];
+            const holidayLabel = holidays[dateStr] ? `<br><span style="font-size:9px">${holidays[dateStr]}</span>` : '';
+            
+            headerHtml += `
+                <div class="${classes.join(' ')}" style="width:${config.cellWidth}px;">
+                    <div>${currentDate.getMonth()+1}/${currentDate.getDate()}</div>
+                    <div>(${dayLabel})</div>
+                    ${holidayLabel}
+                </div>`;
+
+            // グリッド縦線
+            gridHtml += `<div class="grid-line" style="left: ${(i+1) * config.cellWidth}px;"></div>`;
+        }
+        
+        headerEl.innerHTML = headerHtml;
+        
+        // 今日の線の位置
+        const today = new Date();
+        const diff = getDayDiff(config.startDate, formatDate(today));
+        if(diff >= 0 && diff < config.totalDays) {
+            document.getElementById('current-day-line').style.left = `${diff * config.cellWidth}px`;
+        }
+    }
+
+    // タスクとサイドバーの描画
+    function renderTasks() {
+        sidebarEl.innerHTML = '';
+        bodyEl.innerHTML = '';
+
+        tasks.forEach((task, index) => {
+            // 1. 左サイドバー描画
+            const sideItem = document.createElement('div');
+            sideItem.className = 'task-row-label';
+            sideItem.innerText = task.name;
+            sidebarEl.appendChild(sideItem);
+
+            // 2. カレンダー行描画
+            const row = document.createElement('div');
+            row.className = 'grid-row';
+            
+            // 背景の縦線を描画（パフォーマンス的には親にまとめたほうが軽いが、今回は行ごとに管理）
+            // 簡易化のため、ここではグリッド線はCSSで描画せず、親の絶対配置線に任せる形にしています
+
+            // 3. タスクバー描画
+            const diffDays = getDayDiff(config.startDate, task.start);
+            const leftPos = diffDays * config.cellWidth;
+            const width = task.days * config.cellWidth;
+
+            const bar = document.createElement('div');
+            bar.className = 'task-bar';
+            bar.style.left = `${leftPos}px`;
+            bar.style.width = `${width}px`;
+            bar.style.backgroundColor = task.color;
+            bar.innerHTML = `${task.name} <div class="resize-handle"></div>`;
+            
+            // リサイズイベントの登録
+            setupResizable(bar, task);
+
+            row.appendChild(bar);
+            bodyEl.appendChild(row);
+        });
+    }
+
+    // JSON出力の更新（開発者確認用）
+    function updateJsonOutput() {
+        const output = {
+            description: "このJSONがDBに保存されるイメージです",
+            tasks: tasks
+        };
+        jsonOutput.textContent = JSON.stringify(output, null, 2);
+    }
+
+    /**
+     * ==========================================
+     * 3. インタラクション (ドラッグ＆リサイズ)
+     * ==========================================
+     */
+
+    // --- カレンダーのドラッグスクロール ---
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    timelineWrapper.addEventListener('mousedown', (e) => {
+        // バーのドラッグ中はスクロールさせない
+        if(e.target.classList.contains('resize-handle') || e.target.classList.contains('task-bar')) return;
+        
+        isDown = true;
+        startX = e.pageX - timelineWrapper.offsetLeft;
+        scrollLeft = timelineWrapper.scrollLeft;
+    });
+
+    timelineWrapper.addEventListener('mouseleave', () => { isDown = false; });
+    timelineWrapper.addEventListener('mouseup', () => { isDown = false; });
+
+    timelineWrapper.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - timelineWrapper.offsetLeft;
+        const walk = (x - startX) * 1.5; // スクロール速度調整
+        timelineWrapper.scrollLeft = scrollLeft - walk;
+    });
+
+    // --- バーのリサイズ機能 ---
+    function setupResizable(barElement, taskData) {
+        const handle = barElement.querySelector('.resize-handle');
+        
+        handle.addEventListener('mousedown', function(e) {
+            e.stopPropagation(); // 親のスクロールイベントを止める
+            e.preventDefault();
+
+            const startX = e.pageX;
+            const startWidth = parseInt(document.defaultView.getComputedStyle(barElement).width, 10);
+            
+            function doDrag(e) {
+                let newWidth = startWidth + e.pageX - startX;
+                // 最小幅制限 (1セル分)
+                if (newWidth < config.cellWidth) newWidth = config.cellWidth;
+                barElement.style.width = newWidth + 'px';
+            }
+
+            function stopDrag() {
+                document.documentElement.removeEventListener('mousemove', doDrag, false);
+                document.documentElement.removeEventListener('mouseup', stopDrag, false);
+                
+                // グリッドにスナップさせる計算
+                const currentWidth = parseInt(barElement.style.width, 10);
+                const newDays = Math.round(currentWidth / config.cellWidth);
+                const snappedWidth = newDays * config.cellWidth;
+                
+                // ビジュアルをスナップ
+                barElement.style.width = snappedWidth + 'px';
+
+                // データの更新 (JSONへの反映)
+                taskData.days = newDays;
+                
+                // ログ出力
+                console.log(`Updated Task [${taskData.name}]: Duration set to ${newDays} days.`);
+                updateJsonOutput();
+            }
+
+            document.documentElement.addEventListener('mousemove', doDrag, false);
+            document.documentElement.addEventListener('mouseup', stopDrag, false);
+        });
+    }
+
+    // 初期表示で「今日」付近にスクロール
+    function scrollToToday() {
+        const diff = getDayDiff(config.startDate, formatDate(new Date()));
+        // 画面中央に来るように調整
+        const centerPos = (diff * config.cellWidth) - (timelineWrapper.clientWidth / 2);
+        if(centerPos > 0) timelineWrapper.scrollLeft = centerPos;
+    }
+
+    // 起動
+    init();
+
+</script>
+</body>
+</html>

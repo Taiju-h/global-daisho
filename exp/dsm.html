@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>地盤改良体 強度推定計算機（グラフ連動）</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px; }
+        .flex-container { display: flex; gap: 20px; }
+        .controls { flex: 1; }
+        .graph-area { flex: 1; min-width: 350px; }
+        label { display: block; margin-top: 10px; font-weight: bold; color: #34495e; }
+        input[type="number"], select { width: calc(100% - 22px); padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #3498db; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; font-size: 14px; width: 100%; transition: background-color 0.3s; }
+        button:hover { background-color: #2980b9; }
+        #result_c, #result_q { margin-top: 15px; padding: 10px; border: 2px solid #2ecc71; background-color: #ecf0f1; border-radius: 5px; font-size: 1em; }
+        .note { margin-top: 20px; padding: 15px; border-left: 5px solid #e74c3c; background-color: #fbecec; font-size: 0.85em; color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🧪 地盤改良体 強度推定計算機（グラフ連動）</h2>
+    <div class="note">
+        🚨 **重要**: この計算結果は理論上の推定値であり、実際の現場設計値ではありません。グラフの**曲線上の点**をクリックすると、その**強度と注入率が下の入力欄に自動反映**されます。
+    </div>
+
+    <div class="flex-container">
+        <div class="controls">
+            <h3>1. パラメータ設定</h3>
+            <label for="soilType">土質とセメントの種類を選ぶ (A, B)</label>
+            <select id="soilType" onchange="loadParameters()">
+                <option value="softClay">軟弱粘性土（A=8e-6, B=2.5）</option>
+                <option value="organicSoil">腐植土（A=5e-7, B=3.0）</option>
+                <option value="sand">砂質土（A=1.5e-5, B=2.2）</option>
+                <option value="custom">カスタム値 (AとBを直接入力)</option>
+            </select>
+            <label for="paramA">パラメータ A (反応性)</label>
+            <input type="number" id="paramA" value="0.000008" step="0.000001" onchange="drawGraph()">
+            <label for="paramB">パラメータ B (累乗指数)</label>
+            <input type="number" id="paramB" value="2.5" step="0.1" onchange="drawGraph()">
+            
+            <hr>
+            
+            <h3>2. 強度目標からの推定</h3>
+            <label for="targetStrength">目標強度 $q_u$ (MPa) を入力</label>
+            <input type="number" id="targetStrength" placeholder="例: 0.5 (490.5 kN/m²)">
+            <button onclick="calculateCement()">注入率を推定 (kg/m³)</button>
+            <div id="result_c"></div>
+
+            <hr>
+
+            <h3>3. 注入量からの推定</h3>
+            <label for="cementAmount">セメント添加量 $C$ (kg/m³) を入力</label>
+            <input type="number" id="cementAmount" placeholder="例: 160">
+            <button onclick="calculateStrength()">強度を推定 (MPa)</button>
+            <div id="result_q"></div>
+        </div>
+
+        <div class="graph-area">
+            <h3>強度曲線 ($q_u$ vs $C$)</h3>
+            <canvas id="strengthChart"></canvas>
+            <p style="font-size: 0.8em; text-align: center; color: #7f8c8d;">X軸: セメント添加量 $C$ (kg/m³)<br>Y軸: 推定強度 $q_u$ (MPa)</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const soilParameters = {
+        softClay: { A: 0.000008, B: 2.5 },
+        organicSoil: { A: 0.0000005, B: 3.0 },
+        sand: { A: 0.000015, B: 2.2 }
+    };
+
+    let chartInstance = null; // Chart.js インスタンスを保持
+
+    function getParams() {
+        const A = parseFloat(document.getElementById('paramA').value);
+        const B = parseFloat(document.getElementById('paramB').value);
+        if (isNaN(A) || isNaN(B) || A <= 0 || B <= 0) {
+            return null;
+        }
+        return { A, B };
+    }
+
+    // セメント添加量 C から強度 q_u を計算
+    function calculate_qu(C, A, B) {
+        if (C < 0) return 0;
+        return A * Math.pow(C, B);
+    }
+
+    // 強度 q_u からセメント添加量 C を計算
+    function calculate_C(qu, A, B) {
+        if (qu <= 0) return 0;
+        return Math.pow(qu / A, 1 / B);
+    }
+
+    function loadParameters() {
+        const type = document.getElementById('soilType').value;
+        if (type in soilParameters) {
+            document.getElementById('paramA').value = soilParameters[type].A;
+            document.getElementById('paramB').value = soilParameters[type].B;
+        }
+        drawGraph();
+    }
+
+    function drawGraph() {
+        const params = getParams();
+        if (!params) return;
+        const { A, B } = params;
+        const ctx = document.getElementById('strengthChart').getContext('2d');
+
+        // グラフのデータポイントを生成 (C: 50 kg/m³ から 300 kg/m³ まで)
+        const dataPoints = [];
+        for (let C = 50; C <= 300; C += 5) {
+            const qu = calculate_qu(C, A, B);
+            dataPoints.push({ x: C, y: qu });
+        }
+
+        // 既存のグラフがあれば破棄
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        // 新しいグラフを作成
+        chartInstance = new Chart(ctx, {
+            type: 'scatter', // 散布図としてデータポイントを扱い、線で結ぶ
+            data: {
+                datasets: [{
+                    label: '推定強度曲線',
+                    data: dataPoints,
+                    backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    borderWidth: 2,
+                    showLine: true,
+                    tension: 0.4, // 曲線を滑らかにする
+                    pointRadius: 4,
+                    pointHitRadius: 10,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                onClick: handleGraphClick, // クリックイベントハンドラを設定
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: 'セメント添加量 C (kg/m³)' },
+                        min: 50,
+                        max: 300,
+                    },
+                    y: {
+                        type: 'linear',
+                        title: { display: true, text: '推定強度 qu (MPa)' },
+                        min: 0,
+                        max: 2, // 最大強度を自動調整しても良いが、ここでは固定
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += `C: ${context.parsed.x.toFixed(1)} kg/m³, qᵤ: ${context.parsed.y.toFixed(3)} MPa`;
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // グラフクリック時の処理
+    function handleGraphClick(e) {
+        const points = chartInstance.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+        
+        if (points.length) {
+            const firstPoint = points[0];
+            const data = chartInstance.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
+            
+            const clickedC = data.x.toFixed(1);
+            const clickedQu = data.y.toFixed(3);
+            
+            // 入力フィールドに値を反映
+            document.getElementById('cementAmount').value = clickedC;
+            document.getElementById('targetStrength').value = clickedQu;
+            
+            // 結果表示エリアをクリア
+            document.getElementById('result_c').innerHTML = '';
+            document.getElementById('result_q').innerHTML = `<strong>グラフから反映:</strong> C: ${clickedC} kg/m³ の強度を推定します。`;
+
+            // 反映した値で強度の再計算を実行 (オプション)
+            // calculateStrength(); 
+            
+            alert(`グラフの点から数値が反映されました。\n注入率 C: ${clickedC} kg/m³\n強度 qu: ${clickedQu} MPa`);
+        }
+    }
+
+    function calculateStrength() {
+        const params = getParams();
+        if (!params) return;
+        const C = parseFloat(document.getElementById('cementAmount').value);
+        if (isNaN(C) || C < 0) {
+            document.getElementById('result_q').innerHTML = '有効なセメント添加量を入力してください。';
+            return;
+        }
+
+        const q_u_mpa = calculate_qu(C, params.A, params.B);
+        const q_u_kn = q_u_mpa * 1000;
+
+        document.getElementById('result_q').innerHTML = `
+            <strong>推定強度:</strong><br>
+            ${q_u_mpa.toFixed(3)} MPa<br>
+            ${q_u_kn.toFixed(1)} kN/m²
+        `;
+    }
+
+    function calculateCement() {
+        const params = getParams();
+        if (!params) return;
+        const q_u_mpa = parseFloat(document.getElementById('targetStrength').value);
+        if (isNaN(q_u_mpa) || q_u_mpa <= 0) {
+            document.getElementById('result_c').innerHTML = '有効な目標強度 (MPa) を入力してください。';
+            return;
+        }
+
+        const C = calculate_C(q_u_mpa, params.A, params.B);
+
+        document.getElementById('result_c').innerHTML = `
+            <strong>必要注入率 (C):</strong><br>
+            ${C.toFixed(1)} kg/m³
+        `;
+    }
+
+    // 初期ロード時の処理
+    window.onload = function() {
+        loadParameters();
+    };
+</script>
+
+</body>
+</html>

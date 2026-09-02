@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daisho Chemical GLOBAL - AI Chat Widget Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2563eb;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .demo-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2563eb;
+        }
+
+        .demo-section h3 {
+            margin-top: 0;
+            color: #2563eb;
+        }
+
+        .button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 10px 10px 0;
+            transition: background 0.2s;
+        }
+
+        .button:hover {
+            background: #1d4ed8;
+        }
+
+        .button.secondary {
+            background: #6b7280;
+        }
+
+        .button.secondary:hover {
+            background: #4b5563;
+        }
+
+        .language-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .status.connected {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .status.disconnected {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .feature h4 {
+            color: #2563eb;
+            margin-top: 0;
+        }
+
+        .note {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border: 1px solid #f59e0b;
+        }
+
+        .note strong {
+            color: #92400e;
+        }
+
+        .lang-demo {
+            background: #e0f2fe;
+            color: #01579b;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border: 1px solid #0288d1;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🧪 Daisho Chemical GLOBAL</h1>
+    <p class="subtitle">AI Chat Widget Demo - Site-wide Multi-Language Support</p>
+
+    <div class="demo-section">
+        <h3>🚀 Auto-Initialization</h3>
+        <p>The widget automatically detects the page language from <code>document.documentElement.lang</code> and
+            initializes accordingly.</p>
+        <div id="connection-status" class="status disconnected">
+            Connecting to chat server...
+        </div>
+        <p><strong>Current page language:</strong> <span id="current-lang"></span></p>
+    </div>
+
+    <div class="demo-section">
+        <h3>🎮 Demo Controls</h3>
+        <p>Test the widget functionality with these controls:</p>
+
+        <button class="button" onclick="openChat()">Open Chat Bubble</button>
+        <button class="button secondary" onclick="closeChat()">Close Chat</button>
+        <button class="button secondary" onclick="clearChat()">Clear Messages</button>
+
+        <h4>🌍 Language Testing</h4>
+        <div class="lang-demo">
+            <strong>Note:</strong> To test different languages, change the page language and reload:
+            <code>document.documentElement.lang = 'ja'</code>
+        </div>
+        <div class="language-buttons">
+            <button class="button" onclick="changeLanguage('en')">English (en)</button>
+            <button class="button" onclick="changeLanguage('ja')">日本語 (ja)</button>
+            <button class="button" onclick="changeLanguage('zh')">中文 (zh)</button>
+            <button class="button" onclick="changeLanguage('ko')">한국어 (ko)</button>
+        </div>
+
+        <h4>💬 Sample Messages</h4>
+        <button class="button" onclick="sendSampleMessage('product')">Ask about products</button>
+        <button class="button" onclick="sendSampleMessage('support')">Technical support</button>
+        <button class="button" onclick="sendSampleMessage('safety')">Safety information</button>
+    </div>
+
+    <div class="features">
+        <div class="feature">
+            <h4>🎯 Site-wide Injection</h4>
+            <p>Single script automatically initializes across all pages</p>
+        </div>
+        <div class="feature">
+            <h4>🌍 Auto Language Detection</h4>
+            <p>Reads document.documentElement.lang for localization</p>
+        </div>
+        <div class="feature">
+            <h4>💬 Floating Chat Bubble</h4>
+            <p>Creates &lt;div id="daisho-chat"&gt; with expandable window</p>
+        </div>
+        <div class="feature">
+            <h4>⚡ Socket.IO Integration</h4>
+            <p>userMessage/botMessage events with smart fallback</p>
+        </div>
+    </div>
+
+    <div class="note">
+        <strong>Integration:</strong> Add this script to your theme's header for site-wide deployment:<br>
+        <code>&lt;script src="https://your-domain.com/widget.js"&gt;&lt;/script&gt;</code>
+    </div>
+</div>
+
+<!-- Socket.io Client -->
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+
+<!-- AI Chat Widget (Site-wide injection) -->
+<script src="http://localhost:3001/widget.js"></script>
+
+<script>
+    // Display current language
+    document.getElementById('current-lang').textContent = document.documentElement.lang || 'en';
+
+    // Wait for widget to be ready
+    window.addEventListener('load', () => {
+        // Connection status monitoring
+        const statusElement = document.getElementById('connection-status');
+
+        // Check widget availability
+        setTimeout(() => {
+            if (typeof window.daishoChatWidget !== 'undefined' && window.daishoChatWidget.socket) {
+                const socket = window.daishoChatWidget.socket;
+
+                socket.on('connect', () => {
+                    statusElement.textContent = 'Connected to chat server';
+                    statusElement.className = 'status connected';
+                });
+
+                socket.on('disconnect', () => {
+                    statusElement.textContent = 'Disconnected from chat server';
+                    statusElement.className = 'status disconnected';
+                });
+
+                socket.on('connect_error', () => {
+                    statusElement.textContent = 'Failed to connect to chat server';
+                    statusElement.className = 'status disconnected';
+                });
+
+                // Check if already connected
+                if (socket.connected) {
+                    statusElement.textContent = 'Connected to chat server';
+                    statusElement.className = 'status connected';
+                }
+            }
+        }, 500);
+    });
+
+    // Demo control functions
+    function openChat() {
+        if (window.daishoChatWidget) {
+            window.daishoChatWidget.openChat();
+        }
+    }
+
+    function closeChat() {
+        if (window.daishoChatWidget) {
+            window.daishoChatWidget.closeChat();
+        }
+    }
+
+    function clearChat() {
+        if (window.daishoChatWidget && window.daishoChatWidget.messagesContainer) {
+            window.daishoChatWidget.messagesContainer.innerHTML = '';
+        }
+    }
+
+    function changeLanguage(lang) {
+        // Change the document language and reload to demonstrate auto-detection
+        document.documentElement.lang = lang;
+        location.reload();
+    }
+
+    function sendSampleMessage(type) {
+        if (!window.daishoChatWidget) return;
+
+        const messages = {
+            product: "What chemical products do you offer for industrial applications?",
+            support: "I need technical support for your solvent products",
+            safety: "Can you provide safety information for handling your chemicals?"
+        };
+
+        // Open chat first
+        window.daishoChatWidget.openChat();
+
+        // Wait a bit then populate the input
+        setTimeout(() => {
+            if (window.daishoChatWidget.inputField) {
+                window.daishoChatWidget.inputField.value = messages[type];
+                window.daishoChatWidget.inputField.focus();
+            }
+        }, 300);
+    }
+</script>
+</body>
+</html>

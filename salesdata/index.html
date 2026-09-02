@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>株式会社大翔化学研究所 | Daisho Chemical R&D</title>
+    <style>
+        /* ベーススタイル */
+        body { 
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; 
+            margin: 0; 
+            background-color: #0d0d0d; 
+            color: #fff; 
+            line-height: 1.6;
+        }
+
+        /* ヘッダー (画像1再現) */
+        header {
+            background-color: #000;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 0 0 10px 0;
+            letter-spacing: 1px;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            color: #bbb;
+            margin-bottom: 0;
+        }
+
+        /* ナビゲーション (画像1の青い帯) */
+        .sub-nav {
+            background: linear-gradient(90deg, #001a3d 0%, #004098 50%, #001a3d 100%);
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .sub-nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+
+        .sub-nav a:hover { color: #ffcc00; }
+        .sub-nav a::before { content: "• "; }
+
+        /* コンテンツエリア */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            border-left: 5px solid #004098;
+            padding-left: 15px;
+            margin: 40px 0 20px;
+            color: #eee;
+        }
+
+        /* ビデオグリッド */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .video-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            border: 2px solid transparent;
+            transition: 0.3s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffcc00;
+            box-shadow: 0 10px 20px rgba(255,204,0,0.2);
+        }
+
+        .thumb {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            background: #000;
+        }
+
+        .thumb img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        .video-info { padding: 15px; }
+        
+        .badge {
+            font-size: 0.7rem;
+            background: #333;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: inline-block;
+            color: #ffcc00;
+        }
+
+        .v-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .v-meta {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.6rem; }
+            .video-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>株式会社大翔化学研究所 (Daisho Chemical R&D)</h1>
+    <p class="hero-desc">カタログの既製品で諦めていませんか？あなたの現場専用の「処方箋」を開発します。</p>
+</header>
+
+<nav class="sub-nav">
+     <a href="sds/">SDS</a>
+    <a href="search.html">Product search</a>
+
+</nav>
+
+<div class="container">
+    
+    <h2 class="section-title" id="tech-videos">技術解説・実績ビデオ</h2>
+    <div class="video-grid">
+        <a href="https://www.youtube.com/watch?v=vOSk3Z8FUzQ" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/vOSk3Z8FUzQ/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">Technical</span>
+                <span class="v-title">粘性土に効果的な混和剤のご紹介 [S-chem]</span>
+                <span class="v-meta">再生時間 3:38</span>
+            </div>
+        </a>
+        <a href="https://www.youtube.com/watch?v=H1L3_UN20M8" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/H1L3_UN20M8/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">Case Study</span>
+                <span class="v-title">[S-chem] 粘性土に効果的な混和剤のご紹介</span>
+                <span class="v-meta">再生時間 3:38</span>
+            </div>
+        </a>
+        <a href="https://www.youtube.com/watch?v=XtqN4YvtG54" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/XtqN4YvtG54/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">Introduction</span>
+                <span class="v-title">S-Chem (Long Version)</span>
+                <span class="v-meta">再生時間 4:10</span>
+            </div>
+        </a>
+    </div>
+
+    <h2 class="section-title">Product Presentation (Global)</h2>
+    <div class="video-grid">
+        <a href="https://youtu.be/Yzxf-RjeBvo" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/Yzxf-RjeBvo/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">Japanese</span>
+                <span class="v-title">製品比較ビデオ</span>
+            </div>
+        </a>
+        <a href="https://youtu.be/HPehr8DuHFc" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/HPehr8DuHFc/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">English</span>
+                <span class="v-title">Compare in English</span>
+            </div>
+        </a>
+        <a href="https://youtu.be/eF6VcGvnYRc" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/eF6VcGvnYRc/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">Italiano</span>
+                <span class="v-title">Compare in Italy</span>
+            </div>
+        </a>
+        <a href="https://youtu.be/uFSmnxqaSIk" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/uFSmnxqaSIk/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">Polski</span>
+                <span class="v-title">Compare in Polish</span>
+            </div>
+        </a>
+        <a href="https://youtu.be/XI3zT8qCVKI" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/XI3zT8qCVKI/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">Deutsch</span>
+                <span class="v-title">Compare in De</span>
+            </div>
+        </a>
+        <a href="https://youtu.be/f2RhVVSHYp0" class="video-card" target="_blank">
+            <div class="thumb"><img src="https://img.youtube.com/vi/f2RhVVSHYp0/mqdefault.jpg"></div>
+            <div class="video-info">
+                <span class="badge">Français</span>
+                <span class="v-title">Compare in Fr</span>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

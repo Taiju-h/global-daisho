@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>値下げ通知UI モックアップ</title>
+<style>
+  /* 既存のサイト（BIGWEB）の商品カードを模したスタイル */
+  .product-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    width: 250px;
+    font-family: sans-serif;
+    text-align: center;
+    background-color: #f9f9f9;
+  }
+  .price {
+    color: #d00;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  /* 今回追加するスクレイピングシステム用のUIスタイル */
+  .scraping-alert-system {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #ccc;
+  }
+  .alert-btn {
+    background-color: #ff9900;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9em;
+    width: 100%;
+  }
+  .alert-btn:hover {
+    background-color: #e68a00;
+  }
+  
+  /* 登録フォームのスタイル（初期状態は非表示） */
+  .alert-form {
+    display: none;
+    margin-top: 10px;
+    text-align: left;
+  }
+  .alert-form input[type="email"] {
+    width: 90%;
+    padding: 5px;
+    margin-bottom: 5px;
+  }
+  .submit-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+  <h3>BIGWEB 商品ページ（イメージ）</h3>
+  
+  <!-- 商品カード部分 -->
+  <div class="product-card">
+    <div style="height:150px; background-color:#eaeaea; margin-bottom:10px;">
+      <!-- 画像のプレースホルダー -->
+      <span style="line-height:150px; color:#888;">商品画像</span>
+    </div>
+    <div>デビル・ダイナソー</div>
+    <div class="price">4,500円</div>
+
+    <!-- ここからが既存システムとバッティングしない独立したUI -->
+    <div class="scraping-alert-system">
+      <button id="showFormBtn" class="alert-btn">🔔 安くなったら通知</button>
+      
+      <div id="alertForm" class="alert-form">
+        <label style="font-size: 0.8em;">メールアドレス:</label>
+        <input type="email" id="userEmail" placeholder="example@mail.com">
+        <button id="registerBtn" class="submit-btn">登録する</button>
+      </div>
+    </div>
+    <!-- ここまで -->
+
+  </div>
+
+  <!-- JavaScript: 既存システムから独立して動く想定の処理 -->
+  <script>
+    const showFormBtn = document.getElementById('showFormBtn');
+    const alertForm = document.getElementById('alertForm');
+    const registerBtn = document.getElementById('registerBtn');
+
+    // 「安くなったら通知」ボタンを押すと入力フォームが表示される
+    showFormBtn.addEventListener('click', function() {
+      showFormBtn.style.display = 'none';
+      alertForm.style.display = 'block';
+    });
+
+    // 「登録する」ボタンを押したときの処理（ここで外部のAPIを叩く想定）
+    registerBtn.addEventListener('click', function() {
+      const email = document.getElementById('userEmail').value;
+      
+      if(email === "") {
+        alert("メールアドレスを入力してください。");
+        return;
+      }
+
+      // 【補足】実際にはここで fetch() などを使ってスクレイピングシステムのAPIへデータを送信します。
+      // 例: fetch('https://your-scraping-api.com/register', { method: 'POST', body: JSON.stringify({ email: email, productId: '12345' }) })
+
+      alert(email + " 宛に、この商品が安くなった際の通知を登録しました！\n（※既存のBIGWEBシステムとは独立して処理されています）");
+      
+      // フォームを元に戻す
+      alertForm.style.display = 'none';
+      showFormBtn.style.display = 'block';
+      showFormBtn.innerText = "🔔 通知登録済み";
+      showFormBtn.style.backgroundColor = "#28a745";
+    });
+  </script>
+
+</body>
+</html>
