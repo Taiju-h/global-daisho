@@ -31,6 +31,26 @@ VirtualHosts, installs a command-specific sudoers rule, and reloads Apache
 after `apache2ctl configtest` succeeds. VirtualHost backups are written below
 `/var/backups/global-daisho-deployer` before the first edit.
 
+## Protecting Salesdata SDS
+
+The complete `/salesdata/sds/` directory, including direct links to individual
+SDS documents, uses the same Apache Basic-auth user file as `/__deploy/`.
+No user ID or password is stored in the repository.
+
+After deploying the corresponding Git commit, run as root on the VPS:
+
+```bash
+cd /var/www/daisho
+chmod 700 .deploy/install-global-daisho-sds-auth.sh
+.deploy/install-global-daisho-sds-auth.sh
+```
+
+The installer reuses
+`/etc/apache2/global-daisho-deployer.htpasswd` without modifying it, backs up
+the current Apache snippet, runs `apache2ctl configtest`, restores the previous
+configuration if validation fails, and reloads Apache only after validation
+succeeds.
+
 ## Safety rules
 
 - Opening the page only reads repository status. It does not fetch, merge, or reset.
