@@ -68,6 +68,9 @@ succeeds.
 - Once an IP is added to the allowlist, deploy and rollback are limited to
   registered IPs. Diff and allowlist maintenance remain available to an
   authenticated user.
+- The IP management card accepts the current address or any valid IPv4/IPv6
+  address. A Basic-authenticated administrator can add a new address even
+  when the current address is not yet allowed.
 
 ## Reinstall or password change
 

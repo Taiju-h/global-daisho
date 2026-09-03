@@ -211,7 +211,7 @@ $translations = array(
         'reload' => '表示更新', 'history' => 'デプロイ・ロールバック履歴', 'no_history' => '履歴はまだありません。',
         'time' => '日時', 'operation' => '操作', 'from' => '変更前', 'to' => '変更後', 'result' => '結果',
         'ip_control' => 'デプロイ許可IP', 'ip_empty' => '未登録のため、Basic認証済みユーザーを許可しています。',
-        'add_current_ip' => '現在のIPを追加', 'remove' => '削除', 'allowed' => '許可済み',
+        'add_current_ip' => '現在のIPを追加', 'add_ip' => 'IPを追加', 'ip_placeholder' => 'IPv4またはIPv6', 'remove' => '削除', 'allowed' => '許可済み',
         'blocked' => '未許可（反映・ロールバック不可）', 'output' => '実行結果',
         'confirm_deploy' => 'GitHubのmainを本番へ反映します。よろしいですか？',
         'confirm_rollback' => '本番を1コミット前へ戻します。よろしいですか？',
@@ -229,7 +229,7 @@ $translations = array(
         'reload' => 'Refresh status', 'history' => 'Deployment and rollback history', 'no_history' => 'No history yet.',
         'time' => 'Time', 'operation' => 'Operation', 'from' => 'From', 'to' => 'To', 'result' => 'Result',
         'ip_control' => 'Deployment IP allowlist', 'ip_empty' => 'Empty: authenticated users are currently allowed.',
-        'add_current_ip' => 'Add current IP', 'remove' => 'Remove', 'allowed' => 'Allowed',
+        'add_current_ip' => 'Add current IP', 'add_ip' => 'Add IP', 'ip_placeholder' => 'IPv4 or IPv6', 'remove' => 'Remove', 'allowed' => 'Allowed',
         'blocked' => 'Not allowed (deploy and rollback disabled)', 'output' => 'Command result',
         'confirm_deploy' => 'Deploy GitHub main to production?',
         'confirm_rollback' => 'Roll production back by one commit?',
@@ -284,15 +284,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $bootError === '') {
     } else {
         $action = isset($_POST['action']) ? $_POST['action'] : '';
         if ($action === 'add_ip') {
-            if (!filter_var($clientIp, FILTER_VALIDATE_IP)) {
-                $message = 'Invalid client IP.';
+            $newIp = isset($_POST['ip']) ? trim($_POST['ip']) : $clientIp;
+            if (!filter_var($newIp, FILTER_VALIDATE_IP)) {
+                $message = 'Invalid IP address.';
                 $messageType = 'error';
             } else {
-                if (!in_array($clientIp, $allowedIps, true)) {
-                    $allowedIps[] = $clientIp;
+                if (!in_array($newIp, $allowedIps, true)) {
+                    $allowedIps[] = $newIp;
                 }
                 if (writeAllowedIps($allowedIpFile, $allowedIps)) {
-                    $message = 'IP added: ' . $clientIp;
+                    $message = 'IP added: ' . $newIp;
                     $messageType = 'success';
                 } else {
                     $message = 'Could not update the IP allowlist.';
@@ -446,7 +447,13 @@ $history = readHistory($historyFile, 30);
             <h2><?php echo h(t('ip_control')); ?></h2>
             <?php if (!count($allowedIps)): ?><p class="hint"><?php echo h(t('ip_empty')); ?></p><?php endif; ?>
             <?php foreach ($allowedIps as $ip): ?><div class="ip-row"><span class="sha"><?php echo h($ip); ?></span><form method="post" class="inline" onsubmit="return confirm(<?php echo h(json_encode(t('confirm_remove'))); ?>);"><input type="hidden" name="csrf" value="<?php echo h($csrfToken); ?>"><input type="hidden" name="action" value="remove_ip"><input type="hidden" name="ip" value="<?php echo h($ip); ?>"><button type="submit" class="danger"><?php echo h(t('remove')); ?></button></form></div><?php endforeach; ?>
-            <?php if (filter_var($clientIp, FILTER_VALIDATE_IP) && !in_array($clientIp, $allowedIps, true)): ?><form method="post" style="margin-top:14px"><input type="hidden" name="csrf" value="<?php echo h($csrfToken); ?>"><input type="hidden" name="action" value="add_ip"><button type="submit" class="secondary"><?php echo h(t('add_current_ip')); ?> (<?php echo h($clientIp); ?>)</button></form><?php endif; ?>
+            <form method="post" style="margin-top:14px">
+                <input type="hidden" name="csrf" value="<?php echo h($csrfToken); ?>">
+                <input type="hidden" name="action" value="add_ip">
+                <input name="ip" value="<?php echo filter_var($clientIp, FILTER_VALIDATE_IP) ? h($clientIp) : ''; ?>" placeholder="<?php echo h(t('ip_placeholder')); ?>" required style="width:100%;margin-bottom:9px;padding:10px;border:1px solid var(--line);border-radius:8px">
+                <button type="submit" class="secondary"><?php echo h(t('add_ip')); ?></button>
+            </form>
+            <p class="hint"><?php echo h(t('add_current_ip')); ?>: <?php echo h($clientIp); ?> / <?php echo h(t('ip_placeholder')); ?></p>
         </section>
 
         <section class="card"><h2><?php echo h(t('tracked')); ?></h2><?php if ($treeClean): ?><p class="status-ok"><?php echo h(t('clean')); ?></p><?php else: ?><pre><?php echo h(clipOutput($trackedDetails, 10000)); ?></pre><?php endif; ?></section>
@@ -462,3 +469,4 @@ $history = readHistory($historyFile, 30);
 </div>
 </body>
 </html>
+
