@@ -8,6 +8,7 @@ readonly SSH_KEY='/home/heartf/.ssh/global_daisho_github_ed25519'
 readonly RUNTIME_DIR='/var/www/global-daisho-deployer'
 readonly WEB_SOURCE="$REPO_ROOT/.deploy/global-daisho/web"
 readonly LOCK_FILE='/run/lock/global-daisho-deployer.lock'
+readonly BACKUP_ROOT='/var/backups/global-daisho-deployer/force'
 
 die() {
     printf 'ERROR: %s\n' "$*" >&2
@@ -63,6 +64,7 @@ print_status() {
     printf 'COMMIT_TIME=%s\n' "$commit_time"
     printf 'TREE_CLEAN=%s\n' "$clean"
     printf 'ORIGIN=%s\n' "$EXPECTED_ORIGIN"
+    printf 'FORCE_SUPPORTED=1\n'
     printf '%s\n' '---DETAILS---'
     if [ -n "$changes" ]; then
         printf '%s\n' "$changes"
@@ -70,9 +72,10 @@ print_status() {
 }
 
 show_diff() {
-    assert_clean
     git_run fetch --prune origin "$BRANCH"
 
+    printf '%s\n' 'Local changes (including untracked files):'
+    git_run status --short --untracked-files=normal | sed -n '1,500p'
     printf '%s\n' 'Commits:'
     if ! git_run log --oneline --decorate "HEAD..origin/$BRANCH" | sed -n '1,100p'; then
         die 'Could not read remote commits.'
@@ -96,6 +99,47 @@ deploy_production() {
     printf 'BEFORE=%s\nAFTER=%s\n' "$before" "$after"
 }
 
+deploy_force() {
+    local before target backup scratch backup_id
+    command -v php >/dev/null || die 'PHP CLI is required to validate the deployer before deployment.'
+    before="$(git_run rev-parse HEAD)"
+    git_run fetch --prune origin "$BRANCH"
+    target="$(git_run rev-parse --verify "origin/$BRANCH^{commit}")"
+    # Do not overwrite an unresolved merge/rebase. These need explicit recovery.
+    [ -z "$(git_run ls-files -u)" ] || die 'Unmerged index entries exist. Resolve the merge first.'
+    for scratch in MERGE_HEAD rebase-merge rebase-apply; do
+        [ ! -e "$REPO_ROOT/.git/$scratch" ] || die 'A merge or rebase is in progress.'
+    done
+
+    [ ! -L "$BACKUP_ROOT" ] || die 'Backup directory must not be a symlink.'
+    install -d -o root -g root -m 0700 "$BACKUP_ROOT"
+    backup="$(mktemp -d "$BACKUP_ROOT/$(date +%Y%m%d-%H%M%S)-XXXXXX")"
+    chmod 0700 "$backup"
+    printf 'BEFORE=%s\nTARGET=%s\nBACKUP=%s\n' "$before" "$target" "$backup"
+    printf '%s\n' "$before" > "$backup/before"
+    printf '%s\n' "$target" > "$backup/target"
+    git_run show "$target:.deploy/global-daisho/web/index.php" > "$backup/target-index.php"
+    php -l "$backup/target-index.php"
+
+    # Snapshot everything outside .git, including ignored/untracked files.
+    # A failed/incomplete snapshot must stop BEFORE reset changes the worktree.
+    git_run status --porcelain=v1 -z --untracked-files=all > "$backup/status.z"
+    cp -p "$REPO_ROOT/.git/index" "$backup/index"
+    git_run diff --binary > "$backup/unstaged.patch"
+    git_run diff --cached --binary > "$backup/staged.patch"
+    git_run bundle create "$backup/repository.bundle" --all
+    git_run bundle verify "$backup/repository.bundle"
+    tar --exclude='./.git' -cpf "$backup/worktree.tar" -C "$REPO_ROOT" .
+    tar -tf "$backup/worktree.tar" > /dev/null
+    backup_id="$(basename "$backup")"
+    git_run update-ref "refs/deployer-backups/$backup_id" "$before"
+    printf '%s\n' 'Backup complete. Replacing production files with origin/main.'
+    git_run reset --hard "$target"
+    refresh_web_runtime
+    printf 'AFTER=%s\n' "$(git_run rev-parse HEAD)"
+    printf 'Backup retained at: %s\n' "$backup"
+}
+
 rollback_one() {
     local before target after
     assert_clean
@@ -107,20 +151,21 @@ rollback_one() {
     printf 'BEFORE=%s\nAFTER=%s\n' "$before" "$after"
 }
 
-[ "$#" -eq 1 ] || die 'Usage: global-daisho-deploy {status|diff|production|rollback}'
+[ "$#" -eq 1 ] || die 'Usage: global-daisho-deploy {status|diff|production|force-production|rollback}'
 
 case "$1" in
     status)
         assert_repository
         print_status
         ;;
-    diff|production|rollback)
+    diff|production|force-production|rollback)
         exec 9>"$LOCK_FILE"
         flock -n 9 || die 'Another deployment operation is already running.'
         assert_repository
         case "$1" in
             diff) show_diff ;;
             production) deploy_production ;;
+            force-production) deploy_force ;;
             rollback) rollback_one ;;
         esac
         ;;

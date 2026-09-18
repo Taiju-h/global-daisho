@@ -55,7 +55,7 @@ function createToken()
 
 function runHelper($action, &$exitCode)
 {
-    $allowed = array('status', 'diff', 'production', 'rollback');
+    $allowed = array('status', 'diff', 'production', 'force-production', 'rollback');
     if (!in_array($action, $allowed, true)) {
         $exitCode = 126;
         return 'ERROR: Invalid helper action.';
@@ -98,10 +98,13 @@ function parseStatus($text)
 
 function parseOperationOutput($text)
 {
-    $values = array('BEFORE' => 'unknown', 'AFTER' => 'unknown');
+    $values = array('BEFORE' => 'unknown', 'AFTER' => 'unknown', 'BACKUP' => '');
     foreach (preg_split('/\r?\n/', (string)$text) as $line) {
         if (preg_match('/^(BEFORE|AFTER)=([0-9a-f]{40})$/', $line, $matches)) {
             $values[$matches[1]] = $matches[2];
+        }
+        if (preg_match('#^BACKUP=(/var/backups/global-daisho-deployer/force/[A-Za-z0-9-]+)$#', $line, $matches)) {
+            $values['BACKUP'] = $matches[1];
         }
     }
     return $values;
@@ -214,6 +217,10 @@ $translations = array(
         'add_current_ip' => '現在のIPを追加', 'add_ip' => 'IPを追加', 'ip_placeholder' => 'IPv4またはIPv6', 'remove' => '削除', 'allowed' => '許可済み',
         'blocked' => '未許可（反映・ロールバック不可）', 'output' => '実行結果',
         'confirm_deploy' => 'GitHubのmainを本番へ反映します。よろしいですか？',
+        'force_deploy' => 'バックアップして強制反映',
+        'confirm_force' => '本番ファイルをバックアップし、GitHubのmainで上書きします。ローカル変更・独自コミットは本番から外れます。競合する未追跡ファイルも置き換わる場合があります。実行しますか？',
+        'force_note' => '強制反映は本番ファイルを退避してからmainに揃えます。退避先は実行結果に表示します。通常の「1つ前へ戻す」ではローカル変更は復元されません。',
+        'force_upgrade' => '強制反映を使うには実行用スクリプトとsudoersの更新が必要です。',
         'confirm_rollback' => '本番を1コミット前へ戻します。よろしいですか？',
         'confirm_remove' => 'このIPを削除しますか？', 'github' => 'GitHubを開く', 'site' => '公開サイトを開く',
         'note' => '画面表示だけではfetch・merge・resetを実行しません。', 'tracked' => '追跡対象の変更',
@@ -232,6 +239,10 @@ $translations = array(
         'add_current_ip' => 'Add current IP', 'add_ip' => 'Add IP', 'ip_placeholder' => 'IPv4 or IPv6', 'remove' => 'Remove', 'allowed' => 'Allowed',
         'blocked' => 'Not allowed (deploy and rollback disabled)', 'output' => 'Command result',
         'confirm_deploy' => 'Deploy GitHub main to production?',
+        'force_deploy' => 'Back up and force deploy',
+        'confirm_force' => 'Back up production files and overwrite them with GitHub main? Local changes and local-only commits will be removed from production. Conflicting untracked files may also be replaced.',
+        'force_note' => 'Force deploy backs up production files before matching main. The backup location is shown in the result. Ordinary one-commit rollback does not restore local changes.',
+        'force_upgrade' => 'Update the installed helper and sudoers to enable force deployment.',
         'confirm_rollback' => 'Roll production back by one commit?',
         'confirm_remove' => 'Remove this IP?', 'github' => 'Open GitHub', 'site' => 'Open public site',
         'note' => 'Opening this page does not run fetch, merge, or reset.', 'tracked' => 'Tracked changes',
@@ -325,14 +336,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $bootError === '') {
             $commandOutput = runHelper('diff', $exitCode);
             $message = $exitCode === 0 ? 'Comparison completed.' : 'Comparison failed.';
             $messageType = $exitCode === 0 ? 'success' : 'error';
-        } elseif ($action === 'deploy' || $action === 'rollback') {
+        } elseif ($action === 'deploy' || $action === 'force_deploy' || $action === 'rollback') {
             $allowedIps = readAllowedIps($allowedIpFile);
             $ipAllowed = count($allowedIps) === 0 || in_array($clientIp, $allowedIps, true);
             if (!$ipAllowed) {
                 $message = 'This IP is not allowed to deploy: ' . $clientIp;
                 $messageType = 'error';
+            } elseif ($action === 'force_deploy' && (!isset($status['FORCE_SUPPORTED']) || $status['FORCE_SUPPORTED'] !== '1')) {
+                $message = t('force_upgrade');
+                $messageType = 'error';
             } else {
-                $helperAction = $action === 'deploy' ? 'production' : 'rollback';
+                $helperAction = $action === 'rollback' ? 'rollback' : ($action === 'force_deploy' ? 'force-production' : 'production');
                 $beforeFallback = isset($status['COMMIT_FULL']) ? $status['COMMIT_FULL'] : 'unknown';
                 $exitCode = 0;
                 $commandOutput = runHelper($helperAction, $exitCode);
@@ -343,12 +357,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $bootError === '') {
                 appendHistory($historyFile, array(
                     'time' => date('Y-m-d H:i:s T'), 'action' => $action,
                     'from' => $operation['BEFORE'], 'to' => $operation['AFTER'],
+                    'backup' => $operation['BACKUP'],
                     'user' => $authUser, 'ip' => $clientIp,
                     'result' => $exitCode === 0 ? 'success' : 'failed',
                 ));
                 $message = $exitCode === 0
-                    ? ($action === 'deploy' ? 'Deployment completed.' : 'Rollback completed.')
-                    : ($action === 'deploy' ? 'Deployment failed.' : 'Rollback failed.');
+                    ? ($action === 'rollback' ? 'Rollback completed.' : 'Deployment completed.')
+                    : ($action === 'rollback' ? 'Rollback failed.' : 'Deployment failed.');
                 $messageType = $exitCode === 0 ? 'success' : 'error';
             }
         } else {
@@ -370,6 +385,7 @@ $branch = isset($status['BRANCH']) ? $status['BRANCH'] : 'unknown';
 $commit = isset($status['COMMIT_SHORT']) ? $status['COMMIT_SHORT'] : 'unknown';
 $commitTime = isset($status['COMMIT_TIME']) ? $status['COMMIT_TIME'] : 'unknown';
 $treeClean = isset($status['TREE_CLEAN']) && $status['TREE_CLEAN'] === '1';
+$forceSupported = isset($status['FORCE_SUPPORTED']) && $status['FORCE_SUPPORTED'] === '1';
 $trackedDetails = isset($status['DETAILS']) ? $status['DETAILS'] : '';
 $history = readHistory($historyFile, 30);
 ?>
@@ -437,8 +453,11 @@ $history = readHistory($historyFile, 30);
                 <form method="post" onsubmit="return confirm(<?php echo h(json_encode(t('confirm_deploy'))); ?>);"><input type="hidden" name="csrf" value="<?php echo h($csrfToken); ?>"><input type="hidden" name="action" value="deploy"><button type="submit" class="primary" <?php echo ($bootError !== '' || !$treeClean || !$ipAllowed) ? 'disabled' : ''; ?>><?php echo h(t('deploy')); ?></button></form>
                 <form method="post" onsubmit="return confirm(<?php echo h(json_encode(t('confirm_rollback'))); ?>);"><input type="hidden" name="csrf" value="<?php echo h($csrfToken); ?>"><input type="hidden" name="action" value="rollback"><button type="submit" class="danger" <?php echo ($bootError !== '' || !$treeClean || !$ipAllowed) ? 'disabled' : ''; ?>><?php echo h(t('rollback')); ?></button></form>
                 <a class="button outline" href="?lang=<?php echo h($lang); ?>"><?php echo h(t('reload')); ?></a>
+                <form method="post" onsubmit="return confirm(<?php echo h(json_encode(t('confirm_force'))); ?>);"><input type="hidden" name="csrf" value="<?php echo h($csrfToken); ?>"><input type="hidden" name="action" value="force_deploy"><button type="submit" class="danger" <?php echo ($bootError !== '' || !$ipAllowed || !$forceSupported) ? 'disabled' : ''; ?>><?php echo h(t('force_deploy')); ?></button></form>
             </div>
             <p class="hint"><?php echo h(t('note')); ?></p>
+            <p class="hint"><?php echo h(t('force_note')); ?></p>
+            <?php if (!$forceSupported): ?><p class="hint"><?php echo h(t('force_upgrade')); ?></p><?php endif; ?>
         </section>
 
         <?php if ($commandOutput !== ''): ?><section class="card full"><h2><?php echo h(t('output')); ?></h2><pre><?php echo h(clipOutput($commandOutput, 40000)); ?></pre></section><?php endif; ?>
@@ -462,11 +481,10 @@ $history = readHistory($historyFile, 30);
             <h2><?php echo h(t('history')); ?></h2>
             <?php if (!count($history)): ?><p class="hint"><?php echo h(t('no_history')); ?></p><?php else: ?>
             <div class="table-wrap"><table><thead><tr><th><?php echo h(t('time')); ?></th><th><?php echo h(t('operation')); ?></th><th><?php echo h(t('from')); ?></th><th><?php echo h(t('to')); ?></th><th><?php echo h(t('user')); ?> / IP</th><th><?php echo h(t('result')); ?></th></tr></thead><tbody>
-            <?php foreach ($history as $row): ?><tr><td><?php echo h(isset($row['time']) ? $row['time'] : ''); ?></td><td><?php echo h(isset($row['action']) ? $row['action'] : ''); ?></td><td class="sha"><?php echo h(isset($row['from']) ? substr($row['from'], 0, 10) : ''); ?></td><td class="sha"><?php echo h(isset($row['to']) ? substr($row['to'], 0, 10) : ''); ?></td><td><?php echo h(isset($row['user']) ? $row['user'] : ''); ?><div class="meta"><?php echo h(isset($row['ip']) ? $row['ip'] : ''); ?></div></td><td><?php echo h(isset($row['result']) ? $row['result'] : ''); ?></td></tr><?php endforeach; ?>
+            <?php foreach ($history as $row): ?><tr><td><?php echo h(isset($row['time']) ? $row['time'] : ''); ?></td><td><?php echo h(isset($row['action']) ? $row['action'] : ''); ?><?php if (!empty($row['backup'])): ?><div class="meta"><?php echo h($row['backup']); ?></div><?php endif; ?></td><td class="sha"><?php echo h(isset($row['from']) ? substr($row['from'], 0, 10) : ''); ?></td><td class="sha"><?php echo h(isset($row['to']) ? substr($row['to'], 0, 10) : ''); ?></td><td><?php echo h(isset($row['user']) ? $row['user'] : ''); ?><div class="meta"><?php echo h(isset($row['ip']) ? $row['ip'] : ''); ?></div></td><td><?php echo h(isset($row['result']) ? $row['result'] : ''); ?></td></tr><?php endforeach; ?>
             </tbody></table></div><?php endif; ?>
         </section>
     </div>
 </div>
 </body>
 </html>
-
