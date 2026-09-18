@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
         product = 'OP_Flow';
     } else if (filename.startsWith('Backfill_X')) {
         product = 'Backfill_X';
+    } else if (filename.startsWith('D_Retarder')) {
+        product = 'D_Retarder';
     } else if (filename.startsWith('Deeper25')) {
         product = 'Deeper25';
     }
@@ -69,8 +71,9 @@ document.addEventListener('DOMContentLoaded', function() {
     nav.innerHTML = 'Language: ' +
         '<a href="' + product + '_SDS_ja.html">日本語</a> | ' +
         '<a href="' + product + '_SDS_en.html">English</a> | ' +
-        '<a href="' + product + '_SDS_fr.html">Français</a> | ' +
-        '<a href="' + product + '_SDS_pl.html">Polski</a> | ' +
+        (product === 'D_Retarder' ? '' :
+            '<a href="' + product + '_SDS_fr.html">Français</a> | ' +
+            '<a href="' + product + '_SDS_pl.html">Polski</a> | ') +
         '<a href="index.html">Portal</a>';
     
     header.appendChild(nav);
