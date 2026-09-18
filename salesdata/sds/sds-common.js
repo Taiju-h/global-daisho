@@ -71,9 +71,8 @@ document.addEventListener('DOMContentLoaded', function() {
     nav.innerHTML = 'Language: ' +
         '<a href="' + product + '_SDS_ja.html">日本語</a> | ' +
         '<a href="' + product + '_SDS_en.html">English</a> | ' +
-        (product === 'D_Retarder' ? '' :
-            '<a href="' + product + '_SDS_fr.html">Français</a> | ' +
-            '<a href="' + product + '_SDS_pl.html">Polski</a> | ') +
+        '<a href="' + product + '_SDS_fr.html">Français</a> | ' +
+        '<a href="' + product + '_SDS_pl.html">Polski</a> | ' +
         '<a href="index.html">Portal</a>';
     
     header.appendChild(nav);
