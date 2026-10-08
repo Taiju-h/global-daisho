@@ -13,10 +13,13 @@ function h(?string $v): string { return htmlspecialchars((string)$v, ENT_QUOTES,
 function db(): PDO {
     static $pdo = null;
     if ($pdo instanceof PDO) return $pdo;
-    $dsn = getenv('DAISHO_CRM_MYSQL_DSN');
-    $user = getenv('DAISHO_CRM_MYSQL_USER');
-    $password = getenv('DAISHO_CRM_MYSQL_PASSWORD');
-    if (!$dsn || $user === false || $password === false) {
+    // Credentials live outside the Git worktree and web DocumentRoot.
+    $configFile = '/etc/global-daisho/crm-db.php';
+    $config = is_file($configFile) && is_readable($configFile) ? require $configFile : null;
+    $dsn = is_array($config) ? ($config['dsn'] ?? null) : null;
+    $user = is_array($config) ? ($config['user'] ?? null) : null;
+    $password = is_array($config) ? ($config['password'] ?? null) : null;
+    if (!is_string($dsn) || $dsn === '' || !is_string($user) || $user === '' || !is_string($password)) {
         error_log('CRM MySQL configuration missing');
         http_response_code(503);
         exit('CRM database is not configured.');
