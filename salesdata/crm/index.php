@@ -10,33 +10,43 @@ const APP_NAME = 'DAISHO Sales & Technical CRM';
 const INITIAL_PASSWORD_HASH = '$2y$12$h72JAMnv.W/P42/O42Au5uAhEDCsbS/ZJVMxsA3reyEhZcP/nIaYK';
 
 function h(?string $v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
-function db_path(): string {
-    $env = getenv('DAISHO_CRM_DB');
-    return $env ?: '/var/lib/global-daisho-crm/crm.sqlite';
-}
 function db(): PDO {
     static $pdo = null;
     if ($pdo instanceof PDO) return $pdo;
-    $path = db_path();
-    $dir = dirname($path);
-    if (!is_dir($dir)) @mkdir($dir, 0770, true);
-    $pdo = new PDO('sqlite:' . $path, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
-    $pdo->exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
+    $dsn = getenv('DAISHO_CRM_MYSQL_DSN');
+    $user = getenv('DAISHO_CRM_MYSQL_USER');
+    $password = getenv('DAISHO_CRM_MYSQL_PASSWORD');
+    if (!$dsn || $user === false || $password === false) {
+        error_log('CRM MySQL configuration missing');
+        http_response_code(503);
+        exit('CRM database is not configured.');
+    }
+    if (!str_starts_with($dsn, 'mysql:')) {
+        error_log('CRM requires a MySQL PDO DSN');
+        http_response_code(503);
+        exit('CRM database configuration invalid.');
+    }
+    $pdo = new PDO($dsn, $user, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ]);
     migrate($pdo);
     return $pdo;
 }
 function migrate(PDO $db): void {
-    $db->exec(<<<'SQL'
-CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'user', must_change_password INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, last_login_at TEXT);
-CREATE TABLE IF NOT EXISTS companies (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, country TEXT, website TEXT, notes TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
-CREATE TABLE IF NOT EXISTS contacts (id INTEGER PRIMARY KEY AUTOINCREMENT, company_id INTEGER, name TEXT NOT NULL, title TEXT, email TEXT, phone TEXT, notes TEXT, FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE SET NULL);
-CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT UNIQUE, name TEXT NOT NULL, category TEXT, summary TEXT, status TEXT DEFAULT 'active');
-CREATE TABLE IF NOT EXISTS activities (id INTEGER PRIMARY KEY AUTOINCREMENT, activity_date TEXT NOT NULL, company_id INTEGER, contact_id INTEGER, activity_type TEXT NOT NULL DEFAULT 'meeting', subject TEXT NOT NULL, summary_ja TEXT, summary_en TEXT, summary_pl TEXT, next_action TEXT, next_action_date TEXT, status TEXT NOT NULL DEFAULT 'open', created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE SET NULL, FOREIGN KEY(contact_id) REFERENCES contacts(id) ON DELETE SET NULL, FOREIGN KEY(created_by) REFERENCES users(id) ON DELETE SET NULL);
-CREATE TABLE IF NOT EXISTS activity_products (activity_id INTEGER NOT NULL, product_id INTEGER NOT NULL, PRIMARY KEY(activity_id, product_id), FOREIGN KEY(activity_id) REFERENCES activities(id) ON DELETE CASCADE, FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE);
-CREATE TABLE IF NOT EXISTS tests (id INTEGER PRIMARY KEY AUTOINCREMENT, test_date TEXT, company_id INTEGER, product_id INTEGER, site TEXT, title TEXT NOT NULL, purpose TEXT, result TEXT, next_step TEXT, status TEXT NOT NULL DEFAULT 'planned', FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE SET NULL, FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE SET NULL);
-CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, due_date TEXT, company_id INTEGER, contact_id INTEGER, title TEXT NOT NULL, detail TEXT, status TEXT NOT NULL DEFAULT 'open', priority TEXT NOT NULL DEFAULT 'normal', assigned_to INTEGER, FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE SET NULL, FOREIGN KEY(contact_id) REFERENCES contacts(id) ON DELETE SET NULL, FOREIGN KEY(assigned_to) REFERENCES users(id) ON DELETE SET NULL);
-CREATE TABLE IF NOT EXISTS company_product_status (company_id INTEGER NOT NULL, product_id INTEGER NOT NULL, stage TEXT NOT NULL DEFAULT 'interest', summary TEXT, next_action TEXT, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(company_id,product_id), FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE CASCADE, FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE);
-SQL);
+    $tables = [
+        "CREATE TABLE IF NOT EXISTS users (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, username VARCHAR(191) NOT NULL UNIQUE, display_name VARCHAR(255) NOT NULL, password_hash VARCHAR(255) NOT NULL, role VARCHAR(30) NOT NULL DEFAULT 'user', must_change_password TINYINT NOT NULL DEFAULT 1, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, last_login_at TIMESTAMP NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        "CREATE TABLE IF NOT EXISTS companies (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(191) NOT NULL UNIQUE, country VARCHAR(255), website TEXT, notes TEXT, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        "CREATE TABLE IF NOT EXISTS contacts (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, company_id BIGINT UNSIGNED NULL, name VARCHAR(255) NOT NULL, title VARCHAR(255), email VARCHAR(255), phone VARCHAR(100), notes TEXT, FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE SET NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        "CREATE TABLE IF NOT EXISTS products (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, code VARCHAR(191) UNIQUE, name VARCHAR(255) NOT NULL, category VARCHAR(255), summary TEXT, status VARCHAR(30) DEFAULT 'active') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        "CREATE TABLE IF NOT EXISTS activities (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, activity_date VARCHAR(10) NOT NULL, company_id BIGINT UNSIGNED NULL, contact_id BIGINT UNSIGNED NULL, activity_type VARCHAR(30) NOT NULL DEFAULT 'meeting', subject VARCHAR(255) NOT NULL, summary_ja TEXT, summary_en TEXT, summary_pl TEXT, next_action TEXT, next_action_date VARCHAR(10), status VARCHAR(30) NOT NULL DEFAULT 'open', created_by BIGINT UNSIGNED NULL, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE SET NULL, FOREIGN KEY(contact_id) REFERENCES contacts(id) ON DELETE SET NULL, FOREIGN KEY(created_by) REFERENCES users(id) ON DELETE SET NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        "CREATE TABLE IF NOT EXISTS activity_products (activity_id BIGINT UNSIGNED NOT NULL, product_id BIGINT UNSIGNED NOT NULL, PRIMARY KEY(activity_id, product_id), FOREIGN KEY(activity_id) REFERENCES activities(id) ON DELETE CASCADE, FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        "CREATE TABLE IF NOT EXISTS tests (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, test_date VARCHAR(10), company_id BIGINT UNSIGNED NULL, product_id BIGINT UNSIGNED NULL, site VARCHAR(255), title VARCHAR(255) NOT NULL, purpose TEXT, result TEXT, next_step TEXT, status VARCHAR(30) NOT NULL DEFAULT 'planned', FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE SET NULL, FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE SET NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        "CREATE TABLE IF NOT EXISTS tasks (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, due_date VARCHAR(10), company_id BIGINT UNSIGNED NULL, contact_id BIGINT UNSIGNED NULL, title VARCHAR(255) NOT NULL, detail TEXT, status VARCHAR(30) NOT NULL DEFAULT 'open', priority VARCHAR(30) NOT NULL DEFAULT 'normal', assigned_to BIGINT UNSIGNED NULL, FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE SET NULL, FOREIGN KEY(contact_id) REFERENCES contacts(id) ON DELETE SET NULL, FOREIGN KEY(assigned_to) REFERENCES users(id) ON DELETE SET NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+        "CREATE TABLE IF NOT EXISTS company_product_status (company_id BIGINT UNSIGNED NOT NULL, product_id BIGINT UNSIGNED NOT NULL, stage VARCHAR(100) NOT NULL DEFAULT 'interest', summary TEXT, next_action TEXT, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(company_id,product_id), FOREIGN KEY(company_id) REFERENCES companies(id) ON DELETE CASCADE, FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+    ];
+    foreach ($tables as $sql) $db->exec($sql);
     seed($db);
     sync_current_sales_data($db);
 }
@@ -47,7 +57,7 @@ function seed(PDO $db): void {
     }
     if ((int)$db->query('SELECT COUNT(*) FROM companies')->fetchColumn() === 0) {
         $companies = ['鹿島建設株式会社','東急建設株式会社','株式会社テノックス九州','日特建設株式会社','ライト工業株式会社'];
-        $s=$db->prepare('INSERT OR IGNORE INTO companies(name,country) VALUES(?,?)'); foreach($companies as $c) $s->execute([$c,'Japan']);
+        $s=$db->prepare('INSERT IGNORE INTO companies(name,country) VALUES(?,?)'); foreach($companies as $c) $s->execute([$c,'Japan']);
         $ids=[]; foreach($db->query('SELECT id,name FROM companies') as $r) $ids[$r['name']]=$r['id'];
         $c=$db->prepare('INSERT INTO contacts(company_id,name,title,notes) VALUES(?,?,?,?)');
         $c->execute([$ids['鹿島建設株式会社'],'柳井','鹿島技術研究所','飛田給。技術研究所で面談。']);
@@ -84,11 +94,11 @@ function sync_current_sales_data(PDO $db): void {
         ['BENTONITE-AID','ベントナイト膨潤補助剤','Bentonite','ベントナイトの膨潤性・配合最適化'],
         ['BENTONITE-EMULSION','ベントナイト代替エマルジョン','Bentonite replacement','少量添加で粘性を制御するベントナイト代替候補']
     ];
-    $ps=$db->prepare('INSERT INTO products(code,name,category,summary) VALUES(?,?,?,?) ON CONFLICT(code) DO UPDATE SET name=excluded.name,category=excluded.category,summary=excluded.summary');
+    $ps=$db->prepare('INSERT INTO products(code,name,category,summary) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),category=VALUES(category),summary=VALUES(summary)');
     foreach($products as $r) $ps->execute($r);
 
     foreach(['鹿島建設株式会社','東急建設株式会社','ジャパンパイル株式会社','日特建設株式会社','ライト工業株式会社','大林組'] as $name){
-        $db->prepare("INSERT OR IGNORE INTO companies(name,country) VALUES(?, 'Japan')")->execute([$name]);
+        $db->prepare("INSERT IGNORE INTO companies(name,country) VALUES(?, 'Japan')")->execute([$name]);
     }
     $co=[]; foreach($db->query('SELECT id,name FROM companies') as $r) $co[$r['name']]=(int)$r['id'];
     $pr=[]; foreach($db->query('SELECT id,code FROM products') as $r) $pr[$r['code']]=(int)$r['id'];
@@ -108,7 +118,7 @@ function sync_current_sales_data(PDO $db): void {
     }
 
     $up=$db->prepare("INSERT INTO company_product_status(company_id,product_id,stage,summary,next_action,updated_at) VALUES(?,?,?,?,?,CURRENT_TIMESTAMP)
-        ON CONFLICT(company_id,product_id) DO UPDATE SET stage=excluded.stage,summary=excluded.summary,next_action=excluded.next_action,updated_at=CURRENT_TIMESTAMP");
+        ON DUPLICATE KEY UPDATE stage=VALUES(stage),summary=VALUES(summary),next_action=VALUES(next_action),updated_at=CURRENT_TIMESTAMP");
     $rows = [
         ['鹿島建設株式会社','DEEPER','共同評価','TBM・シールド用途。地山軟化→掘削抵抗・トルク・発熱低減→カッター／マシン保護を評価。高強度コンクリート、岩盤、鏡切りも候補。','DEEPERサンプル送付。鹿島側でコンクリート・岩盤・TBM想定試験。詳細解析時はNDA検討。'],
         ['鹿島建設株式会社','BENTONITE-AID','試験準備','鹿島側がシールド用ベントナイトを複数種類送付予定。相性と適正配合を大翔側で評価。','ベントナイト受領後、各材料の膨潤性・適正配合を試験。'],
@@ -141,7 +151,7 @@ function sync_current_sales_data(PDO $db): void {
     ] as $x){
         [$d,$cn,$sub,$codes]=$x;
         $q=$db->prepare('SELECT id FROM activities WHERE activity_date=? AND company_id=? AND subject=? ORDER BY id DESC LIMIT 1'); $q->execute([$d,$co[$cn],$sub]); $aid=(int)$q->fetchColumn();
-        if($aid) foreach($codes as $code) $db->prepare('INSERT OR IGNORE INTO activity_products(activity_id,product_id) VALUES(?,?)')->execute([$aid,$pr[$code]]);
+        if($aid) foreach($codes as $code) $db->prepare('INSERT IGNORE INTO activity_products(activity_id,product_id) VALUES(?,?)')->execute([$aid,$pr[$code]]);
     }
 }
 
@@ -176,7 +186,7 @@ if($page==='bootstrap'){ header_html('初期設定',null); ?><div class="auth ca
 if($page==='login'){ header_html('Login',null); ?><div class="auth card"><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="login"><label>ユーザー名<input name="username" required autofocus></label><label>パスワード<input type="password" name="password" required></label><button>ログイン</button></form></div><?php footer_html(); exit; }
 if($page==='change-password'){ $u=require_login(); header_html('パスワード変更',$u); ?><div class="auth card"><p>初回ログインです。新しいパスワードを登録してください。</p><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="change_password"><label>新しいパスワード<input type="password" name="password" minlength="8" required></label><button>変更して開始</button></form></div><?php footer_html(); exit; }
 $u=require_login();
-if($page==='dashboard'){ header_html('営業ダッシュボード',$u); $stats=['companies'=>(int)db()->query('SELECT COUNT(*) FROM companies')->fetchColumn(),'activities'=>(int)db()->query('SELECT COUNT(*) FROM activities')->fetchColumn(),'open_tasks'=>(int)db()->query("SELECT COUNT(*) FROM tasks WHERE status='open'")->fetchColumn(),'planned_tests'=>(int)db()->query("SELECT COUNT(*) FROM tests WHERE status='planned'")->fetchColumn()]; ?><div class="stats"><?php foreach($stats as $k=>$v):?><div class="stat"><b><?=$v?></b><span><?=h(str_replace('_',' ',$k))?></span></div><?php endforeach;?></div><div class="grid2"><section class="card"><h2>次のアクション</h2><?php $q=db()->query("SELECT tasks.*,companies.name company FROM tasks LEFT JOIN companies ON companies.id=tasks.company_id WHERE tasks.status='open' ORDER BY COALESCE(due_date,'9999-12-31') LIMIT 12"); foreach($q as $r):?><div class="row"><div><b><?=h($r['due_date'])?> <?=h($r['title'])?></b><small><?=h($r['company'])?> / <?=h($r['detail'])?></small></div><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="task_done"><input type="hidden" name="id" value="<?=$r['id']?>"><button class="small">完了</button></form></div><?php endforeach;?></section><section class="card"><h2>予定試験</h2><?php foreach(db()->query("SELECT tests.*,companies.name company FROM tests LEFT JOIN companies ON companies.id=tests.company_id WHERE tests.status='planned' ORDER BY test_date LIMIT 12") as $r):?><div class="row"><div><b><?=h($r['test_date'])?> <?=h($r['title'])?></b><small><?=h($r['company'])?> / <?=h($r['site'])?></small></div></div><?php endforeach;?></section></div><section class="card"><h2>最近の営業履歴</h2><?php foreach(db()->query("SELECT a.*,c.name company,ct.name contact FROM activities a LEFT JOIN companies c ON c.id=a.company_id LEFT JOIN contacts ct ON ct.id=a.contact_id ORDER BY activity_date DESC,id DESC LIMIT 8") as $r):?><article class="activity"><div class="date"><?=h($r['activity_date'])?></div><div><b><?=h($r['company'])?> / <?=h($r['contact'])?> — <?=h($r['subject'])?></b><p><?=nl2br(h($r['summary_ja']))?></p><?php if($r['next_action']):?><small>Next: <?=h($r['next_action_date'])?> <?=h($r['next_action'])?></small><?php endif;?></div></article><?php endforeach;?></section><?php }
+if($page==='dashboard'){ header_html('営業ダッシュボード',$u); $stats=['companies'=>(int)db()->query('SELECT COUNT(*) FROM companies')->fetchColumn(),'activities'=>(int)db()->query('SELECT COUNT(*) FROM activities')->fetchColumn(),'open_tasks'=>(int)db()->query("SELECT COUNT(*) FROM tasks WHERE status='open'")->fetchColumn(),'planned_tests'=>(int)db()->query("SELECT COUNT(*) FROM tests WHERE status='planned'")->fetchColumn()]; ?><div class="stats"><?php foreach($stats as $k=>$v):?><div class="stat"><b><?=$v?></b><span><?=h(str_replace('_',' ',$k))?></span></div><?php endforeach;?></div><div class="grid2"><section class="card"><h2>次のアクション</h2><?php $q=db()->query("SELECT tasks.*,companies.name company FROM tasks LEFT JOIN companies ON companies.id=tasks.company_id WHERE tasks.status='open' ORDER BY COALESCE(due_date,'9999-12-31') LIMIT 12"); foreach($q as $r):?><div class="row"><div><b><?=h($r['due_date'])?> <?=h($r['title'])?></b><small><?=h($r['company'])?> / <?=h($r['detail'])?></small></div><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="task_done"><input type="hidden" name="id" value="<?=$r['id']?>"><button class="small">完了</button></form></div><?php endforeach;?></section><section class="card"><h2>予定試験</h2><?php foreach(db()->query("SELECT tests.*,companies.name company FROM tests LEFT JOIN companies ON companies.id=tests.company_id WHERE tests.status='planned' ORDER BY test_date LIMIT 12") as $r):?><div class="row"><div><b><?=h($r['test_date'])?> <?=h($r['title'])?></b><small><?=h($r['company'])?> / <?=h($r['site'])?></small></div></div><?php endforeach;?></section></div><section class="card"><h2>最近の営業履歴</h2><?php foreach(db()->query("SELECT a.*,c.name company,ct.name contact FROM activities a LEFT JOIN companies c ON c.id=a.company_id LEFT JOIN contacts ct ON ct.id=a.contact_id ORDER BY activity_date DESC,a.id DESC LIMIT 8") as $r):?><article class="activity"><div class="date"><?=h($r['activity_date'])?></div><div><b><?=h($r['company'])?> / <?=h($r['contact'])?> — <?=h($r['subject'])?></b><p><?=nl2br(h($r['summary_ja']))?></p><?php if($r['next_action']):?><small>Next: <?=h($r['next_action_date'])?> <?=h($r['next_action'])?></small><?php endif;?></div></article><?php endforeach;?></section><?php }
 elseif($page==='activities'){ header_html('営業履歴',$u); $companies=db()->query('SELECT * FROM companies ORDER BY name')->fetchAll(); $contacts=db()->query('SELECT * FROM contacts ORDER BY name')->fetchAll(); ?><div class="grid2"><section class="card"><h2>新規営業記録</h2><form method="post" class="form"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="add_activity"><label>日付<input type="date" name="activity_date" value="<?=date('Y-m-d')?>" required></label><label>会社<select name="company_id"><option value="">--</option><?php foreach($companies as $c):?><option value="<?=$c['id']?>"><?=h($c['name'])?></option><?php endforeach;?></select></label><label>担当者<select name="contact_id"><option value="">--</option><?php foreach($contacts as $c):?><option value="<?=$c['id']?>"><?=h($c['name'])?></option><?php endforeach;?></select></label><label>種別<select name="activity_type"><option>meeting</option><option>email</option><option>phone</option><option>sample</option><option>test</option></select></label><label>件名<input name="subject" required></label><label>日本語<textarea name="summary_ja" rows="6"></textarea></label><label>English<textarea name="summary_en" rows="4"></textarea></label><label>Polski<textarea name="summary_pl" rows="4"></textarea></label><label>次アクション<input name="next_action"></label><label>期限<input type="date" name="next_action_date"></label><input type="hidden" name="status" value="open"><button>保存</button></form></section><section class="card"><h2>履歴</h2><?php foreach(db()->query("SELECT a.*,c.name company,ct.name contact FROM activities a LEFT JOIN companies c ON c.id=a.company_id LEFT JOIN contacts ct ON ct.id=a.contact_id ORDER BY activity_date DESC,id DESC") as $r):?><article class="activity"><div class="date"><?=h($r['activity_date'])?></div><div><b><?=h($r['company'])?> / <?=h($r['contact'])?></b><h3><?=h($r['subject'])?></h3><p><?=nl2br(h($r['summary_ja']))?></p><?php if($r['summary_en']):?><details><summary>English</summary><p><?=nl2br(h($r['summary_en']))?></p></details><?php endif;?><?php if($r['summary_pl']):?><details><summary>Polski</summary><p><?=nl2br(h($r['summary_pl']))?></p></details><?php endif;?><small>Next: <?=h($r['next_action_date'])?> <?=h($r['next_action'])?></small></div></article><?php endforeach;?></section></div><?php }
 elseif($page==='companies'){ header_html('会社・担当者',$u); ?><div class="grid2"><section class="card"><h2>会社一覧</h2><?php foreach(db()->query('SELECT c.*,COUNT(ct.id) contacts FROM companies c LEFT JOIN contacts ct ON ct.company_id=c.id GROUP BY c.id ORDER BY c.name') as $r):?><div class="row"><div><b><?=h($r['name'])?></b><small><?=h($r['country'])?> / contacts: <?=$r['contacts']?></small></div></div><?php endforeach;?></section><section class="card"><h2>会社追加</h2><form method="post" class="form"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="add_company"><label>会社名<input name="name" required></label><label>国<input name="country"></label><label>URL<input name="website"></label><label>メモ<textarea name="notes"></textarea></label><button>追加</button></form></section></div><?php }
 elseif($page==='products'){ header_html('製品 / SDS',$u); ?><section class="card"><p>SDSは既存の <code>/salesdata/sds/</code> を自動参照します。製品DBと営業履歴を同じ画面から辿れるようにします。</p><div class="products"><?php foreach(db()->query('SELECT * FROM products ORDER BY name') as $r):?><div class="product"><b><?=h($r['name'])?></b><small><?=h($r['code'])?> / <?=h($r['category'])?></small><p><?=h($r['summary'])?></p></div><?php endforeach;?></div><h2>SDSファイル</h2><div class="sds-list"><?php $files=glob(__DIR__.'/../sds/*.{html,pdf}',GLOB_BRACE)?:[]; sort($files); foreach($files as $f): $n=basename($f);?><a href="../sds/<?=rawurlencode($n)?>" target="_blank"><?=h($n)?></a><?php endforeach;?></div></section><?php }
