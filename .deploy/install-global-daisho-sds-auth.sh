@@ -45,6 +45,7 @@ fi
 
 systemctl reload apache2
 
-printf '%s\n' 'OK: Basic authentication enabled for /salesdata/sds/.'
+printf '%s\n' 'OK: Basic authentication enabled for /salesdata/sds/ and /salesdata/crm/.'
 printf '%s\n' 'Existing /__deploy/ user IDs and passwords were preserved.'
-printf '%s\n' 'URL: https://global.daishokagaku.com/salesdata/sds/'
+printf '%s\n' 'CRM: https://global.daishokagaku.com/salesdata/crm/'
+printf '%s\n' 'SDS: https://global.daishokagaku.com/salesdata/sds/'
