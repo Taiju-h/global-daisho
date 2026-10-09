@@ -106,7 +106,7 @@ function render_cards(array $user): void {
         if(!$rows) echo '<p>'.h(card_text('empty')).'</p>';
         echo '</div></section>';
     } else {
-        $s=$db->prepare('SELECT ct.*,co.name company FROM contact_views v JOIN contacts ct ON ct.id=v.contact_id LEFT JOIN companies co ON co.id=ct.company_id WHERE v.user_id=? ORDER BY v.viewed_at DESC,ct.id DESC LIMIT 6'); $s->execute([$user['id']]);
+        $s=$db->prepare('SELECT ct.*,co.name company FROM contact_views v JOIN contacts ct ON ct.id=v.contact_id LEFT JOIN companies co ON co.id=ct.company_id WHERE v.user_id=? ORDER BY v.viewed_at DESC,ct.id DESC LIMIT 10'); $s->execute([$user['id']]);
         $recent=$s->fetchAll();
         $scans=$db->query("SELECT ct.*,co.name company FROM contacts ct LEFT JOIN companies co ON co.id=ct.company_id WHERE COALESCE(ct.card_scanned_on,ct.card_received_on)>=DATE_SUB(DATE(DATE_ADD(UTC_TIMESTAMP(), INTERVAL 9 HOUR)), INTERVAL 30 DAY) ORDER BY COALESCE(ct.card_scanned_on,ct.card_received_on) DESC,ct.id DESC LIMIT 6")->fetchAll();
         foreach(['recent_views'=>$recent,'recent_scans'=>$scans] as $label=>$rows) {
@@ -487,4 +487,58 @@ function reviewed_cards(): array {
   }
 ]
 CARDS_JSON, true, 512, JSON_THROW_ON_ERROR);
+}
+
+
+function ux(string $ja, string $en, string $pl): string { return ['ja'=>$ja,'en'=>$en,'pl'=>$pl][current_lang()]; }
+function render_registration_help(): void { ?>
+<section class="card help-guide"><h2><?=h(ux('話して営業記録を整理する','Prepare a sales record by talking to ChatGPT','Przygotuj wpis sprzedażowy, rozmawiając z ChatGPT'))?></h2>
+<ol>
+<li><?=h(ux('ChatGPTに、日付・会社・相手・製品・話した内容・次のアクションを伝えます。','Tell ChatGPT the date, company, contact, product, discussion and next action.','Podaj ChatGPT datę, firmę, osobę, produkt, przebieg rozmowy i następne działanie.'))?></li>
+<li><?=h(ux('「DAISHO CRMに登録する営業記録にまとめて。担当者は自分。分からない項目は空欄に」と頼みます。日本語・英語・ポーランド語で話せます。','Ask: “Prepare this as a DAISHO CRM sales record. Set me as the owner. Leave unknown fields blank.” You may speak in Japanese, English or Polish.','Poproś: „Przygotuj wpis do DAISHO CRM. Ustaw mnie jako właściciela. Nieznane pola pozostaw puste.” Możesz mówić po japońsku, angielsku lub polsku.'))?></li>
+<li><?=h(ux('内容を確認します。期限が決まっていない場合は空欄にし、約束したことと提案を分けます。','Review the result. Leave unagreed deadlines blank and distinguish commitments from suggestions.','Sprawdź wynik. Nieuzgodnione terminy pozostaw puste; oddziel zobowiązania od propozycji.'))?></li>
+<li><?=h(ux('営業履歴の「登録する」を開き、内容を貼り付けて保存します。登録者はログイン中のユーザーになります。登録作業をTaijuに依頼することもできます。','Open “Add record” in Sales Activities, paste the prepared details and save. The logged-in user becomes the owner. You can also ask Taiju to handle registration.','Otwórz „Dodaj wpis” w historii sprzedaży, wklej dane i zapisz. Właścicielem zostaje zalogowany użytkownik. Możesz też poprosić Taiju o rejestrację.'))?></li>
+<li><?=h(ux('履歴に表示されたことを確認して完了です。ChatGPT側で登録を依頼した場合も「登録済み」か「反映待ち」かを確認してください。','Check that the record appears in the history. If you ask ChatGPT to arrange registration, verify whether it is saved or still awaiting deployment.','Sprawdź, czy wpis pojawił się w historii. Jeśli zlecasz rejestrację przez ChatGPT, sprawdź, czy dane zapisano, czy nadal czekają na wdrożenie.'))?></li>
+</ol>
+<p><?=h(ux('現在、ChatGPTで話すだけでCRMへ直接保存する自動連携はありません。','There is currently no automatic connection that saves a ChatGPT conversation directly to this CRM.','Obecnie rozmowa z ChatGPT nie zapisuje się automatycznie w CRM.'))?></p>
+<details><summary><?=h(ux('画面から登録する場合','Manual entry','Wpis ręczny'))?></summary><p><?=h(ux('会社がなければ「会社・名刺」で追加します。営業履歴で「登録する」を開き、日付・会社・件名・説明を入力。担当者が一覧にいなければ説明に名前を書きます。製品名は件名にも入れてください。使う言語欄だけ入力し、次のアクションと合意済みの期限を記入して保存します。自動翻訳や横串ビューの自動更新は行われません。','If the company is missing, add it under Companies / Cards. In Sales Activities, open Add record and enter the date, company, subject and description. If the contact is missing, put their name in the description. Include the product name in the subject. Fill the language field you use, add the next action and any agreed due date, then save. Translation and the Cross-Reference View are not updated automatically.','Jeśli brakuje firmy, dodaj ją w Firmy / Wizytówki. Otwórz Dodaj wpis, uzupełnij datę, firmę, temat i opis. Jeśli brakuje kontaktu, wpisz nazwisko w opisie. Dodaj nazwę produktu w temacie. Uzupełnij używany język, następne działanie i uzgodniony termin, a następnie zapisz. Tłumaczenia i widok przekrojowy nie aktualizują się automatycznie.'))?></p></details>
+</section><?php }
+
+function product_mentions(array $product, string $text): bool {
+    $terms=array_unique(array_filter([(string)$product['name'],(string)$product['code']]));
+    foreach($terms as $term) {
+        $parts=preg_split('/[\s_-]+/u',$term);
+        $pattern=implode('[\s_-]*',array_map(fn($part)=>preg_quote($part,'/'),$parts));
+        if(preg_match('/(?<![a-z0-9])'.$pattern.'(?![a-z0-9])/iu',$text)) return true;
+    }
+    return false;
+}
+
+function render_product_links(): void {
+    $db=db(); $id=(int)($_GET['id']??0);
+    $q=$db->prepare('SELECT * FROM products WHERE id=?'); $q->execute([$id]); $p=$q->fetch();
+    if(!$p) { echo '<p>'.h(ux('製品を選択してください。','Please select a product.','Wybierz produkt.')).'</p>'; return; }
+    ?><section class="card"><a href="?page=products">← <?=h(tr('products'))?></a><h2 class="product-heading"><?=h($p['name'])?></h2><p><?=h(localized($p,'summary'))?></p>
+<nav class="related-nav"><a href="#product-sds">SDS</a><a href="#product-actions"><?=h(tr('next_actions'))?></a><a href="#product-history"><?=h(tr('history'))?></a><a href="#product-tests"><?=h(tr('tests'))?></a></nav></section>
+<section class="card" id="product-sds"><h2><?=h(tr('sds_files'))?></h2><div class="sds-list">
+<?php $count=0; $files=glob(__DIR__.'/../sds/*.{html,pdf}',GLOB_BRACE)?:[]; sort($files); foreach($files as $file): $name=basename($file); if(!product_mentions($p,$name)) continue; $count++; ?>
+<a href="../sds/<?=rawurlencode($name)?>" target="_blank" rel="noopener noreferrer"><?=h($name)?></a>
+<?php endforeach; ?></div><p><?=h(ux('ファイル名に製品名が含まれる資料を表示しています。','Documents whose filenames contain the product name are shown.','Wyświetlono dokumenty z nazwą produktu w nazwie pliku.'))?></p>
+<?php if(!$count): ?><p><?=h(ux('一致するSDSは見つかりません。','No matching SDS found.','Nie znaleziono pasującej SDS.'))?></p><?php endif; ?><a href="?page=products#all-sds"><?=h(ux('SDS一覧を見る','Browse all SDS files','Wszystkie pliki SDS'))?></a></section>
+<section class="card" id="product-actions"><h2><?=h(tr('next_actions'))?></h2>
+<?php $q=$db->prepare('SELECT s.*,c.name company FROM company_product_status s JOIN companies c ON c.id=s.company_id WHERE s.product_id=? ORDER BY c.name'); $q->execute([$id]); $rows=$q->fetchAll(); foreach($rows as $r): ?>
+<div class="row"><div><b><?=h($r['company'])?></b><small><?=h(localized($r,'stage'))?> · <?=h(localized($r,'next_action'))?></small><a href="?page=matrix#company-product-<?=(int)$r['company_id']?>-<?=$id?>"><?=h(tr('matrix'))?> ↗</a></div></div>
+<?php endforeach; if(!$rows) echo '<p>'.h(card_text('empty')).'</p>'; ?>
+<h3><?=h(ux('製品名に一致するタスク','Tasks mentioning this product','Zadania wymieniające produkt'))?></h3>
+<?php $found=false; foreach($db->query("SELECT t.*,c.name company FROM tasks t LEFT JOIN companies c ON c.id=t.company_id WHERE t.status IN ('open','waiting','conditional') ORDER BY COALESCE(t.due_date,'9999-12-31'),t.id") as $r): if(!product_mentions($p,implode(' ',[$r['title'],$r['title_en']??'',$r['detail']??'']))) continue; $found=true; ?>
+<div class="row"><div><a href="?page=dashboard#task-<?=(int)$r['id']?>"><?=h(localized($r,'title'))?> ↗</a><small><?=h($r['company'])?> · <?=h($r['due_date'])?> · <?=h(tr('action_status_'.$r['status']))?></small></div></div>
+<?php endforeach; if(!$found) echo '<p>'.h(card_text('empty')).'</p>'; ?></section>
+<section class="card" id="product-history"><h2><?=h(tr('history'))?></h2>
+<?php $q=$db->prepare('SELECT a.*,c.name company FROM activities a JOIN activity_products ap ON ap.activity_id=a.id LEFT JOIN companies c ON c.id=a.company_id WHERE ap.product_id=? ORDER BY a.activity_date DESC,a.id DESC'); $q->execute([$id]); $rows=$q->fetchAll(); foreach($rows as $r): ?>
+<div class="row"><div><a href="?page=activities#activity-<?=(int)$r['id']?>"><?=h(legacy_translation($r['subject']))?> ↗</a><small><?=h($r['activity_date'])?> · <?=h($r['company'])?></small></div></div>
+<?php endforeach; if(!$rows) echo '<p>'.h(card_text('empty')).'</p>'; ?></section>
+<section class="card" id="product-tests"><h2><?=h(tr('tests'))?></h2>
+<?php $q=$db->prepare('SELECT t.*,c.name company FROM tests t LEFT JOIN companies c ON c.id=t.company_id WHERE t.product_id=? ORDER BY t.test_date DESC,t.id DESC'); $q->execute([$id]); $rows=$q->fetchAll(); foreach($rows as $r): ?>
+<div class="row"><div><a href="?page=tests#test-<?=(int)$r['id']?>"><?=h(legacy_translation($r['title']))?> ↗</a><small><?=h($r['company'])?> · <?=h($r['test_date'])?></small></div></div>
+<?php endforeach; if(!$rows) echo '<p>'.h(card_text('empty')).'</p>'; ?></section><?php
 }
