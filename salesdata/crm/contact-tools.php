@@ -62,10 +62,12 @@ function migrate_card_tools(PDO $db): void {
     import_contract_actions($db);
 }
 
-function render_contact_card(array $ct, bool $full=false): void { ?>
-<article class="contact-card">
+function render_contact_card(array $ct, bool $full=false): void {
+    $tone=hexdec(substr(sha1((string)($ct['company']??'')),0,2))%4;
+    ?>
+<article class="contact-card card-tone-<?=$tone?><?=$full?' contact-card-full':''?>">
 <div class="contact-company"><?=h($ct['company'])?></div>
-<strong class="contact-name"><?=h($ct['name'])?></strong><div><?=h(legacy_translation($ct['title']))?></div>
+<strong class="contact-name"><?=h($ct['name'])?></strong><div class="contact-role"><?=h(legacy_translation($ct['title']))?></div>
 <?php foreach(['email'=>'mailto:','mobile'=>'tel:','phone'=>'tel:'] as $field=>$scheme): if(!empty($ct[$field])): ?>
 <div><a href="<?=h($scheme.$ct[$field])?>"><?=h($ct[$field])?></a></div>
 <?php endif; endforeach; ?>
@@ -77,7 +79,7 @@ function render_contact_card(array $ct, bool $full=false): void { ?>
 <?php endif; ?>
 <?php if(!empty($ct['card_scanned_on'])): ?><small><?=h(card_text('scanned'))?>: <?=h($ct['card_scanned_on'])?></small>
 <?php elseif(!empty($ct['card_received_on'])): ?><small><?=h(card_text('received'))?>: <?=h($ct['card_received_on'])?></small><?php endif; ?>
-<?php if(!$full): ?><p><a href="?page=companies&amp;card=<?=(int)$ct['id']?>"><?=h(card_text('open'))?></a></p><?php endif; ?>
+<?php if(!$full): ?><p class="contact-open"><a href="?page=companies&amp;card=<?=(int)$ct['id']?>"><?=h(card_text('open'))?> <span aria-hidden="true">↗</span></a></p><?php endif; ?>
 </article>
 <?php }
 
@@ -94,7 +96,7 @@ function render_cards(array $user): void {
         }
     }
     $q=trim((string)($_GET['q']??'')); ?>
-<section class="card"><h2><?=h(card_text('cards'))?></h2>
+<section class="card card-search"><h2><?=h(card_text('cards'))?></h2>
 <form method="get"><input type="hidden" name="page" value="companies"><label><?=h(card_text('search'))?><input type="search" name="q" value="<?=h($q)?>"></label><button><?=h(card_text('search'))?></button></form></section>
 <?php if($q!=='') {
         $s=$db->prepare("SELECT ct.*,co.name company FROM contacts ct LEFT JOIN companies co ON co.id=ct.company_id WHERE ct.name LIKE ? OR co.name LIKE ? OR ct.email LIKE ? ORDER BY co.name,ct.name");
@@ -118,7 +120,7 @@ function render_cards(array $user): void {
     }
     $groups=[];
     foreach($db->query('SELECT ct.*,co.name company FROM contacts ct LEFT JOIN companies co ON co.id=ct.company_id ORDER BY co.name,ct.name') as $ct) $groups[$ct['company']??'—'][]=$ct;
-    ?><section class="card"><details><summary>📁 <?=h(card_text('all'))?> (<?=array_sum(array_map('count',$groups))?>)</summary>
+    ?><section class="card card-directory"><details><summary>📁 <?=h(card_text('all'))?> (<?=array_sum(array_map('count',$groups))?>)</summary>
     <?php foreach($groups as $company=>$rows): ?><details><summary>📁 <?=h($company)?> (<?=count($rows)?>)</summary><div class="contact-cards"><?php foreach($rows as $ct) render_contact_card($ct); ?></div></details><?php endforeach; ?>
     </details></section><?php
 }
