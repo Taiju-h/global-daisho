@@ -32,8 +32,10 @@ foreach([
     [str_repeat('x',1048577),'ddl'],
     ['SELECT 1;','other'],
 ] as [$sql,$kind]) migration_reject(fn()=>crm_migration_sql($sql,$kind),'invalid/unsafe migration rejected');
-$files=crm_migration_files(dirname(__DIR__).'/crm-sql');
-migration_check(count($files)===4,'four supplied schema files validated');
+$allFiles=crm_migration_files(dirname(__DIR__).'/crm-sql');
+migration_check(count($allFiles)>=4,'all supplied schema files validated');
+// Keep the plan scenarios stable as new numbered migrations are added.
+$files=array_slice($allFiles,0,4,true);
 $names=array_keys($files);
 $history=[];
 migration_check(count(crm_migration_plan($files,$history))===4,'new installation plans all files');
