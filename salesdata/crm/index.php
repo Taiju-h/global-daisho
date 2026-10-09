@@ -10,6 +10,7 @@ header('Referrer-Policy: same-origin');
 const APP_NAME = 'DAISHO Sales & Technical CRM';
 require_once __DIR__.'/contact-tools.php';
 require_once __DIR__.'/chatgpt-import.php';
+require_once __DIR__.'/tests-sheet.php';
 const INITIAL_PASSWORD_HASH = '$2y$12$h72JAMnv.W/P42/O42Au5uAhEDCsbS/ZJVMxsA3reyEhZcP/nIaYK';
 
 function h(?string $v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
@@ -165,6 +166,7 @@ function migrate(PDO $db): void {
     sync_current_sales_data($db);
     import_reviewed_mail_actions($db);
     migrate_card_tools($db);
+    migrate_sheet_tests($db);
 }
 function ensure_column(PDO $db,string $table,string $column,string $definition): void {
     $q=$db->prepare('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME=?');
@@ -428,7 +430,7 @@ elseif($page==='matrix'){ header_html(tr('matrix'),$u); ?>
 </section>
 <?php }
 
-elseif($page==='tests'){ header_html(tr('tests'),$u); ?><section class="card"><?php foreach(db()->query("SELECT t.*,c.name company,p.name product FROM tests t LEFT JOIN companies c ON c.id=t.company_id LEFT JOIN products p ON p.id=t.product_id ORDER BY COALESCE(test_date,'9999-12-31')") as $r):?><article class="activity" id="test-<?=(int)$r['id']?>"><div class="date"><?=h($r['test_date'])?></div><div><b><?=h(legacy_translation($r['title']))?></b><p><?=h($r['company'])?> / <?=h(legacy_translation($r['site']))?> / <?=h($r['product'])?></p><small>Status: <?=h($r['status'])?></small></div></article><?php endforeach;?></section><?php }
+elseif($page==='tests'){ header_html(tr('tests'),$u); render_sheet_tests(); }
 elseif($page==='users'){ if($u['role']!=='admin') exit('Forbidden'); header_html(tr('users'),$u); ?><div class="grid2"><section class="card"><h2>Users</h2><?php foreach(db()->query('SELECT id,username,display_name,role,must_change_password,last_login_at FROM users ORDER BY id') as $r):?><div class="row"><div><b><?=h($r['display_name'])?> (<?=h($r['username'])?>)</b><small><?=h($r['role'])?> / <?= $r['must_change_password']?'初回変更待ち':'active' ?> / last: <?=h($r['last_login_at'])?></small></div></div><?php endforeach;?></section><section class="card"><h2>ユーザー追加</h2><?php if(!empty($notice)):?><p class="ok"><?=h($notice)?></p><?php endif;?><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><p>追加ユーザーの初期パスワードは <b>0921</b>。初回ログイン時に変更必須です。</p><form method="post" class="form"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="add_user"><label>表示名<input name="display_name" required></label><label><?=h(tr('username'))?><input name="username" required></label><label>権限<select name="role"><option value="user">user</option><option value="admin">admin</option></select></label><button><?=h(tr('add'))?></button></form></section></div>
 <section class="card"><h2><?=h(tr('reset_password'))?></h2><p><?=h(tr('reset_help'))?></p>
 <form method="post" class="form" action="?page=users">
@@ -443,6 +445,7 @@ elseif($page==='users'){ if($u['role']!=='admin') exit('Forbidden'); header_html
 <button><?=h(tr('reset_password'))?></button>
 </form></section><?php }
 footer_html();
+
 
 
 
