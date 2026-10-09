@@ -493,7 +493,7 @@ CARDS_JSON, true, 512, JSON_THROW_ON_ERROR);
 
 function ux(string $ja, string $en, string $pl): string { return ['ja'=>$ja,'en'=>$en,'pl'=>$pl][current_lang()]; }
 function render_registration_help(): void { ?>
-<section class="card help-guide"><h2><?=h(ux('話して営業記録を整理する','Prepare a sales record by talking to ChatGPT','Przygotuj wpis sprzedażowy, rozmawiając z ChatGPT'))?></h2>
+<section class="card help-guide"><p><a href="?page=chatgpt-import"><?=h(ux('ChatGPTから取り込む：依頼文・確認・登録','Import from ChatGPT: instructions, preview and save','Importuj z ChatGPT: instrukcja, podgląd i zapis'))?> ↗</a></p><p><?=h(ux('このボタンで依頼文をコピーし、ChatGPTのJSON出力を貼り付けて確認後に登録できます。Git操作は不要です。','Copy the instructions on the import page, paste the JSON returned by ChatGPT, review and save. No Git operations are needed.','Skopiuj instrukcję ze strony importu, wklej JSON z ChatGPT, sprawdź i zapisz. Git nie jest potrzebny.'))?></p><h2><?=h(ux('話して営業記録を整理する','Prepare a sales record by talking to ChatGPT','Przygotuj wpis sprzedażowy, rozmawiając z ChatGPT'))?></h2>
 <ol>
 <li><?=h(ux('ChatGPTに、日付・会社・相手・製品・話した内容・次のアクションを伝えます。','Tell ChatGPT the date, company, contact, product, discussion and next action.','Podaj ChatGPT datę, firmę, osobę, produkt, przebieg rozmowy i następne działanie.'))?></li>
 <li><?=h(ux('「DAISHO CRMに登録する営業記録にまとめて。担当者は自分。分からない項目は空欄に」と頼みます。日本語・英語・ポーランド語で話せます。','Ask: “Prepare this as a DAISHO CRM sales record. Set me as the owner. Leave unknown fields blank.” You may speak in Japanese, English or Polish.','Poproś: „Przygotuj wpis do DAISHO CRM. Ustaw mnie jako właściciela. Nieznane pola pozostaw puste.” Możesz mówić po japońsku, angielsku lub polsku.'))?></li>
