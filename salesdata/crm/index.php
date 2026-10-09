@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 session_start();
+header('Cache-Control: no-store, private');
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
@@ -275,7 +276,15 @@ function sync_current_sales_data(PDO $db): void {
 }
 
 function csrf(): string { if(empty($_SESSION['csrf'])) $_SESSION['csrf']=bin2hex(random_bytes(24)); return $_SESSION['csrf']; }
-function check_csrf(): void { if(!hash_equals($_SESSION['csrf']??'', $_POST['csrf']??'')) { http_response_code(403); exit('CSRF validation failed'); } }
+function check_csrf(): void {
+    $expected=$_SESSION['csrf']??null;
+    $provided=$_POST['csrf']??null;
+    if(!is_string($expected) || $expected==='' || !is_string($provided) || !hash_equals($expected,$provided)) {
+        $_SESSION['form_expired']=true;
+        header('Location:'.(empty($_SESSION['uid'])?'?page=login':'?'),true,303);
+        exit;
+    }
+}
 function user_count(): int { return (int)db()->query('SELECT COUNT(*) FROM users')->fetchColumn(); }
 function current_user(): ?array { if(empty($_SESSION['uid'])) return null; $s=db()->prepare('SELECT * FROM users WHERE id=?'); $s->execute([$_SESSION['uid']]); $u=$s->fetch(); if(!$u || (int)($_SESSION['auth_version']??0)!==(int)$u['auth_version']) { unset($_SESSION['uid'],$_SESSION['auth_version']); return null; } return $u; }
 function require_login(): array { $u=current_user(); if(!$u){ header('Location:?page=login'); exit; } return $u; }
@@ -315,7 +324,9 @@ if($_SERVER['REQUEST_METHOD']==='POST') {
 $page=$action==='reset_password'?'users':($_GET['page']??'dashboard'); if(user_count()===0) $page='bootstrap'; $u=current_user(); if(!in_array($page,['login','bootstrap'],true) && !$u) redirect('?page=login'); if($u && $u['must_change_password'] && $page!=='change-password') $page='change-password';
 function header_html(string $title, ?array $u): void { $lang=current_lang(); ?>
 <!doctype html><html lang="<?=h($lang)?>"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=h($title)?> | <?=APP_NAME?></title><link rel="stylesheet" href="style.css"></head><body>
-<header class="top"><div><strong>DAISHO</strong><span>Sales & Technical CRM</span></div><?php if($u): ?><nav><a href="?"><?=h(tr('dashboard'))?></a><a href="?page=activities"><?=h(tr('activities'))?></a><a href="?page=companies"><?=h(tr('companies'))?></a><a href="?page=products"><?=h(tr('products'))?></a><a href="?page=matrix"><?=h(tr('matrix'))?></a><a href="?page=tests"><?=h(tr('tests'))?></a><?php if($u['role']==='admin'):?><a href="?page=users"><?=h(tr('users'))?></a><?php endif;?></nav><?php endif; ?><div class="lang-switch" aria-label="<?=h(tr('language'))?>"><a class="<?=current_lang()==='ja'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'ja']))?>">日本語</a><a class="<?=current_lang()==='en'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'en']))?>">EN</a><a class="<?=current_lang()==='pl'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'pl']))?>">PL</a></div><?php if($u): ?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="linkbtn">Logout</button></form><?php endif; ?></header><main class="wrap"><h1><?=h($title)?></h1><?php }
+<header class="top"><div><strong>DAISHO</strong><span>Sales & Technical CRM</span></div><?php if($u): ?><nav><a href="?"><?=h(tr('dashboard'))?></a><a href="?page=activities"><?=h(tr('activities'))?></a><a href="?page=companies"><?=h(tr('companies'))?></a><a href="?page=products"><?=h(tr('products'))?></a><a href="?page=matrix"><?=h(tr('matrix'))?></a><a href="?page=tests"><?=h(tr('tests'))?></a><?php if($u['role']==='admin'):?><a href="?page=users"><?=h(tr('users'))?></a><?php endif;?></nav><?php endif; ?><div class="lang-switch" aria-label="<?=h(tr('language'))?>"><a class="<?=current_lang()==='ja'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'ja']))?>">日本語</a><a class="<?=current_lang()==='en'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'en']))?>">EN</a><a class="<?=current_lang()==='pl'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'pl']))?>">PL</a></div><?php if($u): ?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="linkbtn">Logout</button></form><?php endif; ?></header><main class="wrap"><h1><?=h($title)?></h1><?php if(!empty($_SESSION['form_expired'])): unset($_SESSION['form_expired']); ?>
+<p class="error"><?=h(['ja'=>'フォームの有効期限が切れました。もう一度入力してください。保存操作は行われていません。','en'=>'This form has expired. Please enter your details again. No changes were saved.','pl'=>'Formularz wygasł. Wpisz dane ponownie. Żadne zmiany nie zostały zapisane.'][$lang])?></p>
+<?php endif; }
 function footer_html(): void { echo '</main></body></html>'; }
 if($page==='bootstrap'){ header_html('初期設定',null); ?><div class="auth card"><p>初回のみ、初期パスワード <b>0921</b> で管理者を登録します。登録後は0921ではログインできません。</p><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="bootstrap"><label>初期パスワード<input type="password" name="initial_password" required></label><label>表示名<input name="display_name" required></label><label><?=h(tr('username'))?><input name="username" value="taiju" required></label><label>新しいパスワード<input type="password" name="password" minlength="8" required></label><button>管理者を登録</button></form></div><?php footer_html(); exit; }
 if($page==='login'){ header_html(tr('login'),null); ?><div class="auth card"><p><?=h(tr('login_help'))?></p><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="login"><label><?=h(tr('username'))?><input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus></label><label><?=h(tr('password'))?><input type="password" name="password" autocomplete="current-password" required></label><button><?=h(tr('login'))?></button></form></div><?php footer_html(); exit; }
