@@ -25,3 +25,44 @@ button.linkbtn:hover{background:var(--panel2)}
 .matrix tbody tr:hover{background:#edf4fb}
 .matrix th{font-weight:700}
 .stage,.owner-badge{font-weight:600}
+
+/* Business cards: warm paper, company accents and quiet, one-shot motion. */
+.contact-cards{grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:22px;padding:8px 2px 16px;perspective:1200px}
+.contact-card{--ink:#305c87;--wash:#edf3fa;position:relative;isolation:isolate;min-height:250px;padding:26px 28px 20px;gap:7px;border:1px solid #dce0e4;border-radius:10px;background:radial-gradient(ellipse at 100% 0,var(--wash),transparent 62%),repeating-linear-gradient(0deg,#ffffff00 0 3px,#8391a405 3px 4px),#fffefa;box-shadow:0 2px 0 #fff,0 4px 0 #dfe4e8,0 9px 22px #2534480c;transform-origin:50% 85%;transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease;animation:card-arrive .45s ease-out backwards}
+.contact-card::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;border-radius:10px 0 0 10px;background:var(--ink);pointer-events:none}
+.contact-card::after{content:"";position:absolute;right:24px;top:22px;width:26px;height:18px;border:1px solid var(--ink);border-radius:3px;box-shadow:4px -4px 0 -1px #fffefa,4px -4px 0 0 var(--ink);opacity:.25;pointer-events:none}
+.card-tone-1{--ink:#306b64;--wash:#eaf5ef}
+.card-tone-2{--ink:#805d36;--wash:#f8efdf}
+.card-tone-3{--ink:#695887;--wash:#f1ecf8}
+.contact-company{padding-right:42px;color:var(--ink);font-size:12px;font-weight:700;letter-spacing:.04em;overflow-wrap:anywhere}
+.contact-name{margin-top:12px;font-size:23px;line-height:1.4;letter-spacing:.025em;overflow-wrap:anywhere}
+.contact-role{font-size:12px;line-height:1.6;color:#596779;margin-bottom:14px;overflow-wrap:anywhere}
+.contact-card a{color:var(--ink);text-decoration:none;font-size:13px}
+.contact-card a:hover{text-decoration:underline;text-underline-offset:4px}
+.contact-card small{font-size:11px;color:#697483;overflow-wrap:anywhere}
+.contact-open{margin:14px 0 0;padding-top:12px;border-top:1px solid #26384c14}
+.contact-card:not(.contact-card-full) .contact-open{margin-top:auto}
+.contact-open a{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-weight:700;min-height:32px}
+.contact-open span{font-size:20px;transition:transform .2s ease}
+.contact-card:focus-within{outline:2px solid var(--ink);outline-offset:4px}
+.contact-card-full{max-width:760px;margin:20px auto;min-height:300px;padding:36px}
+.contact-card-full .contact-name{font-size:30px}
+.contact-card:nth-child(6n+2){animation-delay:45ms}
+.contact-card:nth-child(6n+3){animation-delay:90ms}
+.contact-card:nth-child(6n+4){animation-delay:135ms}
+.contact-card:nth-child(6n+5){animation-delay:180ms}
+.contact-card:nth-child(6n+6){animation-delay:225ms}
+.card-search{background:linear-gradient(115deg,#fffefa,#eff4f8);border-color:#d8e0e7}
+.card-search h2{font-size:24px;letter-spacing:.04em}
+.card-search form{display:flex;align-items:end;gap:12px}
+.card-search label{flex:1}
+.card-directory{background:#f8f9fb}
+.card-directory summary{padding:14px 12px;cursor:pointer;font-weight:600;border-radius:8px;color:#344d68}
+.card-directory summary:hover{background:#eaf0f5}
+.card-directory summary:focus-visible{outline:3px solid #245fa8;outline-offset:2px}
+.card-directory details details{margin:8px 0;border:1px solid #d9e1e9;border-radius:10px;background:#fff}
+.card-directory details details .contact-cards{padding:16px}
+@keyframes card-arrive{from{opacity:0;transform:translateY(12px) rotateX(4deg)}to{opacity:1;transform:none}}
+@media(hover:hover) and (pointer:fine){.contact-card:hover{transform:translateY(-5px) rotateX(1deg);box-shadow:0 2px 0 #fff,0 4px 0 #dfe4e8,0 17px 32px #25344820;border-color:#bdcbd5}.contact-card:hover .contact-open span{transform:translate(2px,-2px)}}
+@media(max-width:600px){.contact-cards{grid-template-columns:1fr;gap:18px}.contact-card{padding:22px;min-height:235px}.contact-card-full{padding:24px}.card-search form{align-items:stretch;flex-direction:column}.contact-name{font-size:22px}}
+@media(prefers-reduced-motion:reduce){.contact-card,.contact-open span{animation:none!important;transition:none!important}.contact-card:hover,.contact-card:hover .contact-open span{transform:none}}
