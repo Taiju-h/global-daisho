@@ -68,6 +68,7 @@ function render_contact_card(array $ct, bool $full=false): void {
     ?>
 <article class="contact-card card-tone-<?=$tone?><?=$full?' contact-card-full':''?>">
 <div class="contact-company"><?=h($ct['company'])?></div>
+<?php if($full) gpt_edit_link('contact',(int)$ct['id']); ?>
 <strong class="contact-name"><?=h($ct['name'])?></strong><div class="contact-role"><?=h(legacy_translation($ct['title']))?></div>
 <?php foreach(['email'=>'mailto:','mobile'=>'tel:','phone'=>'tel:'] as $field=>$scheme): if(!empty($ct[$field])): ?>
 <div><a href="<?=h($scheme.$ct[$field])?>"><?=h($ct[$field])?></a></div>
@@ -97,7 +98,7 @@ function render_cards(array $user): void {
         }
     }
     $q=trim((string)($_GET['q']??'')); ?>
-<section class="card card-search"><h2><?=h(card_text('cards'))?></h2>
+<section class="card card-search"><p><a href="?page=chatgpt-import"><?=h(ux('名刺をChatGPTから取り込む','Import business cards from ChatGPT','Importuj wizytówki z ChatGPT'))?></a></p><h2><?=h(card_text('cards'))?></h2>
 <form method="get"><input type="hidden" name="page" value="companies"><label><?=h(card_text('search'))?><input type="search" name="q" value="<?=h($q)?>"></label><button><?=h(card_text('search'))?></button></form></section>
 <?php if($q!=='') {
         $s=$db->prepare("SELECT ct.*,co.name company FROM contacts ct LEFT JOIN companies co ON co.id=ct.company_id WHERE ct.name LIKE ? OR co.name LIKE ? OR ct.email LIKE ? ORDER BY co.name,ct.name");
@@ -493,17 +494,15 @@ CARDS_JSON, true, 512, JSON_THROW_ON_ERROR);
 
 function ux(string $ja, string $en, string $pl): string { return ['ja'=>$ja,'en'=>$en,'pl'=>$pl][current_lang()]; }
 function render_registration_help(): void { ?>
-<section class="card help-guide"><p><a href="?page=chatgpt-import"><?=h(ux('ChatGPTから取り込む：依頼文・確認・登録','Import from ChatGPT: instructions, preview and save','Importuj z ChatGPT: instrukcja, podgląd i zapis'))?> ↗</a></p><p><?=h(ux('このボタンで依頼文をコピーし、ChatGPTのJSON出力を貼り付けて確認後に登録できます。Git操作は不要です。','Copy the instructions on the import page, paste the JSON returned by ChatGPT, review and save. No Git operations are needed.','Skopiuj instrukcję ze strony importu, wklej JSON z ChatGPT, sprawdź i zapisz. Git nie jest potrzebny.'))?></p><h2><?=h(ux('話して営業記録を整理する','Prepare a sales record by talking to ChatGPT','Przygotuj wpis sprzedażowy, rozmawiając z ChatGPT'))?></h2>
+<section class="card help-guide"><h2><?=h(ux('スキャン・会話から追加／修正','Add or update from scans and conversations','Dodawaj i zmieniaj dane ze skanów i rozmów'))?></h2>
 <ol>
-<li><?=h(ux('ChatGPTに、日付・会社・相手・製品・話した内容・次のアクションを伝えます。','Tell ChatGPT the date, company, contact, product, discussion and next action.','Podaj ChatGPT datę, firmę, osobę, produkt, przebieg rozmowy i następne działanie.'))?></li>
-<li><?=h(ux('「DAISHO CRMに登録する営業記録にまとめて。担当者は自分。分からない項目は空欄に」と頼みます。日本語・英語・ポーランド語で話せます。','Ask: “Prepare this as a DAISHO CRM sales record. Set me as the owner. Leave unknown fields blank.” You may speak in Japanese, English or Polish.','Poproś: „Przygotuj wpis do DAISHO CRM. Ustaw mnie jako właściciela. Nieznane pola pozostaw puste.” Możesz mówić po japońsku, angielsku lub polsku.'))?></li>
-<li><?=h(ux('内容を確認します。期限が決まっていない場合は空欄にし、約束したことと提案を分けます。','Review the result. Leave unagreed deadlines blank and distinguish commitments from suggestions.','Sprawdź wynik. Nieuzgodnione terminy pozostaw puste; oddziel zobowiązania od propozycji.'))?></li>
-<li><?=h(ux('営業履歴の「登録する」を開き、内容を貼り付けて保存します。登録者はログイン中のユーザーになります。登録作業をTaijuに依頼することもできます。','Open “Add record” in Sales Activities, paste the prepared details and save. The logged-in user becomes the owner. You can also ask Taiju to handle registration.','Otwórz „Dodaj wpis” w historii sprzedaży, wklej dane i zapisz. Właścicielem zostaje zalogowany użytkownik. Możesz też poprosić Taiju o rejestrację.'))?></li>
-<li><?=h(ux('履歴に表示されたことを確認して完了です。ChatGPT側で登録を依頼した場合も「登録済み」か「反映待ち」かを確認してください。','Check that the record appears in the history. If you ask ChatGPT to arrange registration, verify whether it is saved or still awaiting deployment.','Sprawdź, czy wpis pojawił się w historii. Jeśli zlecasz rejestrację przez ChatGPT, sprawdź, czy dane zapisano, czy nadal czekają na wdrożenie.'))?></li>
-</ol>
-<p><?=h(ux('現在、ChatGPTで話すだけでCRMへ直接保存する自動連携はありません。','There is currently no automatic connection that saves a ChatGPT conversation directly to this CRM.','Obecnie rozmowa z ChatGPT nie zapisuje się automatycznie w CRM.'))?></p>
-<details><summary><?=h(ux('画面から登録する場合','Manual entry','Wpis ręczny'))?></summary><p><?=h(ux('会社がなければ「会社・名刺」で追加します。営業履歴で「登録する」を開き、日付・会社・件名・説明を入力。担当者が一覧にいなければ説明に名前を書きます。製品名は件名にも入れてください。使う言語欄だけ入力し、次のアクションと合意済みの期限を記入して保存します。自動翻訳や横串ビューの自動更新は行われません。','If the company is missing, add it under Companies / Cards. In Sales Activities, open Add record and enter the date, company, subject and description. If the contact is missing, put their name in the description. Include the product name in the subject. Fill the language field you use, add the next action and any agreed due date, then save. Translation and the Cross-Reference View are not updated automatically.','Jeśli brakuje firmy, dodaj ją w Firmy / Wizytówki. Otwórz Dodaj wpis, uzupełnij datę, firmę, temat i opis. Jeśli brakuje kontaktu, wpisz nazwisko w opisie. Dodaj nazwę produktu w temacie. Uzupełnij używany język, następne działanie i uzgodniony termin, a następnie zapisz. Tłumaczenia i widok przekrojowy nie aktualizują się automatycznie.'))?></p></details>
-</section><?php }
+<li><?=h(ux('新規の名刺・日報は「ChatGPTから取り込む」で依頼文をコピーします。登録済みの修正は対象の「ChatGPTで修正」を押し、ID付きの依頼文をコピーします。','For new cards or sales records, copy the instructions from Import from ChatGPT. For corrections, use Edit with ChatGPT on the existing record and copy its instructions with the record ID.','Dla nowych wizytówek lub wpisów skopiuj instrukcję z Importuj z ChatGPT. Aby poprawić wpis, wybierz Edytuj z ChatGPT i skopiuj instrukcję z ID.'))?></li>
+<li><?=h(ux('ChatGPTに依頼文とスキャン画像・PDF、または修正内容を渡し、「この内容で追加／更新して」と伝えます。','Give ChatGPT the instructions and your scan, PDF or corrections; ask it to prepare the additions or updates.','Przekaż ChatGPT instrukcję i skan, PDF lub poprawki; poproś o przygotowanie zmian.'))?></li>
+<li><?=h(ux('返ってきたJSONを取り込み画面に貼り付け、「取り込み内容を確認」を押します。会社・人物・変更前後を確認し、「この内容で反映する」で保存します。','Paste the returned JSON into the import page and preview it. Check the company, person and before/after values, then apply the changes.','Wklej JSON do strony importu i wyświetl podgląd. Sprawdź firmę, osobę oraz wartości przed i po zmianie, następnie zatwierdź.'))?></li>
+</ol><p><?=h(ux('空欄・読み取れない情報では既存データを消しません。候補が複数ある場合はIDを指定し直します。日報・タスクの修正は登録者または管理者が行います。','Blank or unreadable information does not erase existing data. If several records match, use a record ID. Sales records and tasks can be edited by their owner or an administrator.','Puste lub nieczytelne pola nie usuwają danych. Jeśli pasuje kilka wpisów, podaj ID. Wpisy i zadania edytuje właściciel lub administrator.'))?></p>
+<p><a href="?page=chatgpt-import"><?=h(ux('ChatGPTから取り込む','Import from ChatGPT','Importuj z ChatGPT'))?> ↗</a></p>
+<p><?=h(ux('会話の自動取得ではなく、ChatGPTの出力を貼り付ける方式です。通常の登録・修正でGit操作は不要です。','This uses pasted ChatGPT output, not automatic conversation retrieval. Routine registration and edits do not require Git.','Wklejasz wynik z ChatGPT; rozmowy nie są pobierane automatycznie. Rejestracja i edycja danych nie wymagają Git.'))?></p>
+<details><summary><?=h(ux('手入力する場合','Manual entry','Wpis ręczny'))?></summary><p><?=h(ux('営業履歴の「登録する」を開いて入力・保存します。会社がなければ「会社・名刺」から追加できます。','Open Add record in Sales Activities, fill in the details and save. Add a missing company under Companies / Cards.','Otwórz Dodaj wpis w historii sprzedaży, uzupełnij dane i zapisz. Brakującą firmę dodaj w Firmy / Wizytówki.'))?></p></details></section><?php }
 
 function product_mentions(array $product, string $text): bool {
     $terms=array_unique(array_filter([(string)$product['name'],(string)$product['code']]));
@@ -577,3 +576,4 @@ function repair_dt_relationships(PDO $db): void {
         $db->commit();
     } catch(Throwable $e) { if($db->inTransaction()) $db->rollBack(); throw $e; }
 }
+
