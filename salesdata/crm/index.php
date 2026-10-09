@@ -19,6 +19,18 @@ function current_lang(): string {
 function tr(string $key): string {
     static $d=[
       'ja'=>[
+        'reset_password'=>'パスワードをリセット',
+        'temporary_password'=>'仮パスワード（12文字以上）',
+        'admin_password'=>'確認用：ご自身のCRMパスワード',
+        'reset_help'=>'対象ユーザー名を確認して仮パスワードを設定してください。相手は次回ログイン後に変更が必要です。',
+        'reset_done'=>'パスワードをリセットしました。対象ユーザー名と仮パスワードを本人に伝えてください。',
+        'reset_invalid'=>'対象ユーザーまたは確認用パスワードが正しくありません。',
+        'reset_short'=>'仮パスワードは12文字以上72バイト以下で入力してください。',
+        'login_failed'=>'ユーザー名またはパスワードが違います。',
+        'login_help'=>'CRM専用のユーザー名・パスワードを入力してください。入口のBasic認証やGitHubとは別です。忘れた場合はTaijuにリセットを依頼してください。',
+        'first_change'=>'仮パスワードでログインしています。新しいパスワードを設定してください。',
+        'new_password'=>'新しいパスワード',
+        'start'=>'変更して開始',
         'dashboard'=>'営業ダッシュボード','activities'=>'営業履歴','companies'=>'会社','products'=>'製品 / SDS','matrix'=>'営業 横串ビュー','tests'=>'試験・現場テスト','users'=>'ユーザー管理',
         'next_actions'=>'次のアクション','planned_tests'=>'予定試験','recent_activities'=>'最近の営業履歴','new_activity'=>'新規営業記録','history'=>'履歴','date'=>'日付','company'=>'会社','contact'=>'担当者','type'=>'種別','subject'=>'件名','japanese'=>'日本語','english'=>'English','polish'=>'Polski','next_action'=>'次アクション','due'=>'期限','save'=>'保存','done'=>'完了',
         'company_list'=>'会社一覧','add_company'=>'会社追加','company_name'=>'会社名','country'=>'国','url'=>'URL','memo'=>'メモ','add'=>'追加',
@@ -28,6 +40,18 @@ function tr(string $key): string {
         'login'=>'ログイン','username'=>'ユーザー名','password'=>'パスワード','change_password'=>'パスワード変更','language'=>'言語','owner'=>'登録者'
       ],
       'en'=>[
+        'reset_password'=>'Reset password',
+        'temporary_password'=>'Temporary password (at least 12 characters)',
+        'admin_password'=>'Confirm with your own CRM password',
+        'reset_help'=>'Check the target username and set a temporary password. The user must change it at the next login.',
+        'reset_done'=>'Password reset. Give the username and temporary password to the account owner.',
+        'reset_invalid'=>'The selected user or your confirmation password is incorrect.',
+        'reset_short'=>'Use at least 12 characters and no more than 72 bytes for the temporary password.',
+        'login_failed'=>'Incorrect username or password.',
+        'login_help'=>'Enter your CRM username and password. These are separate from Basic authentication and GitHub. Ask Taiju for a reset if you have forgotten them.',
+        'first_change'=>'You are using a temporary password. Set a new password to continue.',
+        'new_password'=>'New password',
+        'start'=>'Change and continue',
         'dashboard'=>'Sales Dashboard','activities'=>'Sales Activities','companies'=>'Companies','products'=>'Products / SDS','matrix'=>'Cross-Reference View','tests'=>'Tests / Field Trials','users'=>'User Management',
         'next_actions'=>'Next Actions','planned_tests'=>'Planned Tests','recent_activities'=>'Recent Sales Activities','new_activity'=>'New Sales Record','history'=>'History','date'=>'Date','company'=>'Company','contact'=>'Contact','type'=>'Type','subject'=>'Subject','japanese'=>'Japanese','english'=>'English','polish'=>'Polish','next_action'=>'Next Action','due'=>'Due Date','save'=>'Save','done'=>'Done',
         'company_list'=>'Company List','add_company'=>'Add Company','company_name'=>'Company Name','country'=>'Country','url'=>'URL','memo'=>'Notes','add'=>'Add',
@@ -37,6 +61,18 @@ function tr(string $key): string {
         'login'=>'Login','username'=>'Username','password'=>'Password','change_password'=>'Change Password','language'=>'Language','owner'=>'Owner'
       ],
       'pl'=>[
+        'reset_password'=>'Zresetuj hasło',
+        'temporary_password'=>'Hasło tymczasowe (co najmniej 12 znaków)',
+        'admin_password'=>'Potwierdź własnym hasłem do CRM',
+        'reset_help'=>'Sprawdź nazwę użytkownika i ustaw hasło tymczasowe. Użytkownik musi je zmienić przy następnym logowaniu.',
+        'reset_done'=>'Hasło zresetowane. Przekaż nazwę użytkownika i hasło tymczasowe właścicielowi konta.',
+        'reset_invalid'=>'Wybrany użytkownik lub Twoje hasło potwierdzające jest nieprawidłowe.',
+        'reset_short'=>'Hasło tymczasowe musi mieć co najmniej 12 znaków i nie więcej niż 72 bajty.',
+        'login_failed'=>'Nieprawidłowa nazwa użytkownika lub hasło.',
+        'login_help'=>'Wpisz nazwę użytkownika i hasło do CRM. Są one odrębne od uwierzytelniania Basic i GitHub. Jeśli ich nie pamiętasz, poproś Taiju o reset.',
+        'first_change'=>'Korzystasz z hasła tymczasowego. Ustaw nowe hasło, aby kontynuować.',
+        'new_password'=>'Nowe hasło',
+        'start'=>'Zmień i kontynuuj',
         'dashboard'=>'Panel sprzedaży','activities'=>'Historia sprzedaży','companies'=>'Firmy','products'=>'Produkty / SDS','matrix'=>'Widok przekrojowy','tests'=>'Testy / Próby terenowe','users'=>'Użytkownicy',
         'next_actions'=>'Następne działania','planned_tests'=>'Planowane testy','recent_activities'=>'Ostatnie działania sprzedażowe','new_activity'=>'Nowy wpis sprzedażowy','history'=>'Historia','date'=>'Data','company'=>'Firma','contact'=>'Kontakt','type'=>'Typ','subject'=>'Temat','japanese'=>'Japoński','english'=>'Angielski','polish'=>'Polski','next_action'=>'Następne działanie','due'=>'Termin','save'=>'Zapisz','done'=>'Gotowe',
         'company_list'=>'Lista firm','add_company'=>'Dodaj firmę','company_name'=>'Nazwa firmy','country'=>'Kraj','url'=>'URL','memo'=>'Notatki','add'=>'Dodaj',
@@ -118,6 +154,7 @@ function migrate(PDO $db): void {
     ensure_column($db,'company_product_status','owner_name','VARCHAR(191) NULL');
     ensure_column($db,'tests','owner_name','VARCHAR(191) NULL');
     ensure_column($db,'tasks','owner_name','VARCHAR(191) NULL');
+    ensure_column($db,'users','auth_version','BIGINT UNSIGNED NOT NULL DEFAULT 0');
     seed($db);
     sync_current_sales_data($db);
 }
@@ -240,7 +277,7 @@ function sync_current_sales_data(PDO $db): void {
 function csrf(): string { if(empty($_SESSION['csrf'])) $_SESSION['csrf']=bin2hex(random_bytes(24)); return $_SESSION['csrf']; }
 function check_csrf(): void { if(!hash_equals($_SESSION['csrf']??'', $_POST['csrf']??'')) { http_response_code(403); exit('CSRF validation failed'); } }
 function user_count(): int { return (int)db()->query('SELECT COUNT(*) FROM users')->fetchColumn(); }
-function current_user(): ?array { if(empty($_SESSION['uid'])) return null; $s=db()->prepare('SELECT * FROM users WHERE id=?'); $s->execute([$_SESSION['uid']]); return $s->fetch() ?: null; }
+function current_user(): ?array { if(empty($_SESSION['uid'])) return null; $s=db()->prepare('SELECT * FROM users WHERE id=?'); $s->execute([$_SESSION['uid']]); $u=$s->fetch(); if(!$u || (int)($_SESSION['auth_version']??0)!==(int)$u['auth_version']) { unset($_SESSION['uid'],$_SESSION['auth_version']); return null; } return $u; }
 function require_login(): array { $u=current_user(); if(!$u){ header('Location:?page=login'); exit; } return $u; }
 function redirect(string $to): never { header('Location:'.$to); exit; }
 
@@ -251,22 +288,38 @@ if($_SERVER['REQUEST_METHOD']==='POST') {
         $code=(string)($_POST['initial_password']??''); $pw=(string)($_POST['password']??'');
         if(!password_verify($code, INITIAL_PASSWORD_HASH)) $error='初期パスワードが違います。'; elseif(strlen($pw)<8) $error='新しいパスワードは8文字以上にしてください。'; else { $s=db()->prepare('INSERT INTO users(username,display_name,password_hash,role,must_change_password) VALUES(?,?,?,?,0)'); try{$s->execute([trim($_POST['username']??'admin'),trim($_POST['display_name']??'Administrator'),password_hash($pw,PASSWORD_DEFAULT),'admin']); $_SESSION['uid']=(int)db()->lastInsertId(); redirect('?');} catch(Throwable $e){$error='ユーザー名が使用済みです。';} }
     } elseif($action==='login') {
-        $s=db()->prepare('SELECT * FROM users WHERE username=?'); $s->execute([trim($_POST['username']??'')]); $u=$s->fetch(); if(!$u || !password_verify((string)($_POST['password']??''),$u['password_hash'])) $error='ユーザー名またはパスワードが違います。'; else {$_SESSION['uid']=(int)$u['id']; db()->prepare('UPDATE users SET last_login_at=CURRENT_TIMESTAMP WHERE id=?')->execute([$u['id']]); redirect($u['must_change_password']?'?page=change-password':'?');}
+        $s=db()->prepare('SELECT * FROM users WHERE username=?'); $s->execute([trim($_POST['username']??'')]); $u=$s->fetch(); if(!$u || !password_verify((string)($_POST['password']??''),$u['password_hash'])) $error=tr('login_failed'); else {session_regenerate_id(true); $_SESSION['uid']=(int)$u['id']; $_SESSION['auth_version']=(int)$u['auth_version']; db()->prepare('UPDATE users SET last_login_at=CURRENT_TIMESTAMP WHERE id=?')->execute([$u['id']]); redirect($u['must_change_password']?'?page=change-password':'?');}
     } elseif($action==='logout') { session_destroy(); redirect('?page=login'); }
     elseif($action==='change_password') { $u=require_login(); $pw=(string)($_POST['password']??''); if(strlen($pw)<8) $error='新しいパスワードは8文字以上にしてください。'; else {db()->prepare('UPDATE users SET password_hash=?,must_change_password=0 WHERE id=?')->execute([password_hash($pw,PASSWORD_DEFAULT),$u['id']]); redirect('?');} }
     elseif($action==='add_user') { $u=require_login(); if($u['role']!=='admin') exit('Forbidden'); $s=db()->prepare('INSERT INTO users(username,display_name,password_hash,role,must_change_password) VALUES(?,?,?,?,1)'); try{$s->execute([trim($_POST['username']),trim($_POST['display_name']),INITIAL_PASSWORD_HASH,$_POST['role']==='admin'?'admin':'user']); $notice='ユーザーを追加しました。初回パスワードは0921、ログイン後に変更必須です。';}catch(Throwable $e){$error='ユーザーを追加できませんでした。';} }
+    elseif($action==='reset_password') {
+        $u=require_login();
+        if($u['role']!=='admin' || $u['must_change_password']) { http_response_code(403); exit('Forbidden'); }
+        $targetId=(int)($_POST['target_id']??0);
+        $pw=(string)($_POST['temporary_password']??'');
+        $q=db()->prepare('SELECT id FROM users WHERE id=?');
+        $q->execute([$targetId]);
+        if(!password_verify((string)($_POST['admin_password']??''),$u['password_hash']) || !$q->fetch() || $targetId===(int)$u['id']) {
+            $error=tr('reset_invalid');
+        } elseif(preg_match_all('/./us',$pw)<12 || strlen($pw)>72) {
+            $error=tr('reset_short');
+        } else {
+            db()->prepare('UPDATE users SET password_hash=?,must_change_password=1,auth_version=auth_version+1 WHERE id=?')->execute([password_hash($pw,PASSWORD_DEFAULT),$targetId]);
+            $notice=tr('reset_done');
+        }
+    }
     elseif($action==='add_company') { require_login(); db()->prepare('INSERT INTO companies(name,country,website,notes) VALUES(?,?,?,?)')->execute([trim($_POST['name']),trim($_POST['country']),trim($_POST['website']),trim($_POST['notes'])]); redirect('?page=companies'); }
     elseif($action==='add_activity') { $u=require_login(); $s=db()->prepare('INSERT INTO activities(activity_date,company_id,contact_id,activity_type,subject,summary_ja,summary_en,summary_pl,next_action,next_action_date,status,created_by,owner_name) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'); $s->execute([$_POST['activity_date'],$_POST['company_id']?:null,$_POST['contact_id']?:null,$_POST['activity_type'],trim($_POST['subject']),trim($_POST['summary_ja']),trim($_POST['summary_en']),trim($_POST['summary_pl']),trim($_POST['next_action']),$_POST['next_action_date']?:null,$_POST['status'],$u['id'],$u['display_name']]); redirect('?page=activities'); }
     elseif($action==='task_done') { require_login(); db()->prepare("UPDATE tasks SET status='done' WHERE id=?")->execute([(int)$_POST['id']]); redirect('?'); }
 }
-$page=$_GET['page']??'dashboard'; if(user_count()===0) $page='bootstrap'; $u=current_user(); if(!in_array($page,['login','bootstrap'],true) && !$u) redirect('?page=login'); if($u && $u['must_change_password'] && $page!=='change-password') $page='change-password';
+$page=$action==='reset_password'?'users':($_GET['page']??'dashboard'); if(user_count()===0) $page='bootstrap'; $u=current_user(); if(!in_array($page,['login','bootstrap'],true) && !$u) redirect('?page=login'); if($u && $u['must_change_password'] && $page!=='change-password') $page='change-password';
 function header_html(string $title, ?array $u): void { $lang=current_lang(); ?>
 <!doctype html><html lang="<?=h($lang)?>"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=h($title)?> | <?=APP_NAME?></title><link rel="stylesheet" href="style.css"></head><body>
 <header class="top"><div><strong>DAISHO</strong><span>Sales & Technical CRM</span></div><?php if($u): ?><nav><a href="?"><?=h(tr('dashboard'))?></a><a href="?page=activities"><?=h(tr('activities'))?></a><a href="?page=companies"><?=h(tr('companies'))?></a><a href="?page=products"><?=h(tr('products'))?></a><a href="?page=matrix"><?=h(tr('matrix'))?></a><a href="?page=tests"><?=h(tr('tests'))?></a><?php if($u['role']==='admin'):?><a href="?page=users"><?=h(tr('users'))?></a><?php endif;?></nav><?php endif; ?><div class="lang-switch" aria-label="<?=h(tr('language'))?>"><a class="<?=current_lang()==='ja'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'ja']))?>">日本語</a><a class="<?=current_lang()==='en'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'en']))?>">EN</a><a class="<?=current_lang()==='pl'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'pl']))?>">PL</a></div><?php if($u): ?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="linkbtn">Logout</button></form><?php endif; ?></header><main class="wrap"><h1><?=h($title)?></h1><?php }
 function footer_html(): void { echo '</main></body></html>'; }
 if($page==='bootstrap'){ header_html('初期設定',null); ?><div class="auth card"><p>初回のみ、初期パスワード <b>0921</b> で管理者を登録します。登録後は0921ではログインできません。</p><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="bootstrap"><label>初期パスワード<input type="password" name="initial_password" required></label><label>表示名<input name="display_name" required></label><label><?=h(tr('username'))?><input name="username" value="taiju" required></label><label>新しいパスワード<input type="password" name="password" minlength="8" required></label><button>管理者を登録</button></form></div><?php footer_html(); exit; }
-if($page==='login'){ header_html(tr('login'),null); ?><div class="auth card"><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="login"><label><?=h(tr('username'))?><input name="username" required autofocus></label><label><?=h(tr('password'))?><input type="password" name="password" required></label><button><?=h(tr('login'))?></button></form></div><?php footer_html(); exit; }
-if($page==='change-password'){ $u=require_login(); header_html(tr('change_password'),$u); ?><div class="auth card"><p>初回ログインです。新しいパスワードを登録してください。</p><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="change_password"><label>新しいパスワード<input type="password" name="password" minlength="8" required></label><button>変更して開始</button></form></div><?php footer_html(); exit; }
+if($page==='login'){ header_html(tr('login'),null); ?><div class="auth card"><p><?=h(tr('login_help'))?></p><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="login"><label><?=h(tr('username'))?><input name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus></label><label><?=h(tr('password'))?><input type="password" name="password" autocomplete="current-password" required></label><button><?=h(tr('login'))?></button></form></div><?php footer_html(); exit; }
+if($page==='change-password'){ $u=require_login(); header_html(tr('change_password'),$u); ?><div class="auth card"><p><?=h(tr('first_change'))?></p><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="change_password"><label><?=h(tr('new_password'))?><input type="password" name="password" autocomplete="new-password" minlength="8" required></label><button><?=h(tr('start'))?></button></form></div><?php footer_html(); exit; }
 $u=require_login();
 if($page==='dashboard'){ header_html(tr('dashboard'),$u); $stats=['companies'=>(int)db()->query('SELECT COUNT(*) FROM companies')->fetchColumn(),'activities'=>(int)db()->query('SELECT COUNT(*) FROM activities')->fetchColumn(),'open_tasks'=>(int)db()->query("SELECT COUNT(*) FROM tasks WHERE status='open'")->fetchColumn(),'planned_tests'=>(int)db()->query("SELECT COUNT(*) FROM tests WHERE status='planned'")->fetchColumn()]; ?><div class="stats"><?php foreach($stats as $k=>$v):?><div class="stat"><b><?=$v?></b><span><?=h(str_replace('_',' ',$k))?></span></div><?php endforeach;?></div><div class="grid2"><section class="card"><h2><?=h(tr('next_actions'))?></h2><?php $q=db()->query("SELECT tasks.*,companies.name company FROM tasks LEFT JOIN companies ON companies.id=tasks.company_id WHERE tasks.status='open' ORDER BY COALESCE(due_date,'9999-12-31') LIMIT 12"); foreach($q as $r):?><div class="row"><div><b><?=h($r['due_date'])?> <?=h(legacy_translation($r['title']))?></b><small><?=h($r['company'])?> / <?=h(legacy_translation($r['detail']))?></small></div><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="task_done"><input type="hidden" name="id" value="<?=$r['id']?>"><button class="small"><?=h(tr('done'))?></button></form></div><?php endforeach;?></section><section class="card"><h2><?=h(tr('planned_tests'))?></h2><?php foreach(db()->query("SELECT tests.*,companies.name company FROM tests LEFT JOIN companies ON companies.id=tests.company_id WHERE tests.status='planned' ORDER BY test_date LIMIT 12") as $r):?><div class="row"><div><b><?=h($r['test_date'])?> <?=h(legacy_translation($r['title']))?></b><small><?=h($r['company'])?> / <?=h(legacy_translation($r['site']))?></small></div></div><?php endforeach;?></section></div><section class="card"><h2><?=h(tr('recent_activities'))?></h2><?php foreach(db()->query("SELECT a.*,c.name company,ct.name contact FROM activities a LEFT JOIN companies c ON c.id=a.company_id LEFT JOIN contacts ct ON ct.id=a.contact_id ORDER BY activity_date DESC,a.id DESC LIMIT 8") as $r):?><article class="activity"><div class="date"><?=h($r['activity_date'])?></div><div><b><?=h($r['company'])?> / <?=h($r['contact'])?> — <?=h(legacy_translation($r['subject']))?></b><p><?=nl2br(h(localized($r,'summary')))?></p><?php if($r['next_action']):?><small>Next: <?=h($r['next_action_date'])?> <?=h(localized($r,'next_action'))?></small><?php endif;?></div></article><?php endforeach;?></section><?php }
 elseif($page==='activities'){ header_html(tr('activities'),$u); $companies=db()->query('SELECT * FROM companies ORDER BY name')->fetchAll(); $contacts=db()->query('SELECT * FROM contacts ORDER BY name')->fetchAll(); ?><div class="grid2"><section class="card"><h2><?=h(tr('new_activity'))?></h2><form method="post" class="form"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="add_activity"><label><?=h(tr('date'))?><input type="date" name="activity_date" value="<?=date('Y-m-d')?>" required></label><label><?=h(tr('company'))?><select name="company_id"><option value="">--</option><?php foreach($companies as $c):?><option value="<?=$c['id']?>"><?=h($c['name'])?></option><?php endforeach;?></select></label><label><?=h(tr('contact'))?><select name="contact_id"><option value="">--</option><?php foreach($contacts as $c):?><option value="<?=$c['id']?>"><?=h($c['name'])?></option><?php endforeach;?></select></label><label><?=h(tr('type'))?><select name="activity_type"><option>meeting</option><option>email</option><option>phone</option><option>sample</option><option>test</option></select></label><label><?=h(tr('subject'))?><input name="subject" required></label><label><?=h(tr('japanese'))?><textarea name="summary_ja" rows="6"></textarea></label><label><?=h(tr('english'))?><textarea name="summary_en" rows="4"></textarea></label><label><?=h(tr('polish'))?><textarea name="summary_pl" rows="4"></textarea></label><label><?=h(tr('next_action'))?><input name="next_action"></label><label><?=h(tr('due'))?><input type="date" name="next_action_date"></label><input type="hidden" name="status" value="open"><button><?=h(tr('save'))?></button></form></section><section class="card"><h2><?=h(tr('history'))?></h2><?php foreach(db()->query("SELECT a.*,c.name company,ct.name contact FROM activities a LEFT JOIN companies c ON c.id=a.company_id LEFT JOIN contacts ct ON ct.id=a.contact_id ORDER BY activity_date DESC,id DESC") as $r):?><article class="activity"><div class="date"><?=h($r['activity_date'])?></div><div><b><?=h($r['company'])?> / <?=h($r['contact'])?></b><span class="owner-badge"><?=h(tr('owner'))?>: <?=h($r['owner_name']?:'Taiju')?></span><h3><?=h(legacy_translation($r['subject']))?></h3><p><?=nl2br(h(localized($r,'summary')))?></p><?php if($r['summary_en']):?><details><summary>English</summary><p><?=nl2br(h($r['summary_en']))?></p></details><?php endif;?><?php if($r['summary_pl']):?><details><summary>Polski</summary><p><?=nl2br(h($r['summary_pl']))?></p></details><?php endif;?><small>Next: <?=h($r['next_action_date'])?> <?=h(localized($r,'next_action'))?></small></div></article><?php endforeach;?></section></div><?php }
@@ -301,5 +354,17 @@ elseif($page==='matrix'){ header_html(tr('matrix'),$u); ?>
 <?php }
 
 elseif($page==='tests'){ header_html(tr('tests'),$u); ?><section class="card"><?php foreach(db()->query("SELECT t.*,c.name company,p.name product FROM tests t LEFT JOIN companies c ON c.id=t.company_id LEFT JOIN products p ON p.id=t.product_id ORDER BY COALESCE(test_date,'9999-12-31')") as $r):?><article class="activity"><div class="date"><?=h($r['test_date'])?></div><div><b><?=h(legacy_translation($r['title']))?></b><p><?=h($r['company'])?> / <?=h(legacy_translation($r['site']))?> / <?=h($r['product'])?></p><small>Status: <?=h($r['status'])?></small></div></article><?php endforeach;?></section><?php }
-elseif($page==='users'){ if($u['role']!=='admin') exit('Forbidden'); header_html(tr('users'),$u); ?><div class="grid2"><section class="card"><h2>Users</h2><?php foreach(db()->query('SELECT username,display_name,role,must_change_password,last_login_at FROM users ORDER BY id') as $r):?><div class="row"><div><b><?=h($r['display_name'])?> (<?=h($r['username'])?>)</b><small><?=h($r['role'])?> / <?= $r['must_change_password']?'初回変更待ち':'active' ?> / last: <?=h($r['last_login_at'])?></small></div></div><?php endforeach;?></section><section class="card"><h2>ユーザー追加</h2><?php if(!empty($notice)):?><p class="ok"><?=h($notice)?></p><?php endif;?><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><p>追加ユーザーの初期パスワードは <b>0921</b>。初回ログイン時に変更必須です。</p><form method="post" class="form"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="add_user"><label>表示名<input name="display_name" required></label><label><?=h(tr('username'))?><input name="username" required></label><label>権限<select name="role"><option value="user">user</option><option value="admin">admin</option></select></label><button><?=h(tr('add'))?></button></form></section></div><?php }
+elseif($page==='users'){ if($u['role']!=='admin') exit('Forbidden'); header_html(tr('users'),$u); ?><div class="grid2"><section class="card"><h2>Users</h2><?php foreach(db()->query('SELECT id,username,display_name,role,must_change_password,last_login_at FROM users ORDER BY id') as $r):?><div class="row"><div><b><?=h($r['display_name'])?> (<?=h($r['username'])?>)</b><small><?=h($r['role'])?> / <?= $r['must_change_password']?'初回変更待ち':'active' ?> / last: <?=h($r['last_login_at'])?></small></div></div><?php endforeach;?></section><section class="card"><h2>ユーザー追加</h2><?php if(!empty($notice)):?><p class="ok"><?=h($notice)?></p><?php endif;?><?php if(!empty($error)):?><p class="error"><?=h($error)?></p><?php endif;?><p>追加ユーザーの初期パスワードは <b>0921</b>。初回ログイン時に変更必須です。</p><form method="post" class="form"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="add_user"><label>表示名<input name="display_name" required></label><label><?=h(tr('username'))?><input name="username" required></label><label>権限<select name="role"><option value="user">user</option><option value="admin">admin</option></select></label><button><?=h(tr('add'))?></button></form></section></div>
+<section class="card"><h2><?=h(tr('reset_password'))?></h2><p><?=h(tr('reset_help'))?></p>
+<form method="post" class="form" action="?page=users">
+<input type="hidden" name="csrf" value="<?=h(csrf())?>">
+<input type="hidden" name="action" value="reset_password">
+<label><?=h(tr('username'))?><select name="target_id" required><option value="">--</option>
+<?php foreach(db()->query('SELECT id,username,display_name FROM users ORDER BY username') as $target): if((int)$target['id']===(int)$u['id']) continue; ?>
+<option value="<?=(int)$target['id']?>"><?=h($target['display_name'])?> (<?=h($target['username'])?>)</option>
+<?php endforeach;?></select></label>
+<label><?=h(tr('temporary_password'))?><input type="password" name="temporary_password" autocomplete="new-password" minlength="12" maxlength="72" required></label>
+<label><?=h(tr('admin_password'))?><input type="password" name="admin_password" autocomplete="current-password" required></label>
+<button><?=h(tr('reset_password'))?></button>
+</form></section><?php }
 footer_html();
