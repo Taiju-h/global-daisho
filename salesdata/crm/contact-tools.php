@@ -60,6 +60,7 @@ function migrate_card_tools(PDO $db): void {
         $db->commit();
     } catch(Throwable $e) { if($db->inTransaction()) $db->rollBack(); throw $e; }
     import_contract_actions($db);
+    repair_dt_relationships($db);
 }
 
 function render_contact_card(array $ct, bool $full=false): void {
@@ -519,7 +520,11 @@ function render_product_links(): void {
     $q=$db->prepare('SELECT * FROM products WHERE id=?'); $q->execute([$id]); $p=$q->fetch();
     if(!$p) { echo '<p>'.h(ux('製品を選択してください。','Please select a product.','Wybierz produkt.')).'</p>'; return; }
     ?><section class="card"><a href="?page=products">← <?=h(tr('products'))?></a><h2 class="product-heading"><?=h($p['name'])?></h2><p><?=h(localized($p,'summary'))?></p>
-<nav class="related-nav"><a href="#product-sds">SDS</a><a href="#product-actions"><?=h(tr('next_actions'))?></a><a href="#product-history"><?=h(tr('history'))?></a><a href="#product-tests"><?=h(tr('tests'))?></a></nav></section>
+<nav class="related-nav"><a href="#product-companies"><?=h(tr('companies'))?></a><a href="#product-sds">SDS</a><a href="#product-actions"><?=h(tr('next_actions'))?></a><a href="#product-history"><?=h(tr('history'))?></a><a href="#product-tests"><?=h(tr('tests'))?></a></nav></section>
+<section class="card" id="product-companies"><h2><?=h(ux('関連会社','Related companies','Powiązane firmy'))?></h2>
+<?php $q=$db->prepare('SELECT c.id,c.name FROM companies c WHERE c.id IN (SELECT company_id FROM company_product_status WHERE product_id=? UNION SELECT a.company_id FROM activities a JOIN activity_products ap ON ap.activity_id=a.id WHERE ap.product_id=? UNION SELECT company_id FROM tests WHERE product_id=?) ORDER BY c.name'); $q->execute([$id,$id,$id]); $companies=$q->fetchAll(); foreach($companies as $company): ?>
+<div class="row"><a href="?<?=h(http_build_query(['page'=>'companies','q'=>$company['name']]))?>"><?=h($company['name'])?> ↗</a></div>
+<?php endforeach; if(!$companies) echo '<p>'.h(card_text('empty')).'</p>'; ?></section>
 <section class="card" id="product-sds"><h2><?=h(tr('sds_files'))?></h2><div class="sds-list">
 <?php $count=0; $files=glob(__DIR__.'/../sds/*.{html,pdf}',GLOB_BRACE)?:[]; sort($files); foreach($files as $file): $name=basename($file); if(!product_mentions($p,$name)) continue; $count++; ?>
 <a href="../sds/<?=rawurlencode($name)?>" target="_blank" rel="noopener noreferrer"><?=h($name)?></a>
@@ -527,7 +532,7 @@ function render_product_links(): void {
 <?php if(!$count): ?><p><?=h(ux('一致するSDSは見つかりません。','No matching SDS found.','Nie znaleziono pasującej SDS.'))?></p><?php endif; ?><a href="?page=products#all-sds"><?=h(ux('SDS一覧を見る','Browse all SDS files','Wszystkie pliki SDS'))?></a></section>
 <section class="card" id="product-actions"><h2><?=h(tr('next_actions'))?></h2>
 <?php $q=$db->prepare('SELECT s.*,c.name company FROM company_product_status s JOIN companies c ON c.id=s.company_id WHERE s.product_id=? ORDER BY c.name'); $q->execute([$id]); $rows=$q->fetchAll(); foreach($rows as $r): ?>
-<div class="row"><div><b><?=h($r['company'])?></b><small><?=h(localized($r,'stage'))?> · <?=h(localized($r,'next_action'))?></small><a href="?page=matrix#company-product-<?=(int)$r['company_id']?>-<?=$id?>"><?=h(tr('matrix'))?> ↗</a></div></div>
+<div class="row"><div><b><?=h($r['company'])?></b><small><?=h(localized($r,'stage'))?> · <?=h(localized($r,'next_action'))?></small><small><?=h(localized($r,'summary'))?></small><a href="?page=matrix#company-product-<?=(int)$r['company_id']?>-<?=$id?>"><?=h(tr('matrix'))?> ↗</a></div></div>
 <?php endforeach; if(!$rows) echo '<p>'.h(card_text('empty')).'</p>'; ?>
 <h3><?=h(ux('製品名に一致するタスク','Tasks mentioning this product','Zadania wymieniające produkt'))?></h3>
 <?php $found=false; foreach($db->query("SELECT t.*,c.name company FROM tasks t LEFT JOIN companies c ON c.id=t.company_id WHERE t.status IN ('open','waiting','conditional') ORDER BY COALESCE(t.due_date,'9999-12-31'),t.id") as $r): if(!product_mentions($p,implode(' ',[$r['title'],$r['title_en']??'',$r['detail']??'']))) continue; $found=true; ?>
@@ -541,4 +546,34 @@ function render_product_links(): void {
 <?php $q=$db->prepare('SELECT t.*,c.name company FROM tests t LEFT JOIN companies c ON c.id=t.company_id WHERE t.product_id=? ORDER BY t.test_date DESC,t.id DESC'); $q->execute([$id]); $rows=$q->fetchAll(); foreach($rows as $r): ?>
 <div class="row"><div><a href="?page=tests#test-<?=(int)$r['id']?>"><?=h(legacy_translation($r['title']))?> ↗</a><small><?=h($r['company'])?> · <?=h($r['test_date'])?></small></div></div>
 <?php endforeach; if(!$rows) echo '<p>'.h(card_text('empty')).'</p>'; ?></section><?php
+}
+
+function repair_dt_relationships(PDO $db): void {
+    $db->exec("CREATE TABLE IF NOT EXISTS crm_data_repairs (repair_key VARCHAR(191) PRIMARY KEY, applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $db->beginTransaction();
+    try {
+        $claim=$db->prepare('INSERT IGNORE INTO crm_data_repairs(repair_key) VALUES(?)');
+        $claim->execute(['dt-company-links-20261010-v1']);
+        if(!$claim->rowCount()) { $db->commit(); return; }
+        $product=$db->query("SELECT * FROM products WHERE code='DT'")->fetch();
+        if(!$product) throw new RuntimeException('DT product is missing');
+        $pid=(int)$product['id'];
+        // Company associations confirmed by Taiju on 10 October; do not infer DT = DEEPER.
+        $rows=[
+            ['株式会社テノックス九州','試験施工報告あり','Field trial report recorded','Zarejestrowano raport z próby terenowej','DT剤の試験施工状況を営業履歴で管理。','DT field trial progress is tracked in the sales history.','Postęp próby terenowej DT zapisano w historii sprzedaży.','詳細結果・コア結果の確認','Review detailed results and core results','Sprawdzić szczegółowe wyniki i wyniki badań rdzeni'],
+            ['鹿島建設株式会社','関連あり','Related company','Firma powiązana','DTの関連取引先。Taiju確認（2026-10-10）。個別の試験・発送状況は未設定。','DT-related company, confirmed by Taiju on 10 Oct 2026. Specific trial and shipment status has not been set.','Firma związana z DT, potwierdzona przez Taiju 10 października 2026. Nie ustalono statusu konkretnych prób ani wysyłek.','','','']
+        ];
+        foreach($rows as $r) {
+            $db->prepare("INSERT IGNORE INTO companies(name,country) VALUES(?,'Japan')")->execute([$r[0]]);
+            $find=$db->prepare('SELECT id FROM companies WHERE name=?'); $find->execute([$r[0]]); $cid=(int)$find->fetchColumn();
+            // Preserve any more recent status already entered by a user.
+            $db->prepare('INSERT IGNORE INTO company_product_status(company_id,product_id,stage,stage_en,stage_pl,summary,summary_en,summary_pl,next_action,next_action_en,next_action_pl,owner_name) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
+                ->execute([$cid,$pid,...array_slice($r,1),'Taiju']);
+        }
+        $link=$db->prepare('INSERT IGNORE INTO activity_products(activity_id,product_id) VALUES(?,?)');
+        foreach($db->query('SELECT id,subject,summary_ja,summary_en,summary_pl,next_action FROM activities') as $a) {
+            if(product_mentions($product,implode(' ',array_filter([$a['subject'],$a['summary_ja'],$a['summary_en'],$a['summary_pl'],$a['next_action']])))) $link->execute([$a['id'],$pid]);
+        }
+        $db->commit();
+    } catch(Throwable $e) { if($db->inTransaction()) $db->rollBack(); throw $e; }
 }
