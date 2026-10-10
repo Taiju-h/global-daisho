@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-session_start();
+if(!defined('CRM_LIBRARY_ONLY')) session_start();
 header('Cache-Control: no-store, private');
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
@@ -131,7 +131,7 @@ function db(): PDO {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
-    migrate($pdo);
+    if(!defined('CRM_LIBRARY_ONLY')) migrate($pdo);
     return $pdo;
 }
 function migrate(PDO $db): void {
@@ -351,6 +351,13 @@ function current_user(): ?array { if(empty($_SESSION['uid'])) return null; $s=db
 function require_login(): array { $u=current_user(); if(!$u){ header('Location:?page=login'); exit; } return $u; }
 function redirect(string $to): never { header('Location:'.$to); exit; }
 
+if(defined('CRM_LIBRARY_ONLY')) return;
+require_once __DIR__.'/mcp-core.php';
+if(($_GET['page']??'')==='mcp-connect') { crm_mcp_connect_page(); exit; }
+if(!empty($_SESSION['mcp_login_return']) && ($mcpUser=current_user()) && !$mcpUser['must_change_password']) {
+    unset($_SESSION['mcp_login_return']); redirect('oauth.php?route=resume');
+}
+
 $action=$_POST['action']??'';
 if($_SERVER['REQUEST_METHOD']==='POST') {
     check_csrf();
@@ -386,7 +393,7 @@ if($_SERVER['REQUEST_METHOD']==='POST') {
 $page=$action==='reset_password'?'users':($_GET['page']??'dashboard'); if(user_count()===0) $page='bootstrap'; $u=current_user(); if(!in_array($page,['login','bootstrap'],true) && !$u) redirect('?page=login'); if($u && $u['must_change_password'] && $page!=='change-password') $page='change-password';
 function header_html(string $title, ?array $u): void { $lang=current_lang(); ?>
 <!doctype html><html lang="<?=h($lang)?>"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=h($title)?> | <?=APP_NAME?></title><link rel="icon" type="image/svg+xml" href="favicon-admin.svg?v=1"><link rel="stylesheet" href="style.css?v=20261010-records"></head><body>
-<header class="top"><div><strong>DAISHO</strong><span>Sales & Technical CRM</span></div><?php if($u): ?><nav><a href="?"><?=h(tr('dashboard'))?></a><a href="?page=activities"><?=h(tr('activities'))?></a><a href="?page=companies"><?=h(tr('companies'))?></a><a href="?page=products"><?=h(tr('products'))?></a><a href="?page=matrix"><?=h(tr('matrix'))?></a><a href="?page=tests"><?=h(tr('tests'))?></a><a href="?page=chatgpt-import"><?=h(ux('ChatGPTから取り込む','Import from ChatGPT','Importuj z ChatGPT'))?></a><a href="?page=registration-help"><?=h(ux('登録方法','How to register','Jak dodać wpis'))?></a><?php if($u['role']==='admin'):?><a href="?page=users"><?=h(tr('users'))?></a><?php endif;?></nav><?php endif; ?><div class="lang-switch" aria-label="<?=h(tr('language'))?>"><a class="<?=current_lang()==='ja'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'ja']))?>">日本語</a><a class="<?=current_lang()==='en'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'en']))?>">EN</a><a class="<?=current_lang()==='pl'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'pl']))?>">PL</a></div><?php if($u): ?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="linkbtn">Logout</button></form><?php endif; ?></header><main class="wrap"><h1><?=h($title)?></h1><?php if(!empty($_SESSION['form_expired'])): unset($_SESSION['form_expired']); ?>
+<header class="top"><div><strong>DAISHO</strong><span>Sales & Technical CRM</span></div><?php if($u): ?><nav><a href="?"><?=h(tr('dashboard'))?></a><a href="?page=activities"><?=h(tr('activities'))?></a><a href="?page=companies"><?=h(tr('companies'))?></a><a href="?page=products"><?=h(tr('products'))?></a><a href="?page=matrix"><?=h(tr('matrix'))?></a><a href="?page=tests"><?=h(tr('tests'))?></a><a href="?page=chatgpt-import"><?=h(ux('ChatGPTから取り込む','Import from ChatGPT','Importuj z ChatGPT'))?></a><a href="?page=mcp-connect"><?=h(ux('ChatGPT接続','Connect ChatGPT','Połącz ChatGPT'))?></a><a href="?page=registration-help"><?=h(ux('登録方法','How to register','Jak dodać wpis'))?></a><?php if($u['role']==='admin'):?><a href="?page=users"><?=h(tr('users'))?></a><?php endif;?></nav><?php endif; ?><div class="lang-switch" aria-label="<?=h(tr('language'))?>"><a class="<?=current_lang()==='ja'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'ja']))?>">日本語</a><a class="<?=current_lang()==='en'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'en']))?>">EN</a><a class="<?=current_lang()==='pl'?'active':''?>" href="?<?=http_build_query(array_merge($_GET,['lang'=>'pl']))?>">PL</a></div><?php if($u): ?><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><input type="hidden" name="action" value="logout"><button class="linkbtn">Logout</button></form><?php endif; ?></header><main class="wrap"><h1><?=h($title)?></h1><?php if(!empty($_SESSION['form_expired'])): unset($_SESSION['form_expired']); ?>
 <p class="error"><?=h(['ja'=>'フォームの有効期限が切れました。もう一度入力してください。保存操作は行われていません。','en'=>'This form has expired. Please enter your details again. No changes were saved.','pl'=>'Formularz wygasł. Wpisz dane ponownie. Żadne zmiany nie zostały zapisane.'][$lang])?></p>
 <?php endif; }
 function footer_html(): void { echo '</main></body></html>'; }
@@ -445,6 +452,7 @@ elseif($page==='users'){ if($u['role']!=='admin') exit('Forbidden'); header_html
 <button><?=h(tr('reset_password'))?></button>
 </form></section><?php }
 footer_html();
+
 
 
 

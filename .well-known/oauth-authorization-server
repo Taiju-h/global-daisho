@@ -1,0 +1,24 @@
+{
+  "issuer": "https://global.daishokagaku.com",
+  "authorization_endpoint": "https://global.daishokagaku.com/salesdata/crm/oauth.php?route=authorize",
+  "token_endpoint": "https://global.daishokagaku.com/salesdata/crm/oauth.php?route=token",
+  "registration_endpoint": "https://global.daishokagaku.com/salesdata/crm/oauth.php?route=register",
+  "response_types_supported": [
+    "code"
+  ],
+  "grant_types_supported": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "none"
+  ],
+  "code_challenge_methods_supported": [
+    "S256"
+  ],
+  "scopes_supported": [
+    "crm.read",
+    "crm.write"
+  ],
+  "authorization_response_iss_parameter_supported": true
+}

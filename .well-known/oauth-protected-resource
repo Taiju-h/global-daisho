@@ -1,0 +1,13 @@
+{
+  "resource": "https://global.daishokagaku.com/salesdata/crm/mcp.php",
+  "authorization_servers": [
+    "https://global.daishokagaku.com"
+  ],
+  "scopes_supported": [
+    "crm.read",
+    "crm.write"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ]
+}
