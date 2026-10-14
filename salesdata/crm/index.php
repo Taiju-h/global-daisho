@@ -12,6 +12,7 @@ require_once __DIR__.'/contact-tools.php';
 require_once __DIR__.'/chatgpt-import.php';
 require_once __DIR__.'/tests-sheet.php';
 require_once __DIR__.'/pk-report-20261014.php';
+require_once __DIR__.'/artur-pk-report-20261014.php';
 const INITIAL_PASSWORD_HASH = '$2y$12$h72JAMnv.W/P42/O42Au5uAhEDCsbS/ZJVMxsA3reyEhZcP/nIaYK';
 
 function h(?string $v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
@@ -169,6 +170,7 @@ function migrate(PDO $db): void {
     migrate_card_tools($db);
     migrate_sheet_tests($db);
     import_pk_report_20261014($db);
+    import_artur_pk_report_20261014($db);
 }
 function ensure_column(PDO $db,string $table,string $column,string $definition): void {
     $q=$db->prepare('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME=?');
