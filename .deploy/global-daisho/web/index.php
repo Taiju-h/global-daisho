@@ -392,6 +392,7 @@ $history = readHistory($historyFile, 30);
 <!DOCTYPE html>
 <html lang="<?php echo h($lang); ?>">
 <head>
+    <link rel="icon" type="image/svg+xml" sizes="any" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22white%22%2F%3E%3Cpath%20fill%3D%22black%22%20d%3D%22M14%2010h17c15%200%2023%208%2023%2022S46%2054%2031%2054H14zm9%209v26h8c9%200%2014-4%2014-13s-5-13-14-13z%22%2F%3E%3C%2Fsvg%3E">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo h(t('title')); ?></title>
